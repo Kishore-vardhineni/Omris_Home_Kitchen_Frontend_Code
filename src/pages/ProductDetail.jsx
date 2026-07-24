@@ -84,15 +84,15 @@ const ProductDetail = () => {
   const product = getProductById(id);
 
   // ── State — initialised before the early-return so hook order is stable ───
-  const defaultWeight  = product?.defaultWeight || '250gm';
+  const defaultWeight = product?.defaultWeight || '250gm';
   const defaultPacking = 'Without Bottle';
 
-  const [selectedWeight,  setSelectedWeight]  = useState(defaultWeight);
+  const [selectedWeight, setSelectedWeight] = useState(defaultWeight);
   const [selectedPacking, setSelectedPacking] = useState(defaultPacking);
-  const [quantity,        setQuantity]        = useState(1);
-  const [addedToCart,     setAddedToCart]     = useState(false);
-  const [isWishlisted,    setIsWishlisted]    = useState(false);
-  const [activeTab,       setActiveTab]       = useState('description');
+  const [quantity, setQuantity] = useState(1);
+  const [addedToCart, setAddedToCart] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [activeTab, setActiveTab] = useState('description');
 
   // ── Guard ─────────────────────────────────────────────────────────────────
   if (!product) return <ProductNotFound />;
@@ -100,7 +100,7 @@ const ProductDetail = () => {
   // ── Pricing logic (all derived — no duplication) ──────────────────────────
   // priceMap comes directly from the catalog — edit prices there, not here.
   const { priceMap } = product;
-  const weightOptions  = Object.keys(priceMap);         // e.g. ['250gm','500gm','1kg']
+  const weightOptions = Object.keys(priceMap);         // e.g. ['250gm','500gm','1kg']
   const packingOptions = Object.keys(PACKING_PRICES);   // e.g. ['Without Bottle','Bottle']
 
   // Validate selectedWeight (guards against stale state if catalog changes)
@@ -108,9 +108,9 @@ const ProductDetail = () => {
     ? selectedWeight
     : weightOptions[0];
 
-  const unitPrice   = priceMap[activeWeight];
-  const packCharge  = PACKING_PRICES[selectedPacking] ?? 0;
-  const totalPrice  = ((unitPrice + packCharge) * quantity).toFixed(2);
+  const unitPrice = priceMap[activeWeight];
+  const packCharge = PACKING_PRICES[selectedPacking] ?? 0;
+  const totalPrice = ((unitPrice + packCharge) * quantity).toFixed(2);
 
   // Is the 1kg tier selected? Show a "Save 15%" badge.
   const show1kgBadge = activeWeight === '1kg';
@@ -173,7 +173,7 @@ const ProductDetail = () => {
           aria-label="Breadcrumb"
           className="mb-4 lg:mb-8 text-xs sm:text-sm text-neutral-500 flex flex-wrap items-center gap-1.5"
         >
-          <Link to="/"        className="hover:text-black transition-colors">Home</Link>
+          <Link to="/" className="hover:text-black transition-colors">Home</Link>
           <span>/</span>
           <Link to="/products" className="hover:text-black transition-colors">Products</Link>
           <span>/</span>
@@ -201,9 +201,9 @@ const ProductDetail = () => {
             {/* Quality badges */}
             <div className="mt-6 grid grid-cols-3 gap-2 p-3 sm:p-4 bg-stone-50 rounded-2xl border border-stone-200/70">
               {[
-                { icon: ShieldCheck, title: '100% Organic',  sub: 'No Preservatives' },
-                { icon: Truck,       title: 'Fast Shipping', sub: 'Dispatch in 24h',  border: true },
-                { icon: RefreshCw,   title: 'Traditional',   sub: 'Andhra Recipe' },
+                { icon: ShieldCheck, title: '100% Organic', sub: 'No Preservatives' },
+                { icon: Truck, title: 'Fast Shipping', sub: 'Dispatch in 24h', border: true },
+                { icon: RefreshCw, title: 'Traditional', sub: 'Andhra Recipe' },
               ].map(({ icon: Icon, title, sub, border }) => (
                 <div
                   key={title}
@@ -330,7 +330,7 @@ const ProductDetail = () => {
 
             {/* ── CTA buttons ────────────────────────────────────────────── */}
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              <motion.button
+              {/* <motion.button
                 type="button"
                 onClick={handleAddToCart}
                 whileHover={{ scale: 1.015 }}
@@ -340,7 +340,7 @@ const ProductDetail = () => {
               >
                 <ShoppingBag size={20} strokeWidth={2.2} />
                 <span>Add to Cart</span>
-              </motion.button>
+              </motion.button> */}
 
               <motion.button
                 type="button"
@@ -369,13 +369,12 @@ const ProductDetail = () => {
                     key={tab}
                     type="button"
                     onClick={() => setActiveTab(tab)}
-                    className={`pb-3 text-sm font-bold transition-colors relative whitespace-nowrap flex-shrink-0 focus:outline-none ${
-                      activeTab === tab ? 'text-black' : 'text-neutral-400 hover:text-neutral-700'
-                    }`}
+                    className={`pb-3 text-sm font-bold transition-colors relative whitespace-nowrap flex-shrink-0 focus:outline-none ${activeTab === tab ? 'text-black' : 'text-neutral-400 hover:text-neutral-700'
+                      }`}
                   >
                     {tab === 'description' && 'Description'}
                     {tab === 'ingredients' && 'Ingredients'}
-                    {tab === 'storage'     && 'Storage & Shelf Life'}
+                    {tab === 'storage' && 'Storage & Shelf Life'}
                     {activeTab === tab && (
                       <motion.div
                         layoutId="activeTab"
