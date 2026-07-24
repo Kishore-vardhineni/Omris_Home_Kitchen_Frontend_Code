@@ -1,0 +1,297 @@
+/* ================================================================
+   HERO SECTION — Full-width image carousel
+   ================================================================ */
+
+/* ── Outer section ─────────────────────────────────────────── */
+.hero-section {
+  position: relative;
+  width: 100%;
+  min-height: 92vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background-color: #1a2d0f; /* fallback while image loads */
+}
+
+/* ── Background carousel track ─────────────────────────────── */
+.hero-bg-track {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+}
+
+/* Each slide is absolutely positioned, full size */
+.hero-bg-slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  /* Subtle zoom-in effect while visible */
+  animation: heroZoom 5s ease forwards;
+}
+
+@keyframes heroZoom {
+  from { transform: scale(1); }
+  to   { transform: scale(1.06); }
+}
+
+/* Dark gradient overlay — left is darker for text, right is lighter */
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    rgba(10, 20, 5, 0.82) 0%,
+    rgba(10, 20, 5, 0.60) 45%,
+    rgba(10, 20, 5, 0.20) 75%,
+    rgba(10, 20, 5, 0.10) 100%
+  );
+  z-index: 1;
+}
+
+/* ── Floating Particles ────────────────────────────────────── */
+.particles-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  background-color: var(--accent-orange);
+  border-radius: 50%;
+  opacity: 0;
+}
+
+/* ── Content layer ─────────────────────────────────────────── */
+.hero-inner {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  /* flex, gap, padding handled by Tailwind */
+}
+
+.hero-content {
+  color: #fff;
+  /* flex, max-width handled by Tailwind */
+}
+
+.hero-right-spacer {
+  flex: 1;
+  /* empty — the full-width BG image is the visual on the right */
+}
+
+/* ── Tag badge ─────────────────────────────────────────────── */
+.hero-tag {
+  display: inline-block;
+  background-color: var(--accent-orange);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  padding: 0.3rem 0.9rem;
+  border-radius: 20px;
+  margin-bottom: 1.2rem;
+}
+
+/* ── Heading ───────────────────────────────────────────────── */
+.hero-content h1 {
+  font-size: clamp(2.4rem, 5vw, 3.8rem);
+  line-height: 1.15;
+  color: #ffffff;
+  margin-bottom: 1.2rem;
+  font-family: 'Outfit', serif;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+
+.text-accent {
+  color: var(--accent-orange);
+}
+
+/* ── Subtitle ──────────────────────────────────────────────── */
+.subtitle {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.82);
+  margin-bottom: 2rem;
+  line-height: 1.7;
+  max-width: 480px;
+}
+
+/* ── Feature list ──────────────────────────────────────────── */
+.features {
+  /* flex and gap handled by Tailwind */
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.97rem;
+}
+
+.feature-icon {
+  color: var(--accent-orange);
+  flex-shrink: 0;
+}
+
+/* ── CTA button ────────────────────────────────────────────── */
+.btn-lg {
+  padding: 0.95rem 2.2rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 8px 24px rgba(224, 123, 57, 0.35);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.btn-lg:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(224, 123, 57, 0.5);
+}
+
+/* ── Prev / Next arrows ────────────────────────────────────── */
+.hero-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.25s ease, transform 0.2s ease;
+}
+
+.hero-arrow:hover {
+  background: var(--accent-orange);
+  border-color: var(--accent-orange);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.hero-arrow-prev { left: 1.5rem; }
+.hero-arrow-next { right: 1.5rem; }
+
+/* ── Dot indicators ────────────────────────────────────────── */
+.hero-dots {
+  position: absolute;
+  bottom: 3.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.hero-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.hero-dot.active {
+  background: var(--accent-orange);
+  transform: scale(1.4);
+  border-radius: 5px;
+  width: 26px;
+}
+
+/* ── Progress bar ──────────────────────────────────────────── */
+.hero-progress-wrap {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.12);
+  z-index: 20;
+}
+
+.hero-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-orange), #f5a623);
+}
+
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
+
+@media (max-width: 992px) {
+  .hero-section {
+    min-height: 80vh;
+  }
+
+  .hero-inner {
+    /* flex handled by Tailwind */
+  }
+
+  .hero-right-spacer {
+    display: none;
+  }
+
+  .hero-content {
+    /* max-width handled by Tailwind */
+  }
+
+  .hero-overlay {
+    background: linear-gradient(
+      180deg,
+      rgba(10, 20, 5, 0.75) 0%,
+      rgba(10, 20, 5, 0.55) 100%
+    );
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-section {
+    min-height: 100svh;
+  }
+
+  .hero-inner {
+    /* padding handled by Tailwind */
+  }
+
+  .hero-content h1 {
+    font-size: 2.1rem;
+  }
+
+  .subtitle {
+    font-size: 0.97rem;
+  }
+
+  .hero-arrow {
+    width: 40px;
+    height: 40px;
+  }
+
+  .hero-arrow-prev { left: 0.75rem; }
+  .hero-arrow-next { right: 0.75rem; }
+
+  .hero-dots {
+    bottom: 2.5rem;
+  }
+}

@@ -1,0 +1,105 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+
+/**
+ * VariantSelector — Responsive pill-style selector for Weight and Packing options.
+ *
+ * Features:
+ *  • Selected pill: black background + white text (with smooth CSS transition)
+ *  • Unselected pill: white background + black border + black text
+ *  • On mobile (<= 480 px) the pill row becomes horizontally scrollable so pills
+ *    never wrap onto a second line or overflow the viewport.
+ *  • Touch-friendly tap targets (min 44 px height).
+ *  • Accepts an optional `priceHint` map so each pill can show its price inline.
+ *
+ * Props:
+ *  @param {string}   label         — section label, e.g. "Weight" or "Packing"
+ *  @param {string[]} options        — array of option strings, e.g. ['250gm','500gm','1kg']
+ *  @param {string}   selectedValue  — currently selected option
+ *  @param {Function} onChange       — callback(option: string) when user selects
+ *  @param {Object}   [priceHint]   — optional { option: price } map shown below each pill
+ */
+const VariantSelector = ({ label, options, selectedValue, onChange, priceHint }) => {
+  return (
+    <div className="flex flex-col gap-2">
+
+      {/* ── Label row ──────────────────────────────────────────────────────── */}
+      <div className="flex items-center gap-3">
+        <span className="text-sm font-semibold text-neutral-700 tracking-wide whitespace-nowrap">
+          {label}:
+        </span>
+        <span className="text-sm font-bold text-neutral-900">
+          {selectedValue}
+        </span>
+      </div>
+
+      {/* ── Pill row — horizontally scrollable on mobile ──────────────────── */}
+      {/*
+          The outer div clips; the inner div scrolls horizontally.
+          `scrollbar-none` hides the scrollbar on WebKit/Firefox while
+          still allowing touch-scroll on iOS/Android.
+      */}
+      <div
+        className="w-full overflow-x-auto"
+        style={{ WebkitOverflowScrolling: 'touch' }}
+      >
+        {/* Hide scrollbar cross-browser */}
+        <div
+          className="flex items-stretch gap-2 pb-1"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {options.map((option) => {
+            const isSelected = selectedValue === option;
+
+            return (
+              <motion.button
+                key={option}
+                type="button"
+                onClick={() => onChange(option)}
+                whileTap={{ scale: 0.95 }}
+                transition={{ duration: 0.12, ease: 'easeOut' }}
+                aria-pressed={isSelected}
+                aria-label={`Select ${label}: ${option}`}
+                className="flex-shrink-0 flex flex-col items-center justify-center gap-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 rounded-xl"
+                style={{
+                  /* Minimum touch target: 44 px high */
+                  minHeight: '44px',
+                  minWidth: '72px',
+                  /* Padding provides breathing room */
+                  padding: priceHint ? '8px 16px' : '10px 18px',
+                  /* Smooth background + border + color transitions */
+                  transition: 'background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease',
+                  backgroundColor: isSelected ? '#000000' : '#ffffff',
+                  color:           isSelected ? '#ffffff' : '#1a1a1a',
+                  border:          isSelected ? '1.5px solid #000000' : '1.5px solid #d4d4d4',
+                  boxShadow:       isSelected ? '0 2px 8px rgba(0,0,0,0.18)' : '0 1px 3px rgba(0,0,0,0.06)',
+                  fontWeight:      isSelected ? '700' : '500',
+                  fontSize:        '0.875rem',  /* 14px */
+                  lineHeight:      1.2,
+                  letterSpacing:   '0.01em',
+                  cursor:          'pointer',
+                }}
+              >
+                <span>{option}</span>
+                {priceHint && priceHint[option] != null && (
+                  <span
+                    style={{
+                      fontSize:   '0.7rem',
+                      fontWeight: isSelected ? '600' : '400',
+                      opacity:    isSelected ? 0.85 : 0.6,
+                      lineHeight: 1,
+                    }}
+                  >
+                    ₹{priceHint[option]}
+                  </span>
+                )}
+              </motion.button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default VariantSelector;

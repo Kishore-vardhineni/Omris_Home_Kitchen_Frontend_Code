@@ -1,0 +1,225 @@
+.varieties-section {
+  padding: 2rem 0;
+  background-color: #fff;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.subtitle-accent {
+  color: var(--accent-orange);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.section-header h2 {
+  font-family: 'Outfit', serif;
+  font-size: 2.5rem;
+  color: var(--primary-dark-green);
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 2rem;
+}
+
+.product-card {
+  background: var(--bg-cream);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  transition: box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+  box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+}
+
+.product-img-wrapper {
+  overflow: hidden;
+  height: 200px;
+}
+
+.product-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.product-card:hover .product-img-wrapper img {
+  transform: scale(1.05);
+}
+
+.product-info {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.product-info h3 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-dark);
+}
+
+.price {
+  color: var(--accent-orange);
+  font-weight: 700;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.add-to-cart-btn {
+  width: 100%;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* WhatsApp green button */
+.btn-whatsapp {
+  background-color: #25d366;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.65rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-family: 'Outfit', sans-serif;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
+}
+
+.btn-whatsapp:hover {
+  background-color: #1ebe5d;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(37, 211, 102, 0.35);
+}
+
+/* Tomato Pickle Section */
+.tomato-section {
+  background-color: #ffffff;
+  margin: 2rem 0 4rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.tomato-header {
+  text-align: left;
+  margin-bottom: 3rem;
+}
+
+.tomato-header h3 {
+  font-family: 'Outfit', serif;
+  font-size: 2.2rem;
+  color: var(--primary-dark-green);
+  margin-bottom: 0.5rem;
+}
+
+.header-underline {
+  width: 80px;
+  height: 4px;
+  background-color: var(--accent-orange);
+  border-radius: 2px;
+}
+
+.tomato-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.5rem;
+}
+
+@media (max-width: 900px) {
+  .tomato-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+}
+
+.tomato-card {
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.tomato-card:hover {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+.tomato-img-wrapper {
+  height: 260px;
+  overflow: hidden;
+  border-radius: 16px 16px 0 0;
+}
+
+.tomato-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.tomato-card:hover .tomato-img-wrapper img {
+  transform: scale(1.08);
+}
+
+.tomato-info {
+  padding: 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.tomato-info h4 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.4rem;
+  color: var(--primary-dark-green);
+  margin-bottom: 0.8rem;
+  font-weight: 700;
+}
+
+.weight-badge {
+  display: inline-block;
+  background: var(--bg-cream);
+  color: var(--text-dark);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 1.2rem;
+}
+
+.tomato-price {
+  color: var(--accent-orange);
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 1.8rem;
+  margin-top: auto;
+}
+
+/* ── Card-link wrapper reset ─────────────────────────────────────────────── */
+/* Ensures the React Router <Link> wrapping each card has no link styling    */
+.product-card-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ── Pointer cursor for clickable cards ─────────────────────────────────── */
+.product-card,
+.tomato-card {
+  cursor: pointer;
+}
+
