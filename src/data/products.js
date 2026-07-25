@@ -10,9 +10,13 @@
 //     point at the canonical product id via `canonicalId` for deep-linking.
 
 import chickenBonePickleImg from '../assets/images/Chicken_Bone.png';
+import chickenBonePickleImg2 from '../assets/images/Chicken_Bone2.png';
+import chickenBonePickleImg3 from '../assets/images/ChickenBone3.png';
 import chickenBonelessPickleImg from '../assets/images/Chicken_Boneless.png';
 import mangoPickleImg from '../assets/images/Mango_Pickel.png';
 import tomatoPickleImg from '../assets/images/tomato_pickle.png';
+import landingImage from '../assets/images/Landingpage_Image.png';
+import landingImage1 from '../assets/images/Landingpage_Image1.png';
 
 // ── Packing price additions (applies globally) ────────────────────────────────
 // Add new packing options here — ProductDetail picks them up automatically.
@@ -30,6 +34,12 @@ export const canonicalProducts = [
     name: 'Chicken Bone Pickle',
     category: 'nonVeg',
     image: chickenBonePickleImg,
+    gallery: [
+      { src: chickenBonePickleImg, alt: 'Chicken Bone Pickle Jar' },
+      { src: chickenBonePickleImg2, alt: 'Chicken Bone Pickle Kitchen Preparation' },
+      { src: chickenBonePickleImg3, alt: 'Chicken Bone Pickle Andhra Spices' },
+      { src: chickenBonePickleImg, alt: 'Chicken Bone Pickle Closeup' },
+    ],
     description: 'Tender bone-in chicken pieces marinated in traditional Andhra spices, slow-cooked and preserved in cold-pressed sesame oil.',
     priceMap: {
       '250gm': 280,
@@ -43,6 +53,12 @@ export const canonicalProducts = [
     name: 'Chicken Boneless Pickle',
     category: 'nonVeg',
     image: chickenBonelessPickleImg,
+    gallery: [
+      { src: chickenBonelessPickleImg, alt: 'Chicken Boneless Pickle Jar' },
+      { src: landingImage1, alt: 'Chicken Boneless Pickle Fresh Preparation' },
+      { src: landingImage, alt: 'Chicken Boneless Pickle Spices' },
+      { src: chickenBonelessPickleImg, alt: 'Chicken Boneless Pickle Serving' },
+    ],
     description: 'Tender boneless chicken pieces marinated in signature Andhra spice blend, preserved in cold-pressed sesame oil.',
     priceMap: {
       '250gm': 320,
@@ -56,6 +72,12 @@ export const canonicalProducts = [
     name: 'Tomato Pickle',
     category: 'veg',
     image: tomatoPickleImg,
+    gallery: [
+      { src: tomatoPickleImg, alt: 'Tomato Pickle Jar' },
+      { src: landingImage, alt: 'Fresh Tomatoes & Spices' },
+      { src: landingImage1, alt: 'Traditional Tomato Pickle Recipe' },
+      { src: tomatoPickleImg, alt: 'Tomato Pickle Serving' },
+    ],
     description: 'Sun-ripened tomatoes slow-cooked with aromatic spices and sesame oil — a tangy Andhra pantry staple.',
     priceMap: {
       '250gm': 200,
@@ -69,6 +91,12 @@ export const canonicalProducts = [
     name: 'Mango Pickle',
     category: 'veg',
     image: mangoPickleImg,
+    gallery: [
+      { src: mangoPickleImg, alt: 'Mango Pickle Jar' },
+      { src: landingImage1, alt: 'Raw Mango & Andhra Spices' },
+      { src: landingImage, alt: 'Traditional Mango Pickle Recipe' },
+      { src: mangoPickleImg, alt: 'Mango Pickle Close Up' },
+    ],
     description: 'Raw mangoes handpicked and blended with aromatic Andhra spices, preserved in cold-pressed sesame oil.',
     priceMap: {
       '250gm': 220,
@@ -83,6 +111,12 @@ export const canonicalProducts = [
     name: 'Garlic Pickle',
     category: 'veg',
     image: tomatoPickleImg,
+    gallery: [
+      { src: tomatoPickleImg, alt: 'Garlic Pickle Jar' },
+      { src: landingImage, alt: 'Garlic Cloves & Guntur Chilli' },
+      { src: landingImage1, alt: 'Traditional Garlic Pickle Prep' },
+      { src: tomatoPickleImg, alt: 'Garlic Pickle Serving' },
+    ],
     description: 'Whole garlic cloves slow-cooked with Guntur chili powder and sesame oil for an intense, pungent flavor.',
     priceMap: {
       '250gm': 249,
@@ -96,6 +130,12 @@ export const canonicalProducts = [
     name: 'Mixed Veg Pickle',
     category: 'veg',
     image: mangoPickleImg,
+    gallery: [
+      { src: mangoPickleImg, alt: 'Mixed Veg Pickle Jar' },
+      { src: landingImage, alt: 'Seasonal Vegetables & Andhra Spices' },
+      { src: landingImage1, alt: 'Mixed Veg Pickle Recipe' },
+      { src: mangoPickleImg, alt: 'Mixed Veg Pickle Close Up' },
+    ],
     description: 'A colorful medley of seasonal vegetables blended with traditional Andhra pickle masala.',
     priceMap: {
       '250gm': 189,
@@ -109,6 +149,12 @@ export const canonicalProducts = [
     name: 'Green Chilli Pickle',
     category: 'veg',
     image: tomatoPickleImg,
+    gallery: [
+      { src: tomatoPickleImg, alt: 'Green Chilli Pickle Jar' },
+      { src: landingImage1, alt: 'Green Chillies & Sesame Oil' },
+      { src: landingImage, alt: 'Green Chilli Pickle Recipe' },
+      { src: tomatoPickleImg, alt: 'Green Chilli Pickle Serving' },
+    ],
     description: 'Whole green chillies preserved in sesame oil with a bold spice mix — for the true heat-lovers.',
     priceMap: {
       '250gm': 159,
