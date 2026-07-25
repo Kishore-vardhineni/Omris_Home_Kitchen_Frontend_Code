@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
@@ -11,8 +11,19 @@ import { motion, AnimatePresence } from 'framer-motion';
  * - 4 thumbnail images below (horizontal slider on mobile)
  * - Active thumbnail highlighted with black border
  */
-const ProductGallery = ({ images, productName }) => {
+const ProductGallery = ({ images, productName, onActiveImageChange }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
+
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [productName, images]);
+
+  useEffect(() => {
+    const activeImg = images[selectedIndex]?.src || images[0]?.src;
+    if (onActiveImageChange && activeImg) {
+      onActiveImageChange(activeImg);
+    }
+  }, [selectedIndex, images, onActiveImageChange]);
 
   const currentImage = images[selectedIndex] || images[0];
 

@@ -10,6 +10,7 @@ import VariantSelector from '../components/Product/VariantSelector';
 import QuantitySelector from '../components/Product/QuantitySelector';
 import StickyMobileAddToCart from '../components/Product/StickyMobileAddToCart';
 import { getProductById, PACKING_PRICES } from '../data/products';
+import { useCart } from '../context/CartContext';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Product Not Found — professional 404 experience
@@ -79,6 +80,7 @@ const AnimatedPrice = ({ price }) => (
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { dispatch } = useCart();
 
   // ── Look up canonical product ─────────────────────────────────────────────
   const product = getProductById(id);
@@ -93,6 +95,7 @@ const ProductDetail = () => {
   const [addedToCart, setAddedToCart] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [activeTab, setActiveTab] = useState('description');
+  const [activeGalleryImage, setActiveGalleryImage] = useState(null);
 
   // ── Guard ─────────────────────────────────────────────────────────────────
   if (!product) return <ProductNotFound />;
@@ -115,24 +118,55 @@ const ProductDetail = () => {
   // Is the 1kg tier selected? Show a "Save 15%" badge.
   const show1kgBadge = activeWeight === '1kg';
 
-  // ── Gallery images ────────────────────────────────────────────────────────
-  const productImages = [
+  // ── Gallery images dynamically loaded for selected product ────────────────
+  const productImages = product.gallery || [
     { src: product.image, alt: `${product.name} – Main View` },
-    { src: product.image, alt: `${product.name} – View 2` },
-    { src: product.image, alt: `${product.name} – View 3` },
-    { src: product.image, alt: `${product.name} – View 4` },
   ];
+
+  const downloadSrc = activeGalleryImage || product.image;
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleAddToCart = () => {
+    const itemPrice = unitPrice + packCharge;
+    const variantSuffix = `${activeWeight}${selectedPacking !== 'Without Bottle' ? ` - ${selectedPacking}` : ''}`;
+    
+    dispatch({
+      type: 'ADD_ITEM',
+      payload: {
+        id: `${product.id}-${activeWeight}-${selectedPacking.replace(/\s+/g, '-').toLowerCase()}`,
+        name: `${product.name} (${variantSuffix})`,
+        price: itemPrice,
+        image: product.image,
+        quantity: quantity,
+        description: product.description,
+        weight: activeWeight,
+        packing: selectedPacking,
+      },
+    });
+
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2500);
   };
 
   const handleBuyNow = () => {
-    alert(
-      `Proceeding to checkout for ${quantity} × ${product.name} (${activeWeight}, ${selectedPacking})\nTotal: Rs. ${totalPrice}`
-    );
+    const itemPrice = unitPrice + packCharge;
+    const variantSuffix = `${activeWeight}${selectedPacking !== 'Without Bottle' ? ` - ${selectedPacking}` : ''}`;
+    
+    dispatch({
+      type: 'ADD_ITEM',
+      payload: {
+        id: `${product.id}-${activeWeight}-${selectedPacking.replace(/\s+/g, '-').toLowerCase()}`,
+        name: `${product.name} (${variantSuffix})`,
+        price: itemPrice,
+        image: product.image,
+        quantity: quantity,
+        description: product.description,
+        weight: activeWeight,
+        packing: selectedPacking,
+      },
+    });
+
+    navigate('/cart');
   };
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -152,6 +186,9 @@ const ProductDetail = () => {
               <Check size={12} strokeWidth={3} />
             </div>
             <span>Added {quantity} × {product.name} ({activeWeight}) to cart!</span>
+            <Link to="/cart" className="ml-2 underline text-amber-400 hover:text-amber-300 transition-colors">
+              View Cart →
+            </Link>
           </motion.div>
         )}
       </AnimatePresence>
@@ -187,12 +224,16 @@ const ProductDetail = () => {
               LEFT — Product Gallery (sticky on desktop)
              ================================================================ */}
           <div className="w-full lg:sticky lg:top-24">
-            <ProductGallery images={productImages} productName={product.name} />
+            <ProductGallery
+              images={productImages}
+              productName={product.name}
+              onActiveImageChange={setActiveGalleryImage}
+            />
 
             {/* ── Download Image Button ─────────────────────────────────── */}
             <div className="mt-3 flex justify-end">
               <a
-                href={product.image}
+                href={downloadSrc}
                 download={`${product.name.replace(/\s+/g, '_')}.png`}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-neutral-200 text-sm font-semibold text-neutral-700 hover:bg-neutral-100 hover:border-neutral-400 transition-all duration-200"
                 aria-label={`Download ${product.name} image`}
@@ -334,7 +375,7 @@ const ProductDetail = () => {
 
             {/* ── CTA buttons ────────────────────────────────────────────── */}
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              {/* <motion.button
+              <motion.button
                 type="button"
                 onClick={handleAddToCart}
                 whileHover={{ scale: 1.015 }}
@@ -344,7 +385,7 @@ const ProductDetail = () => {
               >
                 <ShoppingBag size={20} strokeWidth={2.2} />
                 <span>Add to Cart</span>
-              </motion.button> */}
+              </motion.button>
 
               <motion.button
                 type="button"
