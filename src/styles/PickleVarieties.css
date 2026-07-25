@@ -103,6 +103,28 @@
   box-shadow: 0 6px 18px rgba(37, 211, 102, 0.35);
 }
 
+/* Choose an Option button */
+.btn-choose-option {
+  background-color: var(--primary-dark-green, #1a3c2e);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-family: 'Outfit', sans-serif;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
+}
+
+.btn-choose-option:hover {
+  background-color: #254d3c;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(26, 60, 46, 0.3);
+}
+
 /* Tomato Pickle Section */
 .tomato-section {
   background-color: #ffffff;
