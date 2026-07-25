@@ -24,7 +24,7 @@ const ProductCard = ({ product, index }) => (
         <img src={product.image} alt={product.name} />
       </div>
       <div className="tomato-info">
-        <h4>{product.name}</h4>
+        <h4>{product.name} <strong>(250 gm)</strong></h4>
         <p className="tomato-price">₹{product.price}</p>
         <button className="btn btn-choose-option add-to-cart-btn">
           Choose an Option

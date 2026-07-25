@@ -208,8 +208,16 @@
   font-family: 'Outfit', sans-serif;
   font-size: 1.4rem;
   color: var(--primary-dark-green);
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.3rem;
   font-weight: 700;
+}
+
+.weight-label {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--primary-dark-green, #1a3c2e);
+  margin-bottom: 0.8rem;
 }
 
 .weight-badge {

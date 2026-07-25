@@ -269,7 +269,7 @@ const ProductDetail = () => {
             {/* ── Price (animated) ───────────────────────────────────────── */}
             <div className="flex flex-wrap items-baseline gap-3 pt-1">
               <AnimatedPrice price={totalPrice} />
-              {show1kgBadge && (
+              {/* {show1kgBadge && (
                 <motion.span
                   initial={{ opacity: 0, scale: 0.85 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -277,7 +277,7 @@ const ProductDetail = () => {
                 >
                   Save 15%
                 </motion.span>
-              )}
+              )} */}
             </div>
 
             {/* ── Tax note ───────────────────────────────────────────────── */}

@@ -32,9 +32,9 @@ export const canonicalProducts = [
     image: chickenBonePickleImg,
     description: 'Tender bone-in chicken pieces marinated in traditional Andhra spices, slow-cooked and preserved in cold-pressed sesame oil.',
     priceMap: {
-      '250gm': 189,
-      '500gm': 359,
-      '1kg': 699,
+      '250gm': 280,
+      '500gm': 560,
+      '1kg': 900,
     },
     defaultWeight: '250gm',
   },
@@ -45,9 +45,9 @@ export const canonicalProducts = [
     image: chickenBonelessPickleImg,
     description: 'Tender boneless chicken pieces marinated in signature Andhra spice blend, preserved in cold-pressed sesame oil.',
     priceMap: {
-      '250gm': 189,
-      '500gm': 359,
-      '1kg': 699,
+      '250gm': 320,
+      '500gm': 650,
+      '1kg': 1300,
     },
     defaultWeight: '250gm',
   },
@@ -58,9 +58,9 @@ export const canonicalProducts = [
     image: tomatoPickleImg,
     description: 'Sun-ripened tomatoes slow-cooked with aromatic spices and sesame oil — a tangy Andhra pantry staple.',
     priceMap: {
-      '250gm': 189,
-      '500gm': 359,
-      '1kg': 699,
+      '250gm': 200,
+      '500gm': 400,
+      '1kg': 600,
     },
     defaultWeight: '250gm',
   },
@@ -71,9 +71,9 @@ export const canonicalProducts = [
     image: mangoPickleImg,
     description: 'Raw mangoes handpicked and blended with aromatic Andhra spices, preserved in cold-pressed sesame oil.',
     priceMap: {
-      '250gm': 189,
-      '500gm': 359,
-      '1kg': 699,
+      '250gm': 220,
+      '500gm': 400,
+      '1kg': 6000,
     },
     defaultWeight: '250gm',
   },
@@ -129,27 +129,19 @@ export const getProductById = (id) =>
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const chickenBoneProducts = [
-  { id: 'chicken-bone-pickle', name: 'Chicken Bone Pickle', weight: '250g', price: 189, image: chickenBonePickleImg, category: 'nonVeg' },
-  { id: 'chicken-bone-pickle', name: 'Chicken Bone Pickle', weight: '500g', price: 359, image: chickenBonePickleImg, category: 'nonVeg' },
-  { id: 'chicken-bone-pickle', name: 'Chicken Bone Pickle', weight: '1kg', price: 699, image: chickenBonePickleImg, category: 'nonVeg' },
+  { id: 'chicken-bone-pickle', name: 'Chicken Bone Pickle', price: 280, image: chickenBonePickleImg, category: 'nonVeg' },
 ];
 
 export const chickenBonelessProducts = [
-  { id: 'chicken-boneless-pickle', name: 'Chicken Boneless Pickle', weight: '250g', price: 189, image: chickenBonelessPickleImg, category: 'nonVeg' },
-  { id: 'chicken-boneless-pickle', name: 'Chicken Boneless Pickle', weight: '500g', price: 359, image: chickenBonelessPickleImg, category: 'nonVeg' },
-  { id: 'chicken-boneless-pickle', name: 'Chicken Boneless Pickle', weight: '1kg', price: 699, image: chickenBonelessPickleImg, category: 'nonVeg' },
+  { id: 'chicken-boneless-pickle', name: 'Chicken Boneless Pickle', price: 320, image: chickenBonelessPickleImg, category: 'nonVeg' },
 ];
 
 export const tomatoProducts = [
-  { id: 'tomato-pickle', name: 'Tomato Pickle', weight: '250g', price: 189, image: tomatoPickleImg, category: 'veg' },
-  { id: 'tomato-pickle', name: 'Tomato Pickle', weight: '500g', price: 359, image: tomatoPickleImg, category: 'veg' },
-  { id: 'tomato-pickle', name: 'Tomato Pickle', weight: '1kg', price: 699, image: tomatoPickleImg, category: 'veg' },
+  { id: 'tomato-pickle', name: 'Tomato Pickle', price: 200, image: tomatoPickleImg, category: 'veg' },
 ];
 
 export const mangoProducts = [
-  { id: 'mango-pickle', name: 'Mango Pickle', weight: '250g', price: 189, image: mangoPickleImg, category: 'veg' },
-  { id: 'mango-pickle', name: 'Mango Pickle', weight: '500g', price: 359, image: mangoPickleImg, category: 'veg' },
-  { id: 'mango-pickle', name: 'Mango Pickle', weight: '1kg', price: 699, image: mangoPickleImg, category: 'veg' },
+  { id: 'mango-pickle', name: 'Mango Pickle', price: 220, image: mangoPickleImg, category: 'veg' },
 ];
 
 // ── Home-page variety cards ────────────────────────────────────────────────────
