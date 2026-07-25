@@ -29,27 +29,30 @@ const PickleVarieties = () => {
         </div>
 
         <div className="product-grid">
-          {varietyProducts.map((product, index) => (
-            <Link
-              key={product.id}
-              to={`/products/${product.id}`}
-              className="product-card-link"
-              aria-label={`View details for ${product.name}`}
-            >
-              <motion.div
-                className="product-card"
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -10, scale: 1.02 }}
+          {varietyProducts.map((product, index) => {
+            const categoryRoute = product.category === 'veg' ? '/veg-pickles' : '/non-veg-pickles';
+            return (
+              <Link
+                key={product.id}
+                to={categoryRoute}
+                className="product-card-link"
+                aria-label={`View ${product.name} category`}
               >
-                <div className="product-img-wrapper">
-                  <img src={product.image} alt={product.name} />
-                </div>
-              </motion.div>
-            </Link>
-          ))}
+                <motion.div
+                  className="product-card"
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ y: -10, scale: 1.02 }}
+                >
+                  <div className="product-img-wrapper">
+                    <img src={product.image} alt={product.name} />
+                  </div>
+                </motion.div>
+              </Link>
+            );
+          })}
         </div>
 
         {/* Category links bar */}
