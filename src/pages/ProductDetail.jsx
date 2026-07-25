@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ShoppingBag, Zap, ShieldCheck, Truck, RefreshCw,
-  Heart, Share2, Check, Star, ArrowLeft, PackageX,
+  Heart, Share2, Check, Star, ArrowLeft, PackageX, Download,
 } from 'lucide-react';
 import ProductGallery from '../components/Product/ProductGallery';
 import VariantSelector from '../components/Product/VariantSelector';
@@ -118,18 +118,9 @@ const ProductDetail = () => {
   // ── Gallery images ────────────────────────────────────────────────────────
   const productImages = [
     { src: product.image, alt: `${product.name} – Main View` },
-    {
-      src: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?auto=format&fit=crop&w=1200&q=85',
-      alt: 'Authentic Pickle Fresh Bowl Close Up',
-    },
-    {
-      src: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=1200&q=85',
-      alt: 'Pure Spices & Traditional Ingredients',
-    },
-    {
-      src: 'https://images.unsplash.com/photo-1589301773950-a92c4c1538df?auto=format&fit=crop&w=1200&q=85',
-      alt: 'Traditional Home Kitchen Container',
-    },
+    { src: product.image, alt: `${product.name} – View 2` },
+    { src: product.image, alt: `${product.name} – View 3` },
+    { src: product.image, alt: `${product.name} – View 4` },
   ];
 
   // ── Handlers ──────────────────────────────────────────────────────────────
@@ -197,6 +188,19 @@ const ProductDetail = () => {
              ================================================================ */}
           <div className="w-full lg:sticky lg:top-24">
             <ProductGallery images={productImages} productName={product.name} />
+
+            {/* ── Download Image Button ─────────────────────────────────── */}
+            <div className="mt-3 flex justify-end">
+              <a
+                href={product.image}
+                download={`${product.name.replace(/\s+/g, '_')}.png`}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-neutral-200 text-sm font-semibold text-neutral-700 hover:bg-neutral-100 hover:border-neutral-400 transition-all duration-200"
+                aria-label={`Download ${product.name} image`}
+              >
+                <Download size={15} strokeWidth={2} />
+                Download Image
+              </a>
+            </div>
 
             {/* Quality badges */}
             <div className="mt-6 grid grid-cols-3 gap-2 p-3 sm:p-4 bg-stone-50 rounded-2xl border border-stone-200/70">
