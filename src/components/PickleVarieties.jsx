@@ -51,6 +51,28 @@ const PickleVarieties = () => {
             </Link>
           ))}
         </div>
+
+        {/* Category links bar */}
+        <motion.div
+          className="category-links-bar"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.3 }}
+        >
+          {[
+            { label: 'Veg Pickles',     to: '/veg-pickles'     },
+            { label: 'Non veg Pickles', to: '/non-veg-pickles' },
+            { label: 'Podis',           to: '/products'        },
+            { label: 'Sweets',          to: '/products'        },
+            { label: 'Snacks',          to: '/products'        },
+          ].map((cat, i) => (
+            <Link key={i} to={cat.to} className="category-link">
+              {cat.label} <span className="cat-arrow">→</span>
+            </Link>
+          ))}
+        </motion.div>
+
       </div>
     </section>
   );
