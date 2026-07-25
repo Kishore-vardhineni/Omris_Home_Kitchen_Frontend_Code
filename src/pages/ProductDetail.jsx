@@ -128,13 +128,12 @@ const ProductDetail = () => {
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleAddToCart = () => {
     const itemPrice = unitPrice + packCharge;
-    const variantSuffix = `${activeWeight}${selectedPacking !== 'Without Bottle' ? ` - ${selectedPacking}` : ''}`;
-    
+
     dispatch({
       type: 'ADD_ITEM',
       payload: {
         id: `${product.id}-${activeWeight}-${selectedPacking.replace(/\s+/g, '-').toLowerCase()}`,
-        name: `${product.name} (${variantSuffix})`,
+        name: product.name,
         price: itemPrice,
         image: product.image,
         quantity: quantity,
@@ -150,13 +149,12 @@ const ProductDetail = () => {
 
   const handleBuyNow = () => {
     const itemPrice = unitPrice + packCharge;
-    const variantSuffix = `${activeWeight}${selectedPacking !== 'Without Bottle' ? ` - ${selectedPacking}` : ''}`;
-    
+
     dispatch({
       type: 'ADD_ITEM',
       payload: {
         id: `${product.id}-${activeWeight}-${selectedPacking.replace(/\s+/g, '-').toLowerCase()}`,
-        name: `${product.name} (${variantSuffix})`,
+        name: product.name,
         price: itemPrice,
         image: product.image,
         quantity: quantity,
@@ -387,7 +385,7 @@ const ProductDetail = () => {
                 <span>Add to Cart</span>
               </motion.button>
 
-              <motion.button
+              {/* <motion.button
                 type="button"
                 onClick={handleBuyNow}
                 whileHover={{ scale: 1.015 }}
@@ -397,7 +395,7 @@ const ProductDetail = () => {
               >
                 <Zap size={20} strokeWidth={2.2} className="fill-current" />
                 <span>Buy Now</span>
-              </motion.button>
+              </motion.button> */}
             </div>
 
             {/* ================================================================
