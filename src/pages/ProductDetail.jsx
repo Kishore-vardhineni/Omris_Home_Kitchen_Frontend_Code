@@ -480,9 +480,9 @@ const ProductDetail = () => {
           </div>{/* end right section */}
         </div>{/* end grid */}
 
-        {/* ── Customer Reviews Summary & Modal Section ──────────────────────── */}
+        {/* ── Customer Reviews Summary & Modal Section (Per-Pickle Isolated) ── */}
         <div className="mt-12 lg:mt-16">
-          <ProductReviewsSection />
+          <ProductReviewsSection productId={product.id} productName={product.name} />
         </div>
       </div>{/* end page wrapper */}
 

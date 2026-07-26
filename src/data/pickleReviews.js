@@ -1,0 +1,150 @@
+// ─── Per-Pickle Initial Reviews Database ─────────────────────────────────────────
+// Unique initial reviews for each specific pickle product in the catalog.
+
+export const DEFAULT_PRODUCT_REVIEWS = {
+  'chicken-bone-pickle': [
+    {
+      id: 'cb-1',
+      name: 'Suresh Reddy',
+      email: 'suresh@example.com',
+      rating: 5,
+      title: 'Best Chicken Bone Pickle in Andhra!',
+      text: 'The bone-in chicken pieces absorb the sesame oil and spice blend so deeply. Has that perfect authentic village style taste!',
+      date: 'Jul 22, 2026',
+      verified: true,
+    },
+    {
+      id: 'cb-2',
+      name: 'Ramesh Pillai',
+      email: 'ramesh@example.com',
+      rating: 5,
+      title: 'Incredible Flavor & Crunch',
+      text: 'Tender chicken with rich masala. Goes amazingly well with warm rice and ghee.',
+      date: 'Jul 18, 2026',
+      verified: true,
+    },
+    {
+      id: 'cb-3',
+      name: 'Venkat Rao',
+      email: 'venkat@example.com',
+      rating: 4,
+      title: 'Spicy & Authentic',
+      text: 'Great quality chicken and very fresh. Spice level is bold and satisfying.',
+      date: 'Jul 12, 2026',
+      verified: true,
+    },
+  ],
+
+  'chicken-boneless-pickle': [
+    {
+      id: 'cbl-1',
+      name: 'Rahul Verma',
+      email: 'rahul@example.com',
+      rating: 5,
+      title: 'Juicy Boneless Chunks!',
+      text: 'Super soft and juicy boneless chicken pieces. No hassle with bones, just pure spicy bliss with every bite.',
+      date: 'Jul 24, 2026',
+      verified: true,
+    },
+    {
+      id: 'cbl-2',
+      name: 'Ananya Sharma',
+      email: 'ananya@example.com',
+      rating: 5,
+      title: 'My Daily Favorite',
+      text: 'Ordering my 3rd bottle now! The cold-pressed sesame oil aroma is unmatchable.',
+      date: 'Jul 19, 2026',
+      verified: true,
+    },
+    {
+      id: 'cbl-3',
+      name: 'Mohan Das',
+      email: 'mohan@example.com',
+      rating: 4,
+      title: 'Great spice balance',
+      text: 'Generous quantity of boneless meat. Very happy with the hygienic bottle packaging.',
+      date: 'Jul 14, 2026',
+      verified: true,
+    },
+  ],
+
+  'tomato-pickle': [
+    {
+      id: 'tp-1',
+      name: 'Lakshmi Iyer',
+      email: 'lakshmi@example.com',
+      rating: 5,
+      title: 'Tangy & Rich Andhra Tomato Pickle',
+      text: 'Pairs beautifully with idli, dosa, and curd rice. Pure ripe tomatoes slow-cooked to perfection.',
+      date: 'Jul 25, 2026',
+      verified: true,
+    },
+    {
+      id: 'tp-2',
+      name: 'Deepika Joshi',
+      email: 'deepika@example.com',
+      rating: 5,
+      title: 'Homemade Goodness',
+      text: 'No vinegar or chemical sourness — just authentic sun-ripened tomatoes and Guntur chili!',
+      date: 'Jul 20, 2026',
+      verified: true,
+    },
+  ],
+
+  'mango-pickle': [
+    {
+      id: 'mp-1',
+      name: 'Priya Sharma',
+      email: 'priya@example.com',
+      rating: 5,
+      title: 'Grandmother Recipe Taste!',
+      text: 'The Avakaya Mango Pickle tastes exactly like home. Raw mango sourness balanced with mustard and chili powder.',
+      date: 'Jul 24, 2026',
+      verified: true,
+    },
+    {
+      id: 'mp-2',
+      name: 'Arjun Menon',
+      email: 'arjun@example.com',
+      rating: 5,
+      title: 'Crispy Cut Mango Pieces',
+      text: 'The mango pieces remain firm and crunchy. Outstanding aroma and freshness!',
+      date: 'Jul 21, 2026',
+      verified: true,
+    },
+    {
+      id: 'mp-3',
+      name: 'Sneha Kulkarni',
+      email: 'sneha@example.com',
+      rating: 4,
+      title: 'Delicious Avakaya',
+      text: 'Extremely fresh batch. Must try for all mango pickle lovers.',
+      date: 'Jul 11, 2026',
+      verified: true,
+    },
+  ],
+};
+
+// Generic fallback reviews if product has no custom dataset
+export const GENERIC_REVIEWS = [
+  {
+    id: 'gen-1',
+    name: 'Kavitha Nair',
+    email: 'kavitha@example.com',
+    rating: 5,
+    title: 'Authentic Andhra Taste!',
+    text: 'Prepared with high quality ingredients and traditional home recipe. Highly recommended!',
+    date: 'Jul 20, 2026',
+    verified: true,
+  },
+  {
+    id: 'gen-2',
+    name: 'Anita Desai',
+    email: 'anita@example.com',
+    rating: 4,
+    title: 'Very fresh and flavorful',
+    text: 'Loved the aroma and spice level. Arrived very quickly and well packed.',
+    date: 'Jul 15, 2026',
+    verified: true,
+  },
+];

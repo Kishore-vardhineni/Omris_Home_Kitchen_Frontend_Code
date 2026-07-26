@@ -1,77 +1,47 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import ReviewsSummary from './ReviewsSummary';
 import WriteReviewModal from './WriteReviewModal';
 import ReviewList from './ReviewList';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle } from 'lucide-react';
-
-const INITIAL_REVIEWS = [
-  {
-    id: 1,
-    name: 'Priya Sharma',
-    email: 'priya@example.com',
-    rating: 5,
-    title: 'Authentic Homemade Taste!',
-    text: 'The Mango Pickle tastes exactly like how my grandmother used to make it. The perfect blend of spices and raw mango tanginess. Absolutely love it!',
-    date: 'Jul 24, 2026',
-    verified: true,
-  },
-  {
-    id: 2,
-    name: 'Rahul Verma',
-    email: 'rahul@example.com',
-    rating: 5,
-    title: 'Addictive Flavor & Great Quality',
-    text: 'I am totally addicted to their Garlic Pickle. It has become a staple with my everyday meals. Excellent packaging and super fast delivery too!',
-    date: 'Jul 20, 2026',
-    verified: true,
-  },
-  {
-    id: 3,
-    name: 'Anita Desai',
-    email: 'anita@example.com',
-    rating: 5,
-    title: 'Pure & Preservative Free',
-    text: 'Pure ingredients and no artificial preservatives — that is what I love about Omris Pickles. The Mixed Veg pickle is simply delightful.',
-    date: 'Jul 15, 2026',
-    verified: true,
-  },
-  {
-    id: 4,
-    name: 'Suresh Reddy',
-    email: 'suresh@example.com',
-    rating: 4,
-    title: 'Spicy & Tangy Goodness',
-    text: 'Ordered three jars of Gongura Pickle and they were gone within a week! The tanginess and spice level are absolutely perfect.',
-    date: 'Jul 10, 2026',
-    verified: true,
-  },
-  {
-    id: 5,
-    name: 'Kavitha Nair',
-    email: 'kavitha@example.com',
-    rating: 3,
-    title: 'Decent flavor, slightly spicy for me',
-    text: 'The pickle is very authentic, though a bit too spicy for my personal preference. Packaging was top notch.',
-    date: 'Jul 02, 2026',
-    verified: true,
-  },
-];
+import { DEFAULT_PRODUCT_REVIEWS, GENERIC_REVIEWS } from '../data/pickleReviews';
 
 /**
  * ProductReviewsSection Component
  * 
- * Master section container managing review state.
- * Connects ReviewsSummary, WriteReviewModal, and ReviewList so that
- * submitting a review dynamically recalculates rating averages, star counts,
- * and updates the review list in real time.
+ * Manages separate review sections per pickle product.
+ * - Accepts `productId` and `productName`
+ * - Maintains independent review lists, rating breakdowns, and average scores per pickle
+ * - Persists newly submitted reviews to localStorage per product ID
  */
-const ProductReviewsSection = () => {
-  const [reviews, setReviews] = useState(INITIAL_REVIEWS);
+const ProductReviewsSection = ({ productId = 'general', productName = 'Pickle' }) => {
+  // Helper to load reviews for a specific pickle product
+  const loadReviewsForProduct = (id) => {
+    try {
+      const saved = localStorage.getItem(`omris_reviews_${id}`);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load reviews from localStorage', e);
+    }
+    return DEFAULT_PRODUCT_REVIEWS[id] || GENERIC_REVIEWS;
+  };
+
+  // State keyed by productId
+  const [reviews, setReviews] = useState(() => loadReviewsForProduct(productId));
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
 
-  // Dynamic calculations derived from client state
+  // Sync state whenever productId changes (navigating between different pickles)
+  useEffect(() => {
+    setReviews(loadReviewsForProduct(productId));
+  }, [productId]);
+
+  // Dynamic calculations derived from current pickle's review list
   const { averageRating, totalReviews, ratingBreakdown } = useMemo(() => {
     const total = reviews.length;
     if (total === 0) {
@@ -104,9 +74,18 @@ const ProductReviewsSection = () => {
     };
   }, [reviews]);
 
-  // Handle new review submission
+  // Handle new review submission for this specific pickle
   const handleAddReview = (newReview) => {
-    setReviews((prev) => [newReview, ...prev]);
+    const updated = [newReview, ...reviews];
+    setReviews(updated);
+
+    // Save per-pickle reviews in localStorage
+    try {
+      localStorage.setItem(`omris_reviews_${productId}`, JSON.stringify(updated));
+    } catch (e) {
+      console.error('Failed to save review to localStorage', e);
+    }
+
     setShowSuccessToast(true);
     setTimeout(() => setShowSuccessToast(false), 4000);
   };
@@ -120,15 +99,15 @@ const ProductReviewsSection = () => {
             initial={{ opacity: 0, y: -40 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -40 }}
-            className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-black text-white px-5 py-3 rounded-full shadow-2xl flex items-center gap-3 text-sm font-semibold border border-neutral-700 whitespace-nowrap"
+            className="fixed top-6 left-1/2 -translate-x-1/2 z-[10000] bg-black text-white px-5 py-3 rounded-full shadow-2xl flex items-center gap-3 text-sm font-semibold border border-neutral-700 whitespace-nowrap"
           >
             <CheckCircle className="w-5 h-5 text-teal-400" />
-            <span>Thank you! Your review has been submitted successfully.</span>
+            <span>Review for "{productName}" submitted successfully!</span>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* 3-Column Reviews Summary Bar */}
+      {/* 3-Column Reviews Summary Bar for this Pickle */}
       <ReviewsSummary
         averageRating={averageRating}
         totalReviews={totalReviews}
@@ -139,7 +118,7 @@ const ProductReviewsSection = () => {
       {/* Review Cards List Container */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
         <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 font-sans">
-          Customer Feedbacks ({totalReviews})
+          Customer Feedbacks for {productName} ({totalReviews})
         </h3>
         <ReviewList reviews={reviews} />
       </div>

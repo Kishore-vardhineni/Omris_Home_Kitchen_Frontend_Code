@@ -1,16 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Star, Camera, UploadCloud, AlertCircle } from 'lucide-react';
+import { X, Star, Camera, AlertCircle } from 'lucide-react';
 
 /**
  * WriteReviewModal Component
  * 
  * Accessible modal dialog for submitting a customer review.
- * Features:
- * - Interactive 5-star rating selector with hover preview
- * - Field validation (Name, Email, Rating, Review text)
- * - Photo upload with live thumbnail previews and removal option
- * - Backdrop click & Escape key listeners to close modal
+ * Mobile Optimized:
+ * - High z-index (z-[9999]) to sit above sticky headers and mobile bottom bars
+ * - Fixed sticky modal header so title and close button are always visible
+ * - Touch-friendly form inputs and star rating UI
  */
 const WriteReviewModal = ({ isOpen, onClose, onSubmit }) => {
   const backdropRef = useRef(null);
@@ -28,7 +27,7 @@ const WriteReviewModal = ({ isOpen, onClose, onSubmit }) => {
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
 
-  // Reset state when modal opens/closes
+  // Reset state when modal opens/closes & lock background scroll
   useEffect(() => {
     if (isOpen) {
       setName('');
@@ -50,7 +49,7 @@ const WriteReviewModal = ({ isOpen, onClose, onSubmit }) => {
     };
   }, [isOpen]);
 
-  // Handle Escape key
+  // Handle Escape key to close
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && isOpen) {
@@ -61,7 +60,7 @@ const WriteReviewModal = ({ isOpen, onClose, onSubmit }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  // Validation logic
+  // Form validation logic
   const validate = () => {
     const newErrors = {};
 
@@ -88,7 +87,7 @@ const WriteReviewModal = ({ isOpen, onClose, onSubmit }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle photo upload
+  // Handle photo selection
   const handlePhotoChange = (e) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
@@ -99,7 +98,6 @@ const WriteReviewModal = ({ isOpen, onClose, onSubmit }) => {
     }));
 
     setPhotos((prev) => [...prev, ...newPhotos]);
-    // Reset file input value so same file can be chosen again if removed
     e.target.value = '';
   };
 
@@ -113,7 +111,7 @@ const WriteReviewModal = ({ isOpen, onClose, onSubmit }) => {
     });
   };
 
-  // Handle form submit
+  // Submit review handler
   const handleSubmit = (e) => {
     e.preventDefault();
     setTouched({
@@ -170,7 +168,7 @@ const WriteReviewModal = ({ isOpen, onClose, onSubmit }) => {
       <div
         ref={backdropRef}
         onClick={(e) => e.target === backdropRef.current && onClose()}
-        className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+        className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
         aria-modal="true"
         role="dialog"
       >
@@ -179,23 +177,25 @@ const WriteReviewModal = ({ isOpen, onClose, onSubmit }) => {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ duration: 0.2 }}
-          className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden my-8"
+          className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] sm:max-h-[90vh] flex flex-col my-auto overflow-hidden border border-gray-100"
         >
-          {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-            <h3 className="text-xl font-bold text-gray-900 font-sans">Write a Review</h3>
+          {/* Sticky Modal Header */}
+          <div className="flex items-center justify-between px-5 py-4 sm:px-6 border-b border-gray-200 bg-white shrink-0">
+            <h3 className="text-lg sm:text-xl font-bold text-gray-900 font-sans">
+              Write a Review
+            </h3>
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-full text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none"
+              className="p-2 rounded-full text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none"
               aria-label="Close modal"
             >
               <X size={20} />
             </button>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
+          {/* Scrollable Form Body */}
+          <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto flex-1">
             {/* 1. Your Name */}
             <div>
               <label htmlFor="reviewer-name" className="block text-sm font-semibold text-gray-800 mb-1">
@@ -257,36 +257,38 @@ const WriteReviewModal = ({ isOpen, onClose, onSubmit }) => {
               <label className="block text-sm font-semibold text-gray-800 mb-1">
                 Your Rating <span className="text-red-500">*</span>
               </label>
-              <div className="flex items-center gap-1 py-1">
-                {[1, 2, 3, 4, 5].map((starIndex) => {
-                  const active = starIndex <= (hoverRating || rating);
-                  return (
-                    <button
-                      key={starIndex}
-                      type="button"
-                      onClick={() => {
-                        setRating(starIndex);
-                        setTouched((p) => ({ ...p, rating: true }));
-                        if (errors.rating) {
-                          setErrors((p) => ({ ...p, rating: null }));
-                        }
-                      }}
-                      onMouseEnter={() => setHoverRating(starIndex)}
-                      onMouseLeave={() => setHoverRating(0)}
-                      className="p-1 transition-transform transform hover:scale-110 focus:outline-none"
-                      aria-label={`Rate ${starIndex} out of 5 stars`}
-                    >
-                      <Star
-                        className={`w-7 h-7 transition-colors ${
-                          active
-                            ? 'text-yellow-400 fill-yellow-400'
-                            : 'text-gray-300 fill-transparent'
-                        }`}
-                      />
-                    </button>
-                  );
-                })}
-                <span className="ml-3 text-xs font-medium text-gray-500">
+              <div className="flex flex-wrap items-center justify-between gap-2 py-1">
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((starIndex) => {
+                    const active = starIndex <= (hoverRating || rating);
+                    return (
+                      <button
+                        key={starIndex}
+                        type="button"
+                        onClick={() => {
+                          setRating(starIndex);
+                          setTouched((p) => ({ ...p, rating: true }));
+                          if (errors.rating) {
+                            setErrors((p) => ({ ...p, rating: null }));
+                          }
+                        }}
+                        onMouseEnter={() => setHoverRating(starIndex)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        className="p-1 transition-transform transform hover:scale-110 focus:outline-none"
+                        aria-label={`Rate ${starIndex} out of 5 stars`}
+                      >
+                        <Star
+                          className={`w-6 h-6 sm:w-7 sm:h-7 transition-colors ${
+                            active
+                              ? 'text-yellow-400 fill-yellow-400'
+                              : 'text-gray-300 fill-transparent'
+                          }`}
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+                <span className="text-xs font-medium text-gray-500">
                   {getRatingLabel(hoverRating || rating)}
                 </span>
               </div>
