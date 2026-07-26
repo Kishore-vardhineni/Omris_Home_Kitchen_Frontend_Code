@@ -192,11 +192,11 @@ export const mangoProducts = [
 
 // ── Home-page variety cards ────────────────────────────────────────────────────
 export const varietyProducts = [
-  { id: 'veg-pickle', name: 'Veg Pickel', price: 189, image: tomatoPickleImg, category: 'veg' },
-  { id: 'Non-veg-pickle', name: 'Non Veg Pickle', price: 189, image: chickenBonelessPickleImg, category: 'nonVeg' },
-  { id: 'garlic-pickle', name: 'Garlic Pickle', price: 249, image: chickenBonePickleImg, category: 'podis' },
-  { id: 'mixed-veg-pickle', name: 'Mixed Veg Pickle', price: 189, image: mangoPickleImg, category: 'veg' },
-  { id: 'green-chilli-pickle', name: 'Green Chilli Pickle', price: 159, image: tomatoPickleImg, category: 'veg' },
+  { id: 'veg-pickle', name: 'Veg Pickle', label: 'Veg Pickles', price: 189, image: mangoPickleImg, category: 'veg', route: '/veg-pickles' },
+  { id: 'non-veg-pickle', name: 'Non Veg Pickle', label: 'Non veg Pickles', price: 189, image: chickenBonelessPickleImg, category: 'nonVeg', route: '/non-veg-pickles' },
+  { id: 'garlic-pickle', name: 'Garlic Pickle', label: 'Podis', price: 249, image: chickenBonePickleImg, category: 'podis', route: '/products' },
+  { id: 'mixed-veg-pickle', name: 'Mixed Veg Pickle', label: 'Sweets', price: 189, image: tomatoPickleImg, category: 'veg', route: '/products' },
+  { id: 'green-chilli-pickle', name: 'Green Chilli Pickle', label: 'Snacks', price: 159, image: tomatoPickleImg, category: 'veg', route: '/products' },
 ];
 
 // ── Master flat list (all listing cards) ──────────────────────────────────────

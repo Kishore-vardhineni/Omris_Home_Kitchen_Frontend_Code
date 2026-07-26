@@ -30,13 +30,14 @@ const PickleVarieties = () => {
 
         <div className="product-grid">
           {varietyProducts.map((product, index) => {
-            const categoryRoute = product.category === 'veg' ? '/veg-pickles' : '/non-veg-pickles';
+            const categoryRoute = product.route || (product.category === 'veg' ? '/veg-pickles' : '/non-veg-pickles');
+            const categoryLabel = product.label || product.name;
             return (
               <Link
                 key={product.id}
                 to={categoryRoute}
                 className="product-card-link"
-                aria-label={`View ${product.name} category`}
+                aria-label={`View ${categoryLabel} category`}
               >
                 <motion.div
                   className="product-card"
@@ -47,34 +48,18 @@ const PickleVarieties = () => {
                   whileHover={{ y: -10, scale: 1.02 }}
                 >
                   <div className="product-img-wrapper">
-                    <img src={product.image} alt={product.name} />
+                    <img src={product.image} alt={categoryLabel} />
+                  </div>
+                  <div className="product-card-action">
+                    <span className="category-link">
+                      {categoryLabel} <span className="cat-arrow">→</span>
+                    </span>
                   </div>
                 </motion.div>
               </Link>
             );
           })}
         </div>
-
-        {/* Category links bar */}
-        <motion.div
-          className="category-links-bar"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.3 }}
-        >
-          {[
-            { label: 'Veg Pickles',     to: '/veg-pickles'     },
-            { label: 'Non veg Pickles', to: '/non-veg-pickles' },
-            { label: 'Podis',           to: '/products'        },
-            { label: 'Sweets',          to: '/products'        },
-            { label: 'Snacks',          to: '/products'        },
-          ].map((cat, i) => (
-            <Link key={i} to={cat.to} className="category-link">
-              {cat.label} <span className="cat-arrow">→</span>
-            </Link>
-          ))}
-        </motion.div>
 
       </div>
     </section>
