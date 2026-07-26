@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ScrollToTop from './components/ScrollToTop';
 
 // Pages
 const Home        = React.lazy(() => import('./pages/Home'));
@@ -19,6 +20,7 @@ const FAQ         = React.lazy(() => import('./pages/FAQ'));
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <Navbar />
       <React.Suspense fallback={<div style={{ padding: '100px', textAlign: 'center' }}>Loading...</div>}>
         <Routes>
