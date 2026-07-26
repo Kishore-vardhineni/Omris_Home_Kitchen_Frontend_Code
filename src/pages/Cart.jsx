@@ -1,7 +1,7 @@
 import React from 'react';
 import { useCart } from '../context/CartContext';
-import { Link } from 'react-router-dom';
-import { ShoppingBag, Trash2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ShoppingBag, Trash2, ArrowLeft } from 'lucide-react';
 
 const CartItem = ({ item, dispatch }) => {
   // Extract clean title and weight subtitle
@@ -78,6 +78,7 @@ const CartItem = ({ item, dispatch }) => {
 
 const Cart = () => {
   const { state, dispatch } = useCart();
+  const navigate = useNavigate();
 
   const handleWhatsAppOrder = () => {
     if (state.items.length === 0) return;
@@ -109,6 +110,25 @@ const Cart = () => {
   return (
     <div className="bg-[#faf9f6] min-h-screen font-sans text-neutral-800 p-4 sm:p-8 lg:p-12">
       <div className="max-w-[1000px] mx-auto">
+        {/* Breadcrumb */}
+        <nav
+          aria-label="Breadcrumb"
+          className="mb-3 text-xs sm:text-sm text-neutral-500 flex flex-wrap items-center gap-1.5"
+        >
+          <Link to="/" className="hover:text-black transition-colors">Home</Link>
+          <span>/</span>
+          <span className="text-neutral-900 font-medium">Cart</span>
+        </nav>
+
+        {/* Back button */}
+        <button
+          onClick={() => navigate(-1)}
+          className="mb-6 flex items-center gap-1.5 text-sm font-medium text-neutral-500 hover:text-black transition-colors cursor-pointer"
+          aria-label="Go back"
+        >
+          <ArrowLeft size={16} /> Back
+        </button>
+
         <h1 className="text-3xl sm:text-4xl font-serif text-neutral-900 mb-8 tracking-tight">
           Shopping Cart
         </h1>
