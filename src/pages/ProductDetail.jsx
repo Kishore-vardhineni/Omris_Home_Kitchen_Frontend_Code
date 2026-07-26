@@ -9,6 +9,7 @@ import ProductGallery from '../components/Product/ProductGallery';
 import VariantSelector from '../components/Product/VariantSelector';
 import QuantitySelector from '../components/Product/QuantitySelector';
 import StickyMobileAddToCart from '../components/Product/StickyMobileAddToCart';
+import ProductReviewsSection from '../components/ProductReviewsSection';
 import { getProductById, PACKING_PRICES } from '../data/products';
 import { useCart } from '../context/CartContext';
 
@@ -268,7 +269,7 @@ const ProductDetail = () => {
             {/* ── Brand + action icons ───────────────────────────────────── */}
             <div className="flex items-center justify-between gap-3">
               <span className="text-xs sm:text-sm font-semibold tracking-widest text-neutral-500 uppercase">
-                PALLETURIPACHALLU
+                OmrisHomeKitchen
               </span>
               <div className="flex items-center gap-2 flex-shrink-0">
                 <button
@@ -433,7 +434,7 @@ const ProductDetail = () => {
                 {activeTab === 'description' && (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
                     <p>
-                      Experience the authentic Andhra flavor with PALLETURIPACHALLU's{' '}
+                      Experience the authentic Andhra flavor with OmrisHomeKitchen's{' '}
                       <strong>{product.name}</strong>.{' '}
                       {product.description}
                     </p>
@@ -478,6 +479,11 @@ const ProductDetail = () => {
 
           </div>{/* end right section */}
         </div>{/* end grid */}
+
+        {/* ── Customer Reviews Summary & Modal Section ──────────────────────── */}
+        <div className="mt-12 lg:mt-16">
+          <ProductReviewsSection />
+        </div>
       </div>{/* end page wrapper */}
 
       {/* ── Sticky mobile Add-to-Cart bar (< 640 px) ─────────────────────── */}
