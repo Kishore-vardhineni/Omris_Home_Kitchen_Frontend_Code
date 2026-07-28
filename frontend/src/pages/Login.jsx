@@ -59,21 +59,50 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!validate()) return;
 
     setIsSubmitting(true);
+    setErrors({});
 
-    setTimeout(() => {
+    try {
+      const response = await fetch('http://localhost:3001/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        setErrors({ server: data.message || 'Invalid email or password' });
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('userInfo', JSON.stringify(data.user));
+      }
+
       setIsSubmitting(false);
       setSubmitSuccess(true);
-      
+
       setTimeout(() => {
         navigate('/');
       }, 1500);
-    }, 1000);
+    } catch (err) {
+      console.error('Login error:', err);
+      setErrors({ server: 'Unable to connect to server. Please check your network.' });
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -138,6 +167,21 @@ const Login = () => {
           </div>
 
           <AnimatePresence>
+            {errors.server && (
+              <motion.div 
+                className="success-alert"
+                style={{ backgroundColor: '#fef2f2', borderColor: '#ef4444', color: '#b91c1c' }}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+              >
+                <AlertCircle size={22} color="#ef4444" />
+                <div>
+                  <strong>Sign In Failed</strong>
+                  <p>{errors.server}</p>
+                </div>
+              </motion.div>
+            )}
             {submitSuccess && (
               <motion.div 
                 className="success-alert"

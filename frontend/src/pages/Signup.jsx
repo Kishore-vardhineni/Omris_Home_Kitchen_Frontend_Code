@@ -107,23 +107,53 @@ const Signup = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!validate()) return;
 
     setIsSubmitting(true);
+    setErrors({});
 
-    // Simulate API registration call
-    setTimeout(() => {
+    try {
+      const response = await fetch('http://localhost:3001/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        setErrors({ server: data.message || 'Registration failed. Please try again.' });
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Save user session & token
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('userInfo', JSON.stringify(data.user));
+      }
+
       setIsSubmitting(false);
       setSubmitSuccess(true);
-      
-      // Auto navigate to login page after 2 seconds
+
       setTimeout(() => {
         navigate('/login');
-      }, 2000);
-    }, 1200);
+      }, 1800);
+    } catch (err) {
+      console.error('Signup error:', err);
+      setErrors({ server: 'Unable to connect to server. Please check your network.' });
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -196,6 +226,21 @@ const Signup = () => {
           </div>
 
           <AnimatePresence>
+            {errors.server && (
+              <motion.div 
+                className="success-alert"
+                style={{ backgroundColor: '#fef2f2', borderColor: '#ef4444', color: '#b91c1c' }}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+              >
+                <AlertCircle size={22} color="#ef4444" />
+                <div>
+                  <strong>Registration Error</strong>
+                  <p>{errors.server}</p>
+                </div>
+              </motion.div>
+            )}
             {submitSuccess && (
               <motion.div 
                 className="success-alert"
