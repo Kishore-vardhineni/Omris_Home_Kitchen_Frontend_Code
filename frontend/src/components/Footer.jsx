@@ -42,7 +42,7 @@ const Footer = () => {
           <h4>Contact Us</h4>
           <ul className="contact-list">
             <li><MapPin size={16} /> H.No.2-3-84/1/A, Lalitha Nilyam, Quadribagh, Amberpet, Hyderabad, Telangana, Pin - 500013</li>
-            <li><PhoneCall size={16} /> +91 7670851968</li>
+            <li><PhoneCall size={16} /> +91 7670851967</li>
             <li><Mail size={16} /> omrishomekitchen@gmail.com</li>
           </ul>
         </div>
