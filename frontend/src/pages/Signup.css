@@ -1,0 +1,553 @@
+/* Signup.css - Omri's Home Kitchen */
+
+.signup-page-wrapper {
+  min-height: 100vh;
+  background-color: var(--bg-cream, #FEF3C0);
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(245, 184, 0, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(28, 21, 0, 0.08) 0%, transparent 40%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1rem;
+}
+
+.signup-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  max-width: 1100px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(28, 21, 0, 0.12);
+  overflow: hidden;
+  border: 1px solid rgba(245, 184, 0, 0.3);
+}
+
+/* ── Left Banner ── */
+.signup-banner {
+  position: relative;
+  background: linear-gradient(135deg, #1C1500 0%, #362900 100%);
+  color: #FEF3C0;
+  padding: 3rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+.banner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 80% 20%, rgba(245, 184, 0, 0.2) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.banner-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.banner-logo {
+  height: 48px;
+  object-contain: contain;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
+}
+
+.badge-spice {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(245, 184, 0, 0.2);
+  color: #F5B800;
+  border: 1px solid rgba(245, 184, 0, 0.4);
+  padding: 0.35rem 0.85rem;
+  border-radius: 50px;
+  font-size: 0.825rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.75rem;
+}
+
+.banner-tagline h2 {
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.3;
+  margin-bottom: 0.75rem;
+}
+
+.banner-tagline p {
+  color: rgba(254, 243, 192, 0.85);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.banner-features {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 0.5rem;
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.icon-box {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #F5B800;
+  color: #1C1500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.feature-item h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 0.15rem;
+}
+
+.feature-item p {
+  font-size: 0.825rem;
+  color: rgba(254, 243, 192, 0.75);
+}
+
+.banner-hero-preview {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.floating-pickle-img {
+  max-height: 160px;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+  animation: floatAnim 4s ease-in-out infinite;
+}
+
+@keyframes floatAnim {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* ── Right Form Card ── */
+.signup-card {
+  padding: 3rem 2.75rem;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.form-header {
+  margin-bottom: 1.75rem;
+}
+
+.form-header h3 {
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: #1C1500;
+  margin-bottom: 0.35rem;
+}
+
+.form-header p {
+  color: #666666;
+  font-size: 0.925rem;
+}
+
+/* Success Alert */
+.success-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  background: #ecfdf5;
+  border: 1px solid #10b981;
+  color: #065f46;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.success-alert strong {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.success-alert p {
+  font-size: 0.85rem;
+  margin: 0;
+  opacity: 0.9;
+}
+
+/* Form inputs */
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-group label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1C1500;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #fdfbf7;
+  border: 1.5px solid #e2d9c5;
+  border-radius: 10px;
+  transition: all 0.25s ease;
+}
+
+.input-wrapper:focus-within {
+  border-color: #1C1500;
+  box-shadow: 0 0 0 3px rgba(245, 184, 0, 0.3);
+  background: #ffffff;
+}
+
+.input-wrapper.has-error {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.field-icon {
+  position: absolute;
+  left: 0.85rem;
+  color: #888888;
+  pointer-events: none;
+}
+
+.input-wrapper input {
+  width: 100%;
+  padding: 0.75rem 0.85rem 0.75rem 2.6rem;
+  font-family: inherit;
+  font-size: 0.925rem;
+  color: #1C1500;
+  border: none;
+  outline: none;
+  background: transparent;
+  border-radius: 10px;
+}
+
+.input-wrapper input::placeholder {
+  color: #a0a0a0;
+}
+
+/* Phone input special */
+.phone-wrapper .country-code {
+  position: absolute;
+  left: 2.6rem;
+  font-size: 0.925rem;
+  font-weight: 600;
+  color: #1C1500;
+  user-select: none;
+}
+
+.phone-wrapper input {
+  padding-left: 5rem;
+}
+
+.toggle-password-btn {
+  background: none;
+  border: none;
+  padding: 0.5rem 0.85rem;
+  color: #777777;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.toggle-password-btn:hover {
+  color: #1C1500;
+}
+
+/* Password Strength Meter */
+.password-meter {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.meter-track {
+  flex: 1;
+  height: 5px;
+  background: #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.meter-bar {
+  height: 100%;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.meter-label {
+  font-size: 0.775rem;
+  font-weight: 600;
+}
+
+.error-message {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #ef4444;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-top: 0.15rem;
+}
+
+/* Checkbox styling */
+.checkbox-group {
+  margin-top: 0.25rem;
+}
+
+.checkbox-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.checkmark {
+  width: 18px;
+  height: 18px;
+  background-color: #fdfbf7;
+  border: 1.5px solid #e2d9c5;
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.checkbox-container:hover input ~ .checkmark {
+  border-color: #1C1500;
+}
+
+.checkbox-container input:checked ~ .checkmark {
+  background-color: #1C1500;
+  border-color: #1C1500;
+}
+
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 5px;
+  top: 2px;
+  width: 5px;
+  height: 9px;
+  border: solid #F5B800;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.checkbox-container input:checked ~ .checkmark:after {
+  display: block;
+}
+
+.terms-text {
+  font-size: 0.85rem;
+  color: #555555;
+  line-height: 1.4;
+}
+
+.link-highlight {
+  color: #1C1500;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.link-highlight:hover {
+  color: #d99b00;
+}
+
+/* Submit Button */
+.submit-btn {
+  width: 100%;
+  padding: 0.85rem 1.5rem;
+  background-color: #1C1500;
+  color: #F5B800;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.25s ease;
+  margin-top: 0.5rem;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background-color: #2D2300;
+  box-shadow: 0 6px 18px rgba(28, 21, 0, 0.25);
+}
+
+.submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.spinner-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(245, 184, 0, 0.3);
+  border-top-color: #F5B800;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 0.75rem 0;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.divider span {
+  padding: 0 0.85rem;
+  color: #999999;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Social Button */
+.social-btn {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: #ffffff;
+  border: 1.5px solid #e2d9c5;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.social-btn:hover:not(:disabled) {
+  background: #fcf9f2;
+  border-color: #1C1500;
+}
+
+.google-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Login Link Prompt */
+.login-prompt {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #666666;
+  margin-top: 0.5rem;
+}
+
+.login-link {
+  color: #1C1500;
+  font-weight: 700;
+  text-decoration: underline;
+  margin-left: 0.25rem;
+}
+
+.login-link:hover {
+  color: #d99b00;
+}
+
+/* Responsive adjustments */
+@media (max-width: 960px) {
+  .signup-container {
+    grid-template-columns: 1fr;
+    max-width: 550px;
+  }
+  
+  .signup-banner {
+    padding: 2.25rem 2rem;
+  }
+  
+  .banner-hero-preview {
+    display: none;
+  }
+  
+  .signup-card {
+    padding: 2.25rem 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .signup-page-wrapper {
+    padding: 1rem 0.5rem;
+  }
+
+  .signup-banner {
+    padding: 1.75rem 1.25rem;
+  }
+
+  .signup-card {
+    padding: 1.75rem 1.25rem;
+  }
+
+  .banner-tagline h2 {
+    font-size: 1.5rem;
+  }
+
+  .form-header h3 {
+    font-size: 1.5rem;
+  }
+}

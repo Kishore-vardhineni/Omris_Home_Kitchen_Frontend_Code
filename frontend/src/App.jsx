@@ -17,6 +17,9 @@ const Contact     = React.lazy(() => import('./pages/Contact'));
 const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy'));
 const FAQ         = React.lazy(() => import('./pages/FAQ'));
 
+const Signup       = React.lazy(() => import('./pages/Signup'));
+const Login        = React.lazy(() => import('./pages/Login'));
+
 function App() {
   return (
     <Router>
@@ -31,6 +34,8 @@ function App() {
           <Route path="/products/:id"  element={<ProductDetail />} />
           <Route path="/cart"          element={<Cart />} />
           <Route path="/checkout"      element={<Checkout />} />
+          <Route path="/signup"        element={<Signup />} />
+          <Route path="/login"         element={<Login />} />
           <Route path="/about"         element={<About />} />
           <Route path="/contact"       element={<Contact />} />
           <Route path="/privacy"       element={<PrivacyPolicy />} />
