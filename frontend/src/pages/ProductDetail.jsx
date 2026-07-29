@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -10,13 +10,14 @@ import VariantSelector from '../components/Product/VariantSelector';
 import QuantitySelector from '../components/Product/QuantitySelector';
 import StickyMobileAddToCart from '../components/Product/StickyMobileAddToCart';
 import ProductReviewsSection from '../components/ProductReviewsSection';
-import { getProductById, PACKING_PRICES } from '../data/products';
+import { PACKING_PRICES } from '../data/products';
 import { useCart } from '../context/CartContext';
+import { getProductBySlug } from '../services/productService';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Product Not Found — professional 404 experience
 // ─────────────────────────────────────────────────────────────────────────────
-const ProductNotFound = () => {
+const ProductNotFound = ({ message }) => {
   const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 text-center font-inter">
@@ -35,8 +36,7 @@ const ProductNotFound = () => {
           Product Not Found
         </h1>
         <p className="text-neutral-500 text-base sm:text-lg mb-8 leading-relaxed">
-          The product you're looking for doesn't exist or may have been removed.
-          Browse our full collection to find what you need.
+          {message || "The product you're looking for doesn't exist or may have been removed."}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
@@ -46,10 +46,10 @@ const ProductNotFound = () => {
             <ArrowLeft size={18} /> Go Back
           </button>
           <Link
-            to="/products"
+            to="/"
             className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-black text-white font-semibold hover:bg-neutral-800 transition-all duration-200"
           >
-            Browse All Products
+            Browse Collections
           </Link>
         </div>
       </motion.div>
@@ -70,7 +70,7 @@ const AnimatedPrice = ({ price }) => (
       transition={{ duration: 0.18, ease: 'easeOut' }}
       className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-neutral-900 tracking-tight tabular-nums"
     >
-      Rs.&nbsp;{price}
+      ₹&nbsp;{price}
     </motion.span>
   </AnimatePresence>
 );
@@ -79,67 +79,117 @@ const AnimatedPrice = ({ price }) => (
 // Main Product Detail Page
 // ─────────────────────────────────────────────────────────────────────────────
 const ProductDetail = () => {
-  const { id } = useParams();
+  const { id } = useParams(); // URL parameter id contains the product slug
   const navigate = useNavigate();
   const { dispatch } = useCart();
 
-  // ── Look up canonical product ─────────────────────────────────────────────
-  const product = getProductById(id);
+  // ── States ─────────────────────────────────────────────────────────────────
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // ── State — initialised before the early-return so hook order is stable ───
-  const defaultWeight = product?.defaultWeight || '250gm';
-  const defaultPacking = 'Without Bottle';
-
-  const [selectedWeight, setSelectedWeight] = useState(defaultWeight);
-  const [selectedPacking, setSelectedPacking] = useState(defaultPacking);
+  const [selectedWeight, setSelectedWeight] = useState('');
+  const [selectedPacking, setSelectedPacking] = useState('Without Bottle');
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [activeTab, setActiveTab] = useState('description');
   const [activeGalleryImage, setActiveGalleryImage] = useState(null);
 
-  // ── Guard ─────────────────────────────────────────────────────────────────
-  if (!product) return <ProductNotFound />;
+  // ── Fetch single product ───────────────────────────────────────────────────
+  const loadProduct = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getProductBySlug(id);
+      setProduct(data.product);
 
-  // ── Pricing logic (all derived — no duplication) ──────────────────────────
-  // priceMap comes directly from the catalog — edit prices there, not here.
-  const { priceMap } = product;
-  const weightOptions = Object.keys(priceMap);         // e.g. ['250gm','500gm','1kg']
-  const packingOptions = Object.keys(PACKING_PRICES);   // e.g. ['Without Bottle','Bottle']
+      // Pre-select first available variant
+      if (data.product?.variants && data.product.variants.length > 0) {
+        const firstAvailable = data.product.variants.find((v) => v.isAvailable && v.stock > 0) || data.product.variants[0];
+        setSelectedWeight(firstAvailable.label);
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to fetch product details.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Validate selectedWeight (guards against stale state if catalog changes)
-  const activeWeight = weightOptions.includes(selectedWeight)
-    ? selectedWeight
-    : weightOptions[0];
+  useEffect(() => {
+    loadProduct();
+  }, [id]);
 
-  const unitPrice = priceMap[activeWeight];
+  // ── Early Render States ────────────────────────────────────────────────────
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
+        <p className="text-neutral-600 font-semibold">Loading product details...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center max-w-lg mx-auto gap-4">
+        <p className="text-red-600 font-bold text-xl">{error}</p>
+        <button
+          onClick={loadProduct}
+          className="px-8 py-3 bg-black text-white font-semibold rounded-xl hover:bg-neutral-800 transition-colors"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return <ProductNotFound />;
+  }
+
+  // ── Derived State Options ──────────────────────────────────────────────────
+  const weightOptions = product.variants ? product.variants.map((v) => v.label) : [];
+  const packingOptions = Object.keys(PACKING_PRICES);
+
+  // Identify active variant details
+  const activeVariant = product.variants?.find((v) => v.label === selectedWeight) || product.variants?.[0];
+  const unitPrice = activeVariant ? (activeVariant.discountedPrice ?? activeVariant.price) : 0;
   const packCharge = PACKING_PRICES[selectedPacking] ?? 0;
   const totalPrice = ((unitPrice + packCharge) * quantity).toFixed(2);
 
-  // Is the 1kg tier selected? Show a "Save 15%" badge.
-  const show1kgBadge = activeWeight === '1kg';
+  // Disabled weight options (out of stock or unavailable)
+  const disabledWeights = product.variants
+    ? product.variants.filter((v) => !v.isAvailable || v.stock <= 0).map((v) => v.label)
+    : [];
 
-  // ── Gallery images dynamically loaded for selected product ────────────────
-  const productImages = product.gallery || [
-    { src: product.image, alt: `${product.name} – Main View` },
-  ];
+  // Generate price hints map for Weight VariantSelector
+  const weightPriceHintMap = product.variants
+    ? Object.fromEntries(product.variants.map((v) => [v.label, v.discountedPrice ?? v.price]))
+    : {};
 
-  const downloadSrc = activeGalleryImage || product.image;
+  // Gallery image setup
+  const productImages = product.gallery && product.gallery.length > 0
+    ? product.gallery.map((g) => ({ src: g.url, alt: g.altText || product.name }))
+    : [{ src: product.image?.url, alt: product.image?.altText || product.name }];
 
-  // ── Handlers ──────────────────────────────────────────────────────────────
+  const downloadSrc = activeGalleryImage || product.image?.url;
+
+  // ── Cart Handlers ─────────────────────────────────────────────────────────
   const handleAddToCart = () => {
+    if (!activeVariant) return;
     const itemPrice = unitPrice + packCharge;
 
     dispatch({
       type: 'ADD_ITEM',
       payload: {
-        id: `${product.id}-${activeWeight}-${selectedPacking.replace(/\s+/g, '-').toLowerCase()}`,
+        id: `${product._id}-${selectedWeight}-${selectedPacking.replace(/\s+/g, '-').toLowerCase()}`,
         name: product.name,
         price: itemPrice,
-        image: product.image,
+        image: product.image?.url,
         quantity: quantity,
-        description: product.description,
-        weight: activeWeight,
+        description: product.shortDescription || product.longDescription,
+        weight: selectedWeight,
         packing: selectedPacking,
       },
     });
@@ -148,27 +198,6 @@ const ProductDetail = () => {
     setTimeout(() => setAddedToCart(false), 2500);
   };
 
-  const handleBuyNow = () => {
-    const itemPrice = unitPrice + packCharge;
-
-    dispatch({
-      type: 'ADD_ITEM',
-      payload: {
-        id: `${product.id}-${activeWeight}-${selectedPacking.replace(/\s+/g, '-').toLowerCase()}`,
-        name: product.name,
-        price: itemPrice,
-        image: product.image,
-        quantity: quantity,
-        description: product.description,
-        weight: activeWeight,
-        packing: selectedPacking,
-      },
-    });
-
-    navigate('/cart');
-  };
-
-  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="bg-white min-h-screen font-inter text-neutral-900 selection:bg-black selection:text-white">
 
@@ -184,7 +213,7 @@ const ProductDetail = () => {
             <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-black flex-shrink-0">
               <Check size={12} strokeWidth={3} />
             </div>
-            <span>Added {quantity} × {product.name} ({activeWeight}) to cart!</span>
+            <span>Added {quantity} × {product.name} ({selectedWeight}) to cart!</span>
             <Link to="/cart" className="ml-2 underline text-amber-400 hover:text-amber-300 transition-colors">
               View Cart →
             </Link>
@@ -192,10 +221,9 @@ const ProductDetail = () => {
         )}
       </AnimatePresence>
 
-      {/* ── Page wrapper ─────────────────────────────────────────────────── */}
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 py-6 lg:py-12">
 
-        {/* ── Breadcrumb ───────────────────────────────────────────────────── */}
+        {/* ── Breadcrumbs ──────────────────────────────────────────────────── */}
         <nav
           aria-label="Breadcrumb"
           className="mb-4 lg:mb-8 text-xs sm:text-sm text-neutral-500 flex flex-wrap items-center gap-1.5"
@@ -216,12 +244,10 @@ const ProductDetail = () => {
           <ArrowLeft size={16} /> Back
         </button>
 
-        {/* ── Two-column grid: stacks on mobile, side-by-side on lg+ ───────── */}
+        {/* ── Main columns grid ────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
 
-          {/* ================================================================
-              LEFT — Product Gallery (sticky on desktop)
-             ================================================================ */}
+          {/* Left Column: Gallery */}
           <div className="w-full lg:sticky lg:top-24">
             <ProductGallery
               images={productImages}
@@ -229,23 +255,24 @@ const ProductDetail = () => {
               onActiveImageChange={setActiveGalleryImage}
             />
 
-            {/* ── Download Image Button ─────────────────────────────────── */}
-            <div className="mt-3 flex justify-end">
-              <a
-                href={downloadSrc}
-                download={`${product.name.replace(/\s+/g, '_')}.png`}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-neutral-200 text-sm font-semibold text-neutral-700 hover:bg-neutral-100 hover:border-neutral-400 transition-all duration-200"
-                aria-label={`Download ${product.name} image`}
-              >
-                <Download size={15} strokeWidth={2} />
-                Download Image
-              </a>
-            </div>
+            {downloadSrc && (
+              <div className="mt-3 flex justify-end">
+                <a
+                  href={downloadSrc}
+                  download={`${product.name.replace(/\s+/g, '_')}.png`}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-neutral-200 text-sm font-semibold text-neutral-700 hover:bg-neutral-100 hover:border-neutral-400 transition-all duration-200"
+                  aria-label={`Download ${product.name} image`}
+                >
+                  <Download size={15} strokeWidth={2} />
+                  Download Image
+                </a>
+              </div>
+            )}
 
-            {/* Quality badges */}
+            {/* Quality Badges */}
             <div className="mt-6 grid grid-cols-3 gap-2 p-3 sm:p-4 bg-stone-50 rounded-2xl border border-stone-200/70">
               {[
-                { icon: ShieldCheck, title: '100% Organic', sub: 'No Preservatives' },
+                { icon: ShieldCheck, title: product.isOrganicCertified ? 'Certified Organic' : '100% Natural', sub: product.isVegetarian ? 'Pure Vegetarian' : 'Fresh Recipe' },
                 { icon: Truck, title: 'Fast Shipping', sub: 'Dispatch in 24h', border: true },
                 { icon: RefreshCw, title: 'Traditional', sub: 'Andhra Recipe' },
               ].map(({ icon: Icon, title, sub, border }) => (
@@ -261,12 +288,8 @@ const ProductDetail = () => {
             </div>
           </div>
 
-          {/* ================================================================
-              RIGHT — Product Info & Selectors
-             ================================================================ */}
+          {/* Right Column: Info & Selectors */}
           <div className="flex flex-col gap-5 lg:gap-6">
-
-            {/* ── Brand + action icons ───────────────────────────────────── */}
             <div className="flex items-center justify-between gap-3">
               <span className="text-xs sm:text-sm font-semibold tracking-widest text-neutral-500 uppercase">
                 OmrisHomeKitchen
@@ -291,40 +314,33 @@ const ProductDetail = () => {
               </div>
             </div>
 
-            {/* ── Product name + rating ──────────────────────────────────── */}
-            <div className="-mt-1">
+            <div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tight text-neutral-900 leading-tight">
                 {product.name}
               </h1>
               <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-2.5">
                 <div className="flex items-center text-amber-500">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={14} fill="currentColor" stroke="none" />
+                    <Star
+                      key={i}
+                      size={14}
+                      fill={i < Math.round(product.averageRating || 5) ? 'currentColor' : 'none'}
+                      stroke={i < Math.round(product.averageRating || 5) ? 'none' : 'currentColor'}
+                    />
                   ))}
                 </div>
-                <span className="text-xs font-bold text-neutral-900">4.9</span>
+                <span className="text-xs font-bold text-neutral-900">{product.averageRating || '4.9'}</span>
                 <span className="text-xs text-neutral-400">•</span>
                 <span className="text-xs font-medium text-neutral-500 underline cursor-pointer hover:text-black">
-                  148 Verified Ratings
+                  {product.numReviews || '148'} Verified Reviews
                 </span>
               </div>
             </div>
 
-            {/* ── Price (animated) ───────────────────────────────────────── */}
             <div className="flex flex-wrap items-baseline gap-3 pt-1">
               <AnimatedPrice price={totalPrice} />
-              {/* {show1kgBadge && (
-                <motion.span
-                  initial={{ opacity: 0, scale: 0.85 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="text-xs sm:text-sm font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200"
-                >
-                  Save 15%
-                </motion.span>
-              )} */}
             </div>
 
-            {/* ── Tax note ───────────────────────────────────────────────── */}
             <p className="-mt-3 text-xs sm:text-sm text-neutral-500 font-medium">
               Taxes included.{' '}
               <span className="underline cursor-pointer hover:text-black">Shipping</span>{' '}
@@ -333,23 +349,19 @@ const ProductDetail = () => {
 
             <hr className="border-neutral-200" />
 
-            {/* ================================================================
-                WEIGHT SELECTOR
-                Always shows all weight tiers from priceMap.
-                priceHint surfaces the per-unit price under each pill.
-               ================================================================ */}
-            <VariantSelector
-              label="Weight"
-              options={weightOptions}
-              selectedValue={activeWeight}
-              onChange={setSelectedWeight}
-              priceHint={priceMap}
-            />
+            {/* Weight Selectors */}
+            {weightOptions.length > 0 && (
+              <VariantSelector
+                label="Weight"
+                options={weightOptions}
+                selectedValue={selectedWeight}
+                onChange={setSelectedWeight}
+                priceHint={weightPriceHintMap}
+                disabledOptions={disabledWeights}
+              />
+            )}
 
-            {/* ================================================================
-                PACKING SELECTOR
-                Driven by PACKING_PRICES — add new options there, not here.
-               ================================================================ */}
+            {/* Packing Selector */}
             <VariantSelector
               label="Packing"
               options={packingOptions}
@@ -365,14 +377,14 @@ const ProductDetail = () => {
               }
             />
 
-            {/* ── Quantity selector ──────────────────────────────────────── */}
+            {/* Quantity selector */}
             <QuantitySelector
               quantity={quantity}
-              onIncrement={() => setQuantity((p) => Math.min(p + 1, 20))}
+              onIncrement={() => setQuantity((p) => Math.min(p + 1, activeVariant?.stock || 20))}
               onDecrement={() => setQuantity((p) => Math.max(p - 1, 1))}
             />
 
-            {/* ── CTA buttons ────────────────────────────────────────────── */}
+            {/* Add to Cart CTA */}
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <motion.button
                 type="button"
@@ -385,25 +397,10 @@ const ProductDetail = () => {
                 <ShoppingBag size={20} strokeWidth={2.2} />
                 <span>Add to Cart</span>
               </motion.button>
-
-              {/* <motion.button
-                type="button"
-                onClick={handleBuyNow}
-                whileHover={{ scale: 1.015 }}
-                whileTap={{ scale: 0.985 }}
-                transition={{ duration: 0.15 }}
-                className="w-full py-3.5 sm:py-4 px-6 sm:px-8 bg-emerald-700 text-white font-bold text-sm sm:text-base rounded-2xl shadow-lg hover:shadow-xl hover:bg-emerald-800 transition-all duration-200 flex items-center justify-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2"
-              >
-                <Zap size={20} strokeWidth={2.2} className="fill-current" />
-                <span>Buy Now</span>
-              </motion.button> */}
             </div>
 
-            {/* ================================================================
-                TABBED PRODUCT INFORMATION
-               ================================================================ */}
+            {/* Tabbed Info */}
             <div className="mt-4 pt-6 border-t border-neutral-200 flex flex-col gap-4">
-              {/* Tab headers — scrollable so long labels don't overflow */}
               <div
                 className="flex border-b border-neutral-200 gap-4 sm:gap-6 overflow-x-auto"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
@@ -429,68 +426,57 @@ const ProductDetail = () => {
                 ))}
               </div>
 
-              {/* Tab content */}
               <div className="text-sm text-neutral-600 leading-relaxed min-h-[100px]">
                 {activeTab === 'description' && (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
                     <p>
-                      Experience the authentic Andhra flavor with OmrisHomeKitchen's{' '}
-                      <strong>{product.name}</strong>.{' '}
-                      {product.description}
-                    </p>
-                    <p>
-                      Prepared in small-batch artisanal home kitchens using secret grandmother recipes
-                      passed down for generations. No artificial colors, no MSG, and zero chemical preservatives.
+                      {product.longDescription || product.shortDescription || 'Experience authentic homemade recipes from OmrisHomeKitchen.'}
                     </p>
                   </motion.div>
                 )}
 
                 {activeTab === 'ingredients' && (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2">
-                    <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs sm:text-sm">
-                      {[
-                        'Fresh Selected Ingredients',
-                        'Cold-Pressed Sesame Oil',
-                        'Guntur Red Chili Powder',
-                        'Rock Salt & Garlic',
-                        'Mustard & Fenugreek Powder',
-                        'Asafoetida (Hing)',
-                      ].map((item) => (
-                        <li key={item} className="flex items-start gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-black flex-shrink-0 mt-1.5" />
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    {product.ingredients && product.ingredients.length > 0 ? (
+                      <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs sm:text-sm">
+                        {product.ingredients.map((item) => (
+                          <li key={item} className="flex items-start gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-black flex-shrink-0 mt-1.5" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p>Traditional ingredients used. No artificial colors or preservatives.</p>
+                    )}
                   </motion.div>
                 )}
 
                 {activeTab === 'storage' && (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2">
-                    <p><strong>Shelf Life:</strong> Best before 6 months from date of packing.</p>
+                    <p><strong>Shelf Life:</strong> {product.shelfLife || 'Best before 6 months from packaging.'}</p>
                     <p>
-                      <strong>Storage Instructions:</strong> Store in a cool, dry place.
-                      Always use a clean, dry spoon to avoid moisture contamination.
+                      <strong>Storage Instructions:</strong> {product.storageInstructions || 'Store in a cool, dry place. Always use a dry spoon.'}
                     </p>
                   </motion.div>
                 )}
               </div>
             </div>
 
-          </div>{/* end right section */}
-        </div>{/* end grid */}
-
-        {/* ── Customer Reviews Summary & Modal Section (Per-Pickle Isolated) ── */}
-        <div className="mt-12 lg:mt-16">
-          <ProductReviewsSection productId={product.id} productName={product.name} />
+          </div>
         </div>
-      </div>{/* end page wrapper */}
 
-      {/* ── Sticky mobile Add-to-Cart bar (< 640 px) ─────────────────────── */}
+        {/* Reviews Section */}
+        <div className="mt-12 lg:mt-16">
+          <ProductReviewsSection productId={product._id} productName={product.name} reviewsData={product.reviews || []} />
+        </div>
+      </div>
+
+      {/* Sticky Mobile Cart CTA */}
       <StickyMobileAddToCart
         productName={product.name}
-        price={`Rs. ${totalPrice}`}
-        selectedWeight={activeWeight}
+        price={`₹ ${totalPrice}`}
+        selectedWeight={selectedWeight}
         onAddToCart={handleAddToCart}
       />
     </div>

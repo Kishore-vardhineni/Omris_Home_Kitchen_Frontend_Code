@@ -144,9 +144,9 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Product category is required'],
       enum: {
-        values: ['veg-pickle', 'non-veg-pickle', 'podi', 'combo', 'gift-pack'],
+        values: ['veg-pickle', 'non-veg-pickle', 'podi', 'sweet', 'snack', 'combo', 'gift-pack'],
         message:
-          'Category must be one of: veg-pickle, non-veg-pickle, podi, combo, gift-pack',
+          'Category must be one of: veg-pickle, non-veg-pickle, podi, sweet, snack, combo, gift-pack',
       },
       index: true, // Heavily queried — always indexed
     },
