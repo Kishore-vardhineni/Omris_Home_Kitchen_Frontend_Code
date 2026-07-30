@@ -55,8 +55,8 @@ export const canonicalProducts = [
     image: chickenBonelessPickleImg,
     gallery: [
       { src: chickenBonelessPickleImg, alt: 'Chicken Boneless Pickle Jar' },
-      { src: landingImage1, alt: 'Chicken Boneless Pickle Fresh Preparation' },
-      { src: landingImage, alt: 'Chicken Boneless Pickle Spices' },
+      { src: chickenBonePickleImg2, alt: 'Chicken Boneless Pickle Fresh Preparation' },
+      { src: chickenBonePickleImg3, alt: 'Chicken Boneless Pickle Spices' },
       { src: chickenBonelessPickleImg, alt: 'Chicken Boneless Pickle Serving' },
     ],
     description: 'Tender boneless chicken pieces marinated in signature Andhra spice blend, preserved in cold-pressed sesame oil.',

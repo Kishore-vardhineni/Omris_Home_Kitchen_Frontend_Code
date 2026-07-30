@@ -206,7 +206,7 @@ const productSchema = new mongoose.Schema(
     // Additional gallery images
     gallery: [
       {
-        url:     { type: String, trim: true },
+        url: { type: String, trim: true },
         altText: { type: String, trim: true, default: '' },
       },
     ],
@@ -290,12 +290,12 @@ const productSchema = new mongoose.Schema(
 
     // ── Nutritional Info (values per 100g) ────────────────────────────────
     nutritionalInfo: {
-      calories:      { type: Number, min: 0 }, // kcal
-      protein:       { type: Number, min: 0 }, // g
+      calories: { type: Number, min: 0 }, // kcal
+      protein: { type: Number, min: 0 }, // g
       carbohydrates: { type: Number, min: 0 }, // g
-      fat:           { type: Number, min: 0 }, // g
-      sodium:        { type: Number, min: 0 }, // mg
-      fiber:         { type: Number, min: 0 }, // g
+      fat: { type: Number, min: 0 }, // g
+      sodium: { type: Number, min: 0 }, // mg
+      fiber: { type: Number, min: 0 }, // g
     },
 
     // ── SEO ───────────────────────────────────────────────────────────────
@@ -318,8 +318,8 @@ const productSchema = new mongoose.Schema(
   },
   {
     timestamps: true,          // Adds createdAt & updatedAt automatically
-    toJSON:  { virtuals: true },
-    toObject:{ virtuals: true },
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 
@@ -352,7 +352,6 @@ productSchema.index({ category: 1, isActive: 1 });
 productSchema.index({ category: 1, isFeatured: 1 });
 productSchema.index({ category: 1, isBestseller: 1 });
 productSchema.index({ category: 1, averageRating: -1 });
-productSchema.index({ tags: 1 });
 // Full-text search across name, shortDescription, and tags
 productSchema.index({ name: 'text', shortDescription: 'text', tags: 'text' });
 // Globally unique SKU per variant
@@ -363,16 +362,18 @@ productSchema.index({ 'variants.sku': 1 }, { unique: true, sparse: true });
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Auto-generate a URL slug from the product name when created or name changes
-productSchema.pre('save', function (next) {
+productSchema.pre('save', function () {
   if (!this.slug || this.isModified('name')) {
-    this.slug = this.name
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '') // strip special characters
-      .replace(/\s+/g, '-')          // spaces → hyphens
-      .replace(/-+/g, '-')           // collapse consecutive hyphens
-      .trim();
+    if (this.name) {
+      this.slug = this.name
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    }
   }
-  next();
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -416,7 +417,7 @@ productSchema.statics.decrementStock = async function (productId, variantId, qty
   if (!variant) throw new Error('Variant not found');
   if (variant.stock < qty) return false; // Insufficient stock — caller handles this
 
-  variant.stock   -= qty;
+  variant.stock -= qty;
   product.totalSold += qty;
 
   // Auto-disable the variant when it goes out of stock
@@ -467,7 +468,7 @@ productSchema.methods.addReview = async function (reviewData) {
   }
 
   this.reviews.push(reviewData);
-  this.numReviews    = this.reviews.length;
+  this.numReviews = this.reviews.length;
   this.averageRating =
     this.reviews.reduce((sum, r) => sum + r.rating, 0) / this.numReviews;
 
@@ -483,7 +484,7 @@ productSchema.methods.removeReview = async function (reviewId) {
   this.reviews = this.reviews.filter(
     (r) => r._id.toString() !== reviewId.toString()
   );
-  this.numReviews    = this.reviews.length;
+  this.numReviews = this.reviews.length;
   this.averageRating =
     this.numReviews > 0
       ? this.reviews.reduce((sum, r) => sum + r.rating, 0) / this.numReviews
