@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -103,6 +103,14 @@ const ProductDetail = () => {
     reviewsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  // Gallery image setup (Moved before early returns to obey Hook rules)
+  const productImages = useMemo(() => {
+    if (!product) return [];
+    return product.gallery && product.gallery.length > 0
+      ? product.gallery.map((g) => ({ src: g.url, alt: g.altText || product.name }))
+      : [{ src: product.image?.url, alt: product.image?.altText || product.name }];
+  }, [product]);
+
   // ── Fetch single product ───────────────────────────────────────────────────
   const loadProduct = async () => {
     setLoading(true);
@@ -175,10 +183,6 @@ const ProductDetail = () => {
     ? Object.fromEntries(product.variants.map((v) => [v.label, v.discountedPrice ?? v.price]))
     : {};
 
-  // Gallery image setup
-  const productImages = product.gallery && product.gallery.length > 0
-    ? product.gallery.map((g) => ({ src: g.url, alt: g.altText || product.name }))
-    : [{ src: product.image?.url, alt: product.image?.altText || product.name }];
 
   const downloadSrc = activeGalleryImage || product.image?.url;
 
