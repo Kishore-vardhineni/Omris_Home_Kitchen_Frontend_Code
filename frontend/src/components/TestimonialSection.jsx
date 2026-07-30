@@ -1,134 +1,85 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, ChevronLeft, ChevronRight, Quote } from 'lucide-react';
+import { Star, ChevronLeft, ChevronRight, Quote, Loader2, AlertCircle } from 'lucide-react';
+import { getProductReviews } from '../services/reviewService';
+import { getProducts } from '../services/productService';
 import './TestimonialSection.css';
 
-/* ── 12 Customer Reviews → 4 pages × 3 cards ─────────────── */
-const reviews = [
-  {
-    id: 1,
-    name: 'Priya Sharma',
-    location: 'Hyderabad',
-    rating: 5,
-    text: 'The Mango Pickle tastes exactly like how my grandmother used to make it. The perfect blend of spices and raw mango tanginess. Absolutely love it!',
-    avatar: 'PS',
-    color: '#e07b39',
-  },
-  {
-    id: 2,
-    name: 'Rahul Verma',
-    location: 'Bangalore',
-    rating: 5,
-    text: 'I am totally addicted to their Garlic Pickle. It has become a staple with my everyday meals. Excellent packaging and super fast delivery too!',
-    avatar: 'RV',
-    color: '#2d4a1e',
-  },
-  {
-    id: 3,
-    name: 'Anita Desai',
-    location: 'Hyderabad',
-    rating: 5,
-    text: 'Pure ingredients and no artificial preservatives — that is what I love about Omris Pickles. The Mixed Veg pickle is simply delightful. Will reorder!',
-    avatar: 'AD',
-    color: '#7c3d12',
-  },
-  {
-    id: 4,
-    name: 'Suresh Reddy',
-    location: 'Chennai',
-    rating: 5,
-    text: 'Ordered three jars of Gongura Pickle and they were gone within a week! The tanginess and spice level are absolutely perfect. Best pickles online!',
-    avatar: 'SR',
-    color: '#1e40af',
-  },
-  {
-    id: 5,
-    name: 'Kavitha Nair',
-    location: 'Kochi',
-    rating: 5,
-    text: 'Such authentic homemade taste! You can tell every jar is made with so much love and care. My kids ask for the lemon pickle with every meal now.',
-    avatar: 'KN',
-    color: '#6b21a8',
-  },
-  {
-    id: 6,
-    name: 'Mohan Das',
-    location: 'Delhi',
-    rating: 5,
-    text: 'I gifted a hamper of pickles to my colleagues and everyone was asking where I got them from. The quality is unmatched. Highly recommended!',
-    avatar: 'MD',
-    color: '#065f46',
-  },
-  {
-    id: 7,
-    name: 'Lakshmi Iyer',
-    location: 'Pune',
-    rating: 5,
-    text: 'The Tomato Pickle is a revelation. It pairs beautifully with idli and dosa. I have been ordering every month and the quality is always consistent.',
-    avatar: 'LI',
-    color: '#9f1239',
-  },
-  {
-    id: 8,
-    name: 'Arjun Menon',
-    location: 'Vizag',
-    rating: 5,
-    text: 'As someone from Andhra, I am very particular about my pickles. Omris Pickles nailed it. The spice level, oil, and salt balance is just right. 10/10!',
-    avatar: 'AM',
-    color: '#92400e',
-  },
-  {
-    id: 9,
-    name: 'Deepika Joshi',
-    location: 'Jaipur',
-    rating: 4,
-    text: 'Wonderful homemade flavour. I tried the Amla Pickle for the first time and it is now my favourite. Packaging was secure and the jar arrived perfectly sealed.',
-    avatar: 'DJ',
-    color: '#0e7490',
-  },
-  {
-    id: 10,
-    name: 'Venkat Rao',
-    location: 'Hyderabad',
-    rating: 5,
-    text: 'I have tried many pickle brands online but nothing beats this. You can taste the tradition and love in every bite. My go-to gift for family visits!',
-    avatar: 'VR',
-    color: '#3730a3',
-  },
-  {
-    id: 11,
-    name: 'Sneha Kulkarni',
-    location: 'Nagpur',
-    rating: 5,
-    text: 'The Cauliflower Pickle is a hidden gem. Crunchy, spicy and perfectly salted. My husband finished the entire jar in two days! Placing another order now.',
-    avatar: 'SK',
-    color: '#166534',
-  },
-  {
-    id: 12,
-    name: 'Ramesh Pillai',
-    location: 'Trivandrum',
-    rating: 5,
-    text: 'Omris Pickles remind me of my mother\'s cooking. The Lime Pickle has the exact sourness I grew up with. Authentic, fresh, and absolutely delicious!',
-    avatar: 'RP',
-    color: '#b45309',
-  },
+/* ── Avatar colour palette (cycled by index) ─────────────────── */
+const AVATAR_COLORS = [
+  '#e07b39', '#2d4a1e', '#7c3d12', '#1e40af',
+  '#6b21a8', '#065f46', '#9f1239', '#92400e',
+  '#0e7490', '#3730a3', '#166534', '#b45309',
 ];
 
-/* ── Page-based config: 3 cards per page = 4 pages ─────────── */
-const CARDS_PER_PAGE = 3; // cards shown per slide
-const TOTAL_PAGES = Math.ceil(reviews.length / CARDS_PER_PAGE); // = 4
+/* ── Per-page config ─────────────────────────────────────────── */
+const CARDS_PER_PAGE = 3;
 const AUTO_INTERVAL = 4000;
 
-/* ── Component ──────────────────────────────────────────────── */
+/* ── Helper: initials from name ──────────────────────────────── */
+const getInitials = (name = '') => {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return parts[0].substring(0, 2).toUpperCase();
+};
+
+/* ── Component ───────────────────────────────────────────────── */
 const TestimonialSection = () => {
-  const [page, setPage] = useState(0);          // 0–3
-  const [direction, setDirection] = useState(1);           // 1=right, -1=left
+  const [reviews, setReviews] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const [page, setPage] = useState(0);
+  const [direction, setDirection] = useState(1);
   const [paused, setPaused] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const timerRef = useRef(null);
 
-  /* Responsive: on mobile show 1 card at a time, still 4 pages */
+  // ── Fetch reviews: get all products with reviews, then fetch their reviews ──
+  const fetchReviews = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      // 1. Get all active products
+      const productsData = await getProducts({ limit: 50 });
+      const products = (productsData?.products || []).filter(
+        (p) => p.numReviews > 0 && p._id
+      );
+
+      if (products.length === 0) {
+        setReviews([]);
+        return;
+      }
+
+      // 2. Fetch reviews for each product that has reviews (in parallel)
+      const reviewRequests = products.map((p) =>
+        getProductReviews(p._id, { limit: 10, sort: 'newest' }).catch(() => null)
+      );
+      const results = await Promise.all(reviewRequests);
+
+      // 3. Flatten and deduplicate reviews across products
+      const allReviews = [];
+      results.forEach((result) => {
+        if (result?.success && Array.isArray(result.reviews)) {
+          allReviews.push(...result.reviews);
+        }
+      });
+
+      // 4. Sort by newest and cap at 12
+      allReviews.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setReviews(allReviews.slice(0, 12));
+    } catch (err) {
+      setError(err.message || 'Failed to load testimonials.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchReviews();
+  }, [fetchReviews]);
+
+  // ── Responsive: 1 card on mobile ───────────────────────────
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth <= 640);
     check();
@@ -136,24 +87,32 @@ const TestimonialSection = () => {
     return () => window.removeEventListener('resize', check);
   }, []);
 
+  // ── Derived pagination ──────────────────────────────────────
+  const totalPages = Math.max(1, Math.ceil(reviews.length / CARDS_PER_PAGE));
+
   /* Navigate forward */
   const next = useCallback(() => {
     setDirection(1);
-    setPage((p) => (p + 1) % TOTAL_PAGES);
-  }, []);
+    setPage((p) => (p + 1) % totalPages);
+  }, [totalPages]);
 
   /* Navigate backward */
   const prev = useCallback(() => {
     setDirection(-1);
-    setPage((p) => (p - 1 + TOTAL_PAGES) % TOTAL_PAGES);
-  }, []);
+    setPage((p) => (p - 1 + totalPages) % totalPages);
+  }, [totalPages]);
 
   /* Auto-play */
   useEffect(() => {
-    if (paused) return;
+    if (paused || reviews.length === 0) return;
     timerRef.current = setInterval(next, AUTO_INTERVAL);
     return () => clearInterval(timerRef.current);
-  }, [paused, next]);
+  }, [paused, next, reviews.length]);
+
+  /* Reset page when reviews reload */
+  useEffect(() => {
+    setPage(0);
+  }, [reviews]);
 
   /* Dot click */
   const goTo = (index) => {
@@ -161,7 +120,7 @@ const TestimonialSection = () => {
     setPage(index);
   };
 
-  /* Slice the 3 reviews for the current page */
+  /* Current page cards */
   const pageCards = reviews.slice(page * CARDS_PER_PAGE, page * CARDS_PER_PAGE + CARDS_PER_PAGE);
 
   /* Framer Motion variants */
@@ -213,106 +172,147 @@ const TestimonialSection = () => {
           </motion.p>
         </div>
 
-        {/* ── Carousel ───────────────────────────────────────── */}
-        <div className="carousel-wrapper">
-
-          {/* Prev Arrow */}
-          <button
-            className="carousel-arrow carousel-arrow-prev"
-            onClick={() => { setDirection(-1); prev(); }}
-            aria-label="Previous"
-          >
-            <ChevronLeft size={22} />
-          </button>
-
-          {/* Track */}
-          <div className="carousel-track-outer">
-            <AnimatePresence mode="wait" custom={direction}>
-              <motion.div
-                key={page}
-                className={`testimonial-grid ${isMobile ? 'grid-mobile' : ''}`}
-                custom={direction}
-                variants={variants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-              >
-                {pageCards.map((review) => (
-                  <div className="testimonial-card" key={review.id}>
-                    {/* Decorative quote */}
-                    <div className="card-quote-icon">
-                      <Quote size={28} />
-                    </div>
-
-                    {/* Stars */}
-                    <div className="stars">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          size={16}
-                          fill={i < review.rating ? '#e07b39' : 'transparent'}
-                          color={i < review.rating ? '#e07b39' : 'rgba(255,255,255,0.3)'}
-                        />
-                      ))}
-                      <span className="rating-num">{review.rating}.0</span>
-                    </div>
-
-                    {/* Review text */}
-                    <p className="quote">"{review.text}"</p>
-
-                    {/* Author */}
-                    <div className="author-row">
-                      <div
-                        className="author-avatar"
-                        style={{ backgroundColor: review.color }}
-                      >
-                        {review.avatar}
-                      </div>
-                      <div className="author-info">
-                        <h4 className="customer-name">{review.name}</h4>
-                        <span className="customer-location">{review.location}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </motion.div>
-            </AnimatePresence>
+        {/* ── Loading State ───────────────────────────────────── */}
+        {isLoading && (
+          <div className="flex flex-col items-center justify-center py-20 gap-3 text-white/70">
+            <Loader2 className="w-8 h-8 animate-spin" />
+            <span className="text-sm">Loading reviews…</span>
           </div>
+        )}
 
-          {/* Next Arrow */}
-          <button
-            className="carousel-arrow carousel-arrow-next"
-            onClick={() => { setDirection(1); next(); }}
-            aria-label="Next"
-          >
-            <ChevronRight size={22} />
-          </button>
-        </div>
-
-        {/* ── Progress Bar ────────────────────────────────────── */}
-        <div className="carousel-progress-wrap">
-          <div
-            className="carousel-progress-bar"
-            style={{ width: `${((page + 1) / TOTAL_PAGES) * 100}%` }}
-          />
-        </div>
-
-        {/* ── 4 Dots Only ─────────────────────────────────────── */}
-        <div className="pagination-dots">
-          {Array.from({ length: TOTAL_PAGES }).map((_, i) => (
+        {/* ── Error State ─────────────────────────────────────── */}
+        {!isLoading && error && (
+          <div className="flex flex-col items-center justify-center py-16 gap-3 text-white/70">
+            <AlertCircle className="w-7 h-7" />
+            <p className="text-sm">{error}</p>
             <button
-              key={i}
-              className={`dot ${page === i ? 'active' : ''}`}
-              onClick={() => goTo(i)}
-              aria-label={`Go to page ${i + 1}`}
-            />
-          ))}
-        </div>
+              onClick={fetchReviews}
+              className="mt-1 text-xs underline opacity-70 hover:opacity-100 transition-opacity"
+            >
+              Try again
+            </button>
+          </div>
+        )}
 
-        {/* ── Page counter ────────────────────────────────────── */}
-        <p className="carousel-counter">
-          {page + 1} / {TOTAL_PAGES}
-        </p>
+        {/* ── Carousel (only when reviews loaded) ────────────── */}
+        {!isLoading && !error && reviews.length > 0 && (
+          <>
+            <div className="carousel-wrapper">
+              {/* Prev Arrow */}
+              <button
+                className="carousel-arrow carousel-arrow-prev"
+                onClick={() => { setDirection(-1); prev(); }}
+                aria-label="Previous"
+              >
+                <ChevronLeft size={22} />
+              </button>
+
+              {/* Track */}
+              <div className="carousel-track-outer">
+                <AnimatePresence mode="wait" custom={direction}>
+                  <motion.div
+                    key={page}
+                    className={`testimonial-grid ${isMobile ? 'grid-mobile' : ''}`}
+                    custom={direction}
+                    variants={variants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                  >
+                    {pageCards.map((review, idx) => {
+                      const globalIdx = page * CARDS_PER_PAGE + idx;
+                      const avatarColor = AVATAR_COLORS[globalIdx % AVATAR_COLORS.length];
+                      const initials = getInitials(review.name);
+                      const ratingNum = Number(review.rating) || 5;
+
+                      return (
+                        <div className="testimonial-card" key={review._id}>
+                          {/* Decorative quote */}
+                          <div className="card-quote-icon">
+                            <Quote size={28} />
+                          </div>
+
+                          {/* Stars */}
+                          <div className="stars">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                size={16}
+                                fill={i < ratingNum ? '#e07b39' : 'transparent'}
+                                color={i < ratingNum ? '#e07b39' : 'rgba(255,255,255,0.3)'}
+                              />
+                            ))}
+                            <span className="rating-num">{ratingNum}.0</span>
+                          </div>
+
+                          {/* Review text */}
+                          <p className="quote">"{review.comment}"</p>
+
+                          {/* Author */}
+                          <div className="author-row">
+                            <div
+                              className="author-avatar"
+                              style={{ backgroundColor: avatarColor }}
+                            >
+                              {initials}
+                            </div>
+                            <div className="author-info">
+                              <h4 className="customer-name">{review.name}</h4>
+                              <span className="customer-location">
+                                {review.isVerifiedPurchase ? 'Verified Buyer' : review.title || 'Customer'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
+              {/* Next Arrow */}
+              <button
+                className="carousel-arrow carousel-arrow-next"
+                onClick={() => { setDirection(1); next(); }}
+                aria-label="Next"
+              >
+                <ChevronRight size={22} />
+              </button>
+            </div>
+
+            {/* ── Progress Bar ──────────────────────────────────── */}
+            <div className="carousel-progress-wrap">
+              <div
+                className="carousel-progress-bar"
+                style={{ width: `${((page + 1) / totalPages) * 100}%` }}
+              />
+            </div>
+
+            {/* ── Dots ─────────────────────────────────────────── */}
+            <div className="pagination-dots">
+              {Array.from({ length: totalPages }).map((_, i) => (
+                <button
+                  key={i}
+                  className={`dot ${page === i ? 'active' : ''}`}
+                  onClick={() => goTo(i)}
+                  aria-label={`Go to page ${i + 1}`}
+                />
+              ))}
+            </div>
+
+            {/* ── Page counter ──────────────────────────────────── */}
+            <p className="carousel-counter">
+              {page + 1} / {totalPages}
+            </p>
+          </>
+        )}
+
+        {/* ── Empty State ─────────────────────────────────────── */}
+        {!isLoading && !error && reviews.length === 0 && (
+          <p className="text-center text-white/60 py-12 text-sm">
+            No customer reviews yet. Be the first to share your experience!
+          </p>
+        )}
 
       </div>
     </section>

@@ -7,6 +7,39 @@ import Product from '../models/Product.js';
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
+ * @desc    Get recent approved reviews across ALL products (for homepage testimonials)
+ * @route   GET /api/reviews?limit=12&rating=4
+ * @access  Public
+ */
+export const getAllReviews = async (req, res) => {
+  try {
+    const { limit = 12, rating } = req.query;
+
+    const filter = { isApproved: true };
+    if (rating) filter.rating = { $gte: Number(rating) };
+
+    const reviews = await Review.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(parseInt(limit))
+      .select('-email -__v')
+      .lean();
+
+    return res.status(200).json({
+      success: true,
+      count: reviews.length,
+      reviews,
+    });
+  } catch (error) {
+    console.error('Error in getAllReviews:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while fetching reviews.',
+      error: error.message,
+    });
+  }
+};
+
+/**
  * @desc    Submit a new review for a product
  * @route   POST /api/reviews/:productId
  * @access  Public (anyone can review; verified-purchase flag set server-side)

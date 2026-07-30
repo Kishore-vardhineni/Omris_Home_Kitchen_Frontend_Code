@@ -21,6 +21,20 @@ const handleApiError = (error) => {
 };
 
 /**
+ * Fetch recent approved reviews across ALL products (for homepage testimonials).
+ * @param {Object} params - { limit, rating }
+ * @returns {Promise<Object>} { success, count, reviews }
+ */
+export const getAllReviews = async (params = {}) => {
+  try {
+    const response = await API.get('/reviews', { params });
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+
+/**
  * Fetch all approved reviews for a product (with pagination & sort).
  * @param {string} productId - MongoDB product ID
  * @param {Object} params    - { page, limit, sort }
@@ -65,6 +79,7 @@ export const markReviewHelpful = async (reviewId) => {
 };
 
 export default {
+  getAllReviews,
   getProductReviews,
   createReview,
   markReviewHelpful,

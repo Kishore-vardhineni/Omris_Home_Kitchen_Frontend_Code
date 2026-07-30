@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+  getAllReviews,
   createReview,
   getProductReviews,
   markReviewHelpful,
@@ -7,6 +8,11 @@ import {
 } from '../controllers/reviewController.js';
 
 const router = express.Router();
+
+// @route   GET /api/reviews
+// @desc    Get recent approved reviews across all products (homepage testimonials)
+// @access  Public
+router.get('/', getAllReviews);
 
 // @route   POST /api/reviews/:productId
 // @desc    Submit a new review for a product
