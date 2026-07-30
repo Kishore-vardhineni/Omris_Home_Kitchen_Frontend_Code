@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -96,6 +96,13 @@ const ProductDetail = () => {
   const [activeTab, setActiveTab] = useState('description');
   const [activeGalleryImage, setActiveGalleryImage] = useState(null);
 
+  // ── Ref for smooth scroll to reviews ──────────────────────────────────────
+  const reviewsRef = useRef(null);
+
+  const scrollToReviews = () => {
+    reviewsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   // ── Fetch single product ───────────────────────────────────────────────────
   const loadProduct = async () => {
     setLoading(true);
@@ -174,6 +181,28 @@ const ProductDetail = () => {
     : [{ src: product.image?.url, alt: product.image?.altText || product.name }];
 
   const downloadSrc = activeGalleryImage || product.image?.url;
+
+  // ── Download Image Handler ───────────────────────────────────────────────
+  const handleDownloadImage = async (e, url, filename) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Network response was not ok');
+      const blob = await response.blob();
+      const objectUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(objectUrl);
+    } catch (error) {
+      console.error('Error downloading image:', error);
+      // Fallback: just open the image in a new tab if fetch fails due to CORS
+      window.open(url, '_blank');
+    }
+  };
 
   // ── Cart Handlers ─────────────────────────────────────────────────────────
   const handleAddToCart = () => {
@@ -257,15 +286,14 @@ const ProductDetail = () => {
 
             {downloadSrc && (
               <div className="mt-3 flex justify-end">
-                <a
-                  href={downloadSrc}
-                  download={`${product.name.replace(/\s+/g, '_')}.png`}
+                <button
+                  onClick={(e) => handleDownloadImage(e, downloadSrc, `${product.name.replace(/\s+/g, '_')}.png`)}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-neutral-200 text-sm font-semibold text-neutral-700 hover:bg-neutral-100 hover:border-neutral-400 transition-all duration-200"
                   aria-label={`Download ${product.name} image`}
                 >
                   <Download size={15} strokeWidth={2} />
                   Download Image
-                </a>
+                </button>
               </div>
             )}
 
@@ -331,9 +359,13 @@ const ProductDetail = () => {
                 </div>
                 <span className="text-xs font-bold text-neutral-900">{product.averageRating || '4.9'}</span>
                 <span className="text-xs text-neutral-400">•</span>
-                <span className="text-xs font-medium text-neutral-500 underline cursor-pointer hover:text-black">
+                <button
+                  type="button"
+                  onClick={scrollToReviews}
+                  className="text-xs font-medium text-neutral-500 underline cursor-pointer hover:text-black transition-colors"
+                >
                   {product.numReviews || '148'} Verified Reviews
-                </span>
+                </button>
               </div>
             </div>
 
@@ -467,7 +499,7 @@ const ProductDetail = () => {
         </div>
 
         {/* Reviews Section */}
-        <div className="mt-12 lg:mt-16">
+        <div ref={reviewsRef} className="mt-12 lg:mt-16 scroll-mt-24">
           <ProductReviewsSection productId={product._id} productName={product.name} reviewsData={product.reviews || []} />
         </div>
       </div>

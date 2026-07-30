@@ -10,8 +10,6 @@ const Products    = React.lazy(() => import('./pages/Products'));
 const VegPickles  = React.lazy(() => import('./pages/VegPickles'));
 const NonVegPickles = React.lazy(() => import('./pages/NonVegPickles'));
 const Podis       = React.lazy(() => import('./pages/Podis'));
-const Sweets      = React.lazy(() => import('./pages/Sweets'));
-const Snacks      = React.lazy(() => import('./pages/Snacks'));
 const ProductDetail = React.lazy(() => import('./pages/ProductDetail'));
 const Cart        = React.lazy(() => import('./pages/Cart'));
 const Checkout    = React.lazy(() => import('./pages/Checkout'));
@@ -34,8 +32,6 @@ function App() {
           <Route path="/veg-pickles"   element={<VegPickles />} />
           <Route path="/non-veg-pickles" element={<NonVegPickles />} />
           <Route path="/podis"         element={<Podis />} />
-          <Route path="/sweets"        element={<Sweets />} />
-          <Route path="/snacks"        element={<Snacks />} />
           <Route path="/products"      element={<Products />} />
           <Route path="/products/:id"  element={<ProductDetail />} />
           <Route path="/cart"          element={<Cart />} />
