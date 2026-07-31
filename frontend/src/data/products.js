@@ -10,7 +10,7 @@
 //     point at the canonical product id via `canonicalId` for deep-linking.
 
 import chickenBonePickleImg from '../assets/images/Chicken_Bone.png';
-import chickenBonePickleImg2 from '../assets/images/Chicken_Bone2.png';
+// import chickenBonePickleImg2 from '../assets/images/Chicken_Bone2.png';
 import chickenBonePickleImg3 from '../assets/images/ChickenBone3.png';
 import chickenBonelessPickleImg from '../assets/images/Chicken_Boneless.png';
 import mangoPickleImg from '../assets/images/Mango_Pickel.png';
@@ -36,7 +36,6 @@ export const canonicalProducts = [
     image: chickenBonePickleImg,
     gallery: [
       { src: chickenBonePickleImg, alt: 'Chicken Bone Pickle Jar' },
-      { src: chickenBonePickleImg2, alt: 'Chicken Bone Pickle Kitchen Preparation' },
       { src: chickenBonePickleImg3, alt: 'Chicken Bone Pickle Andhra Spices' },
       { src: chickenBonePickleImg, alt: 'Chicken Bone Pickle Closeup' },
     ],
@@ -55,7 +54,6 @@ export const canonicalProducts = [
     image: chickenBonelessPickleImg,
     gallery: [
       { src: chickenBonelessPickleImg, alt: 'Chicken Boneless Pickle Jar' },
-      { src: chickenBonePickleImg2, alt: 'Chicken Boneless Pickle Fresh Preparation' },
       { src: chickenBonePickleImg3, alt: 'Chicken Boneless Pickle Spices' },
       { src: chickenBonelessPickleImg, alt: 'Chicken Boneless Pickle Serving' },
     ],

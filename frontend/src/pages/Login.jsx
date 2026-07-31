@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Mail,
@@ -19,6 +19,8 @@ import bannerImg from '../assets/images/Mango_Pickel.png';
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || '/';
 
   const [formData, setFormData] = useState({
     email: '',
@@ -96,7 +98,7 @@ const Login = () => {
       setSubmitSuccess(true);
 
       setTimeout(() => {
-        navigate('/');
+        navigate(from, { replace: true });
       }, 1500);
     } catch (err) {
       console.error('Login error:', err);

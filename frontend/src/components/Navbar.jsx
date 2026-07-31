@@ -11,6 +11,16 @@ const Navbar = () => {
   const [userDropdown, setUserDropdown] = useState(false);
   const itemCount = state.items.reduce((acc, item) => acc + item.quantity, 0);
 
+  // Get user info from localStorage
+  const userInfoStr = localStorage.getItem('userInfo');
+  const user = userInfoStr ? JSON.parse(userInfoStr) : null;
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userInfo');
+    window.location.href = '/';
+  };
+
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
 
@@ -65,17 +75,39 @@ const Navbar = () => {
               onMouseEnter={() => setUserDropdown(true)}
               onMouseLeave={() => setUserDropdown(false)}
             >
-              <Link to="/login" className="user-link" onClick={closeMenu} aria-label="Sign In">
-                <User size={24} strokeWidth={1.5} />
-              </Link>
+              {user ? (
+                <div className="user-link cursor-pointer flex items-center gap-2" onClick={closeMenu}>
+                  <User size={24} strokeWidth={1.5} />
+                  <span className="hidden lg:inline-block text-sm font-semibold truncate max-w-[120px]">
+                    {user.name}
+                  </span>
+                </div>
+              ) : (
+                <Link to="/login" className="user-link" onClick={closeMenu} aria-label="Sign In">
+                  <User size={24} strokeWidth={1.5} />
+                </Link>
+              )}
               {userDropdown && (
                 <div className="user-dropdown">
-                  <Link to="/login" className="user-dropdown-item" onClick={() => { closeMenu(); setUserDropdown(false); }}>
-                    Sign In
-                  </Link>
-                  <Link to="/signup" className="user-dropdown-item" onClick={() => { closeMenu(); setUserDropdown(false); }}>
-                    Sign Up
-                  </Link>
+                  {user ? (
+                    <>
+                      <div className="px-4 py-2 text-sm font-bold border-b border-gray-100 lg:hidden">
+                        {user.name}
+                      </div>
+                      <button className="user-dropdown-item text-left w-full" onClick={handleLogout}>
+                        Logout
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link to="/login" className="user-dropdown-item" onClick={() => { closeMenu(); setUserDropdown(false); }}>
+                        Sign In
+                      </Link>
+                      <Link to="/signup" className="user-dropdown-item" onClick={() => { closeMenu(); setUserDropdown(false); }}>
+                        Sign Up
+                      </Link>
+                    </>
+                  )}
                 </div>
               )}
             </div>
