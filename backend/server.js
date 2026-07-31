@@ -17,8 +17,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
-    origin: 'https://omris-home-kitchen-frontend.vercel.app',
+    origin: process.env.CLIENT_URL || 'https://omris-home-kitchen-frontend.vercel.app',
     credentials: true,
   })
 );
