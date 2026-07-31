@@ -32,7 +32,7 @@ app.use("/api/reviews", reviewRoutes);
 
 app.get("/", (req, res) => {
   res.json({
-    message: "Node.js API's is running successfully",
+    message: "Node.js API is running successfully",
   });
 });
 
