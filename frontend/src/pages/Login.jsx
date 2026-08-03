@@ -36,9 +36,9 @@ const Login = () => {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     const val = type === 'checkbox' ? checked : value;
-    
+
     setFormData((prev) => ({ ...prev, [name]: val }));
-    
+
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
@@ -111,9 +111,9 @@ const Login = () => {
   return (
     <div className="signup-page-wrapper">
       <div className="signup-container">
-        
+
         {/* ── Left Side: Brand Showcase Banner ── */}
-        <motion.div 
+        <motion.div
           className="signup-banner shadow-lg"
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
@@ -124,7 +124,7 @@ const Login = () => {
             <Link to="/" className="banner-logo-link">
               <img src={logo} alt="Omris Home Kitchen" className="banner-logo" />
             </Link>
-            
+
             <div className="banner-tagline">
               <span className="badge-spice">
                 <Sparkles size={14} className="inline mr-1" /> Welcome Back!
@@ -158,7 +158,7 @@ const Login = () => {
         </motion.div>
 
         {/* ── Right Side: Login Form Card ── */}
-        <motion.div 
+        <motion.div
           className="signup-card"
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
@@ -171,7 +171,7 @@ const Login = () => {
 
           <AnimatePresence>
             {errors.server && (
-              <motion.div 
+              <motion.div
                 className="success-alert"
                 style={{ backgroundColor: '#fef2f2', borderColor: '#ef4444', color: '#b91c1c' }}
                 initial={{ opacity: 0, y: -10 }}
@@ -186,7 +186,7 @@ const Login = () => {
               </motion.div>
             )}
             {submitSuccess && (
-              <motion.div 
+              <motion.div
                 className="success-alert"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -202,7 +202,7 @@ const Login = () => {
           </AnimatePresence>
 
           <form onSubmit={handleSubmit} noValidate className="signup-form">
-            
+
             {/* Email Address */}
             <div className="form-group">
               <label htmlFor="email">Email Address</label>
