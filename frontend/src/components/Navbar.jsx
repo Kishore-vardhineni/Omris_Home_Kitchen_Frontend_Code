@@ -64,6 +64,7 @@ const Navbar = () => {
             <Link to="/about" onClick={closeMenu} className="py-2 lg:py-0">About Us</Link>
             <Link to="/veg-pickles" onClick={closeMenu} className="py-2 lg:py-0">Veg Pickles</Link>
             <Link to="/non-veg-pickles" onClick={closeMenu} className="py-2 lg:py-0">Non-Veg Pickles</Link>
+            <Link to="/podis" onClick={closeMenu} className="py-2 lg:py-0">Podis</Link>
             <Link to="/contact" onClick={closeMenu} className="py-2 lg:py-0">Contact Us</Link>
           </nav>
 
