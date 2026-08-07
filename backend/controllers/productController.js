@@ -284,3 +284,108 @@ export const getProductById = async (req, res) => {
     });
   }
 };
+
+/**
+ * @desc    Update an existing product
+ * @route   PUT /api/products/:id
+ * @access  Private/Admin
+ */
+export const updateProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    // ── 1. Check if product exists ─────────────────────────────────────────
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found',
+      });
+    }
+
+    // ── 2. Check for duplicate name / slug ────────────────────────────────
+    if (updateData.name && updateData.name !== product.name) {
+      const slug = updateData.name
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim();
+
+      const existingProduct = await Product.findOne({
+        _id: { $ne: id },
+        $or: [{ slug }, { name: { $regex: new RegExp(`^${updateData.name}$`, 'i') } }],
+      });
+
+      if (existingProduct) {
+        return res.status(409).json({
+          success: false,
+          message: 'A product with this name already exists',
+        });
+      }
+    }
+
+    // ── 3. Validate SKUs if variants are updated ──────────────────────────
+    if (updateData.variants && Array.isArray(updateData.variants) && updateData.variants.length > 0) {
+      const skus = updateData.variants.map((v) => (v.sku || '').toUpperCase().trim());
+      const uniqueSkus = new Set(skus);
+      if (uniqueSkus.size !== skus.length) {
+        return res.status(400).json({
+          success: false,
+          message: 'Duplicate SKUs found within variants — each SKU must be unique',
+        });
+      }
+
+      const existingSku = await Product.findOne({
+        _id: { $ne: id },
+        'variants.sku': { $in: skus },
+      });
+
+      if (existingSku) {
+        return res.status(409).json({
+          success: false,
+          message: 'One or more SKUs already exist in the catalogue',
+        });
+      }
+    }
+
+    // ── 4. Update the product ──────────────────────────────────────────────
+    const updatedProduct = await Product.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    });
+
+    // ── 5. Respond ─────────────────────────────────────────────────────────
+    return res.status(200).json({
+      success: true,
+      message: 'Product updated successfully',
+      product: updatedProduct,
+    });
+  } catch (error) {
+    console.error('Error in updateProduct:', error);
+
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern || {})[0] || 'field';
+      return res.status(409).json({
+        success: false,
+        message: `Duplicate value detected for "${field}". Please use a unique value.`,
+      });
+    }
+
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map((e) => e.message);
+      return res.status(400).json({
+        success: false,
+        message: messages.join(', '),
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while updating product',
+      error: error.message,
+    });
+  }
+};
+

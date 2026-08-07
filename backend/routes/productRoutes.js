@@ -3,6 +3,7 @@ import {
   addProduct,
   getProducts,
   getProductById,
+  updateProduct,
 } from '../controllers/productController.js';
 
 const router = express.Router();
@@ -21,5 +22,10 @@ router.get('/', getProducts);
 // @desc    Get a single product by MongoDB _id or URL slug
 // @access  Public
 router.get('/:idOrSlug', getProductById);
+
+// @route   PUT /api/products/:id
+// @desc    Update an existing product
+// @access  Private/Admin
+router.put('/:id', updateProduct);
 
 export default router;
