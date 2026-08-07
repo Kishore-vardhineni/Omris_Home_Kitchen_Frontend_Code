@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcryptjs';
 
 // Address Sub-Schema for Multiple Delivery Addresses
 const addressSchema = new mongoose.Schema(
@@ -112,7 +112,9 @@ const userSchema = new mongoose.Schema(
 
 // Pre-save Middleware: Hash password before saving if modified
 userSchema.pre('save', async function () {
-  if (!this.isModified('password')) return;
+  if (!this.isModified('password')) {
+    return;
+  }
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
