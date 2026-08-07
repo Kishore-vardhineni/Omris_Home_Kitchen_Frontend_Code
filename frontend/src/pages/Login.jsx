@@ -31,7 +31,25 @@ const Login = () => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Calculate password strength
+  const getPasswordStrength = (pass) => {
+    if (!pass) return { score: 0, label: '', color: '' };
+    let score = 0;
+    if (pass.length >= 6) score += 1;
+    if (pass.length >= 10) score += 1;
+    if (/[A-Z]/.test(pass)) score += 1;
+    if (/[0-9]/.test(pass)) score += 1;
+    if (/[^A-Za-z0-9]/.test(pass)) score += 1;
+
+    if (score <= 2) return { score: 1, label: 'Weak', color: '#ef4444' };
+    if (score <= 4) return { score: 2, label: 'Medium', color: '#f59e0b' };
+    return { score: 3, label: 'Strong', color: '#10b981' };
+  };
+
   const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  const passwordStrength = getPasswordStrength(formData.password);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -253,6 +271,25 @@ const Login = () => {
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
+
+              {/* Password Strength Indicator */}
+              {formData.password && (
+                <div className="password-meter">
+                  <div className="meter-track">
+                    <div
+                      className="meter-bar"
+                      style={{
+                        width: `${(passwordStrength.score / 3) * 100}%`,
+                        backgroundColor: passwordStrength.color
+                      }}
+                    ></div>
+                  </div>
+                  <span className="meter-label" style={{ color: passwordStrength.color }}>
+                    {passwordStrength.label} Password
+                  </span>
+                </div>
+              )}
+
               {errors.password && (
                 <span className="error-message">
                   <AlertCircle size={14} /> {errors.password}
