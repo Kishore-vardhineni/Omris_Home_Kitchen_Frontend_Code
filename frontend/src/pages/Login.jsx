@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Mail,
@@ -19,6 +19,8 @@ import bannerImg from '../assets/images/Mango_Pickel.png';
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || '/';
 
   const [formData, setFormData] = useState({
     email: '',
@@ -34,9 +36,9 @@ const Login = () => {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     const val = type === 'checkbox' ? checked : value;
-    
+
     setFormData((prev) => ({ ...prev, [name]: val }));
-    
+
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
@@ -68,7 +70,8 @@ const Login = () => {
     setErrors({});
 
     try {
-      const response = await fetch('http://localhost:3001/api/auth/login', {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -96,7 +99,7 @@ const Login = () => {
       setSubmitSuccess(true);
 
       setTimeout(() => {
-        navigate('/');
+        navigate(from, { replace: true });
       }, 1500);
     } catch (err) {
       console.error('Login error:', err);
@@ -108,9 +111,9 @@ const Login = () => {
   return (
     <div className="signup-page-wrapper">
       <div className="signup-container">
-        
+
         {/* ── Left Side: Brand Showcase Banner ── */}
-        <motion.div 
+        <motion.div
           className="signup-banner shadow-lg"
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
@@ -121,7 +124,7 @@ const Login = () => {
             <Link to="/" className="banner-logo-link">
               <img src={logo} alt="Omris Home Kitchen" className="banner-logo" />
             </Link>
-            
+
             <div className="banner-tagline">
               <span className="badge-spice">
                 <Sparkles size={14} className="inline mr-1" /> Welcome Back!
@@ -155,7 +158,7 @@ const Login = () => {
         </motion.div>
 
         {/* ── Right Side: Login Form Card ── */}
-        <motion.div 
+        <motion.div
           className="signup-card"
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
@@ -168,7 +171,7 @@ const Login = () => {
 
           <AnimatePresence>
             {errors.server && (
-              <motion.div 
+              <motion.div
                 className="success-alert"
                 style={{ backgroundColor: '#fef2f2', borderColor: '#ef4444', color: '#b91c1c' }}
                 initial={{ opacity: 0, y: -10 }}
@@ -183,7 +186,7 @@ const Login = () => {
               </motion.div>
             )}
             {submitSuccess && (
-              <motion.div 
+              <motion.div
                 className="success-alert"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -199,7 +202,7 @@ const Login = () => {
           </AnimatePresence>
 
           <form onSubmit={handleSubmit} noValidate className="signup-form">
-            
+
             {/* Email Address */}
             <div className="form-group">
               <label htmlFor="email">Email Address</label>

@@ -19,7 +19,7 @@ import { motion } from 'framer-motion';
  *  @param {Function} onChange       — callback(option: string) when user selects
  *  @param {Object}   [priceHint]   — optional { option: price } map shown below each pill
  */
-const VariantSelector = ({ label, options, selectedValue, onChange, priceHint }) => {
+const VariantSelector = ({ label, options, selectedValue, onChange, priceHint, disabledOptions = [] }) => {
   return (
     <div className="flex flex-col gap-2">
 
@@ -34,11 +34,6 @@ const VariantSelector = ({ label, options, selectedValue, onChange, priceHint })
       </div>
 
       {/* ── Pill row — horizontally scrollable on mobile ──────────────────── */}
-      {/*
-          The outer div clips; the inner div scrolls horizontally.
-          `scrollbar-none` hides the scrollbar on WebKit/Firefox while
-          still allowing touch-scroll on iOS/Android.
-      */}
       <div
         className="w-full overflow-x-auto"
         style={{ WebkitOverflowScrolling: 'touch' }}
@@ -50,16 +45,19 @@ const VariantSelector = ({ label, options, selectedValue, onChange, priceHint })
         >
           {options.map((option) => {
             const isSelected = selectedValue === option;
+            const isDisabled = disabledOptions.includes(option);
 
             return (
               <motion.button
                 key={option}
                 type="button"
-                onClick={() => onChange(option)}
-                whileTap={{ scale: 0.95 }}
+                disabled={isDisabled}
+                onClick={() => !isDisabled && onChange(option)}
+                whileTap={isDisabled ? {} : { scale: 0.95 }}
                 transition={{ duration: 0.12, ease: 'easeOut' }}
                 aria-pressed={isSelected}
-                aria-label={`Select ${label}: ${option}`}
+                aria-disabled={isDisabled}
+                aria-label={`Select ${label}: ${option}${isDisabled ? ' (Out of stock)' : ''}`}
                 className="flex-shrink-0 flex flex-col items-center justify-center gap-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 rounded-xl"
                 style={{
                   /* Minimum touch target: 44 px high */
@@ -68,16 +66,17 @@ const VariantSelector = ({ label, options, selectedValue, onChange, priceHint })
                   /* Padding provides breathing room */
                   padding: priceHint ? '8px 16px' : '10px 18px',
                   /* Smooth background + border + color transitions */
-                  transition: 'background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease',
-                  backgroundColor: isSelected ? '#000000' : '#ffffff',
-                  color:           isSelected ? '#ffffff' : '#1a1a1a',
-                  border:          isSelected ? '1.5px solid #000000' : '1.5px solid #d4d4d4',
-                  boxShadow:       isSelected ? '0 2px 8px rgba(0,0,0,0.18)' : '0 1px 3px rgba(0,0,0,0.06)',
+                  transition: 'background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease',
+                  backgroundColor: isDisabled ? '#f5f5f5' : (isSelected ? '#000000' : '#ffffff'),
+                  color:           isDisabled ? '#a3a3a3' : (isSelected ? '#ffffff' : '#1a1a1a'),
+                  border:          isDisabled ? '1.5px dashed #d4d4d4' : (isSelected ? '1.5px solid #000000' : '1.5px solid #d4d4d4'),
+                  boxShadow:       isSelected && !isDisabled ? '0 2px 8px rgba(0,0,0,0.18)' : '0 1px 3px rgba(0,0,0,0.06)',
                   fontWeight:      isSelected ? '700' : '500',
                   fontSize:        '0.875rem',  /* 14px */
                   lineHeight:      1.2,
                   letterSpacing:   '0.01em',
-                  cursor:          'pointer',
+                  cursor:          isDisabled ? 'not-allowed' : 'pointer',
+                  opacity:         isDisabled ? 0.6 : 1,
                 }}
               >
                 <span>{option}</span>
@@ -90,7 +89,7 @@ const VariantSelector = ({ label, options, selectedValue, onChange, priceHint })
                       lineHeight: 1,
                     }}
                   >
-                    ₹{priceHint[option]}
+                    {typeof priceHint[option] === 'number' ? `₹${priceHint[option]}` : priceHint[option]}
                   </span>
                 )}
               </motion.button>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Star, Camera, AlertCircle } from 'lucide-react';
+import { X, Star, Camera, AlertCircle, Loader2 } from 'lucide-react';
 
 /**
  * WriteReviewModal Component
@@ -11,7 +11,7 @@ import { X, Star, Camera, AlertCircle } from 'lucide-react';
  * - Fixed sticky modal header so title and close button are always visible
  * - Touch-friendly form inputs and star rating UI
  */
-const WriteReviewModal = ({ isOpen, onClose, onSubmit }) => {
+const WriteReviewModal = ({ isOpen, onClose, onSubmit, isSubmitting = false }) => {
   const backdropRef = useRef(null);
 
   // Form state
@@ -390,9 +390,17 @@ const WriteReviewModal = ({ isOpen, onClose, onSubmit }) => {
             <div className="pt-2">
               <button
                 type="submit"
-                className="w-full py-3.5 bg-black hover:bg-neutral-800 text-white font-bold rounded-xl shadow-md transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 text-sm sm:text-base cursor-pointer"
+                disabled={isSubmitting}
+                className="w-full py-3.5 bg-black hover:bg-neutral-800 text-white font-bold rounded-xl shadow-md transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 text-sm sm:text-base cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
               >
-                Submit Review
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Submitting…
+                  </>
+                ) : (
+                  'Submit Review'
+                )}
               </button>
             </div>
           </form>

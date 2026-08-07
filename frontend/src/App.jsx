@@ -3,12 +3,14 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Pages
 const Home        = React.lazy(() => import('./pages/Home'));
 const Products    = React.lazy(() => import('./pages/Products'));
 const VegPickles  = React.lazy(() => import('./pages/VegPickles'));
 const NonVegPickles = React.lazy(() => import('./pages/NonVegPickles'));
+const Podis       = React.lazy(() => import('./pages/Podis'));
 const ProductDetail = React.lazy(() => import('./pages/ProductDetail'));
 const Cart        = React.lazy(() => import('./pages/Cart'));
 const Checkout    = React.lazy(() => import('./pages/Checkout'));
@@ -30,10 +32,11 @@ function App() {
           <Route path="/"              element={<Home />} />
           <Route path="/veg-pickles"   element={<VegPickles />} />
           <Route path="/non-veg-pickles" element={<NonVegPickles />} />
+          <Route path="/podis"         element={<Podis />} />
           <Route path="/products"      element={<Products />} />
           <Route path="/products/:id"  element={<ProductDetail />} />
-          <Route path="/cart"          element={<Cart />} />
-          <Route path="/checkout"      element={<Checkout />} />
+          <Route path="/cart"          element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+          <Route path="/checkout"      element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
           <Route path="/signup"        element={<Signup />} />
           <Route path="/login"         element={<Login />} />
           <Route path="/about"         element={<About />} />

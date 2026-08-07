@@ -10,7 +10,7 @@
 //     point at the canonical product id via `canonicalId` for deep-linking.
 
 import chickenBonePickleImg from '../assets/images/Chicken_Bone.png';
-import chickenBonePickleImg2 from '../assets/images/Chicken_Bone2.png';
+// import chickenBonePickleImg2 from '../assets/images/Chicken_Bone2.png';
 import chickenBonePickleImg3 from '../assets/images/ChickenBone3.png';
 import chickenBonelessPickleImg from '../assets/images/Chicken_Boneless.png';
 import mangoPickleImg from '../assets/images/Mango_Pickel.png';
@@ -36,7 +36,6 @@ export const canonicalProducts = [
     image: chickenBonePickleImg,
     gallery: [
       { src: chickenBonePickleImg, alt: 'Chicken Bone Pickle Jar' },
-      { src: chickenBonePickleImg2, alt: 'Chicken Bone Pickle Kitchen Preparation' },
       { src: chickenBonePickleImg3, alt: 'Chicken Bone Pickle Andhra Spices' },
       { src: chickenBonePickleImg, alt: 'Chicken Bone Pickle Closeup' },
     ],
@@ -55,8 +54,7 @@ export const canonicalProducts = [
     image: chickenBonelessPickleImg,
     gallery: [
       { src: chickenBonelessPickleImg, alt: 'Chicken Boneless Pickle Jar' },
-      { src: landingImage1, alt: 'Chicken Boneless Pickle Fresh Preparation' },
-      { src: landingImage, alt: 'Chicken Boneless Pickle Spices' },
+      { src: chickenBonePickleImg3, alt: 'Chicken Boneless Pickle Spices' },
       { src: chickenBonelessPickleImg, alt: 'Chicken Boneless Pickle Serving' },
     ],
     description: 'Tender boneless chicken pieces marinated in signature Andhra spice blend, preserved in cold-pressed sesame oil.',
@@ -194,9 +192,7 @@ export const mangoProducts = [
 export const varietyProducts = [
   { id: 'veg-pickle', name: 'Veg Pickle', label: 'Veg Pickles', price: 189, image: mangoPickleImg, category: 'veg', route: '/veg-pickles' },
   { id: 'non-veg-pickle', name: 'Non Veg Pickle', label: 'Non veg Pickles', price: 189, image: chickenBonelessPickleImg, category: 'nonVeg', route: '/non-veg-pickles' },
-  { id: 'garlic-pickle', name: 'Garlic Pickle', label: 'Podis', price: 249, image: chickenBonePickleImg, category: 'podis', route: '/products' },
-  { id: 'mixed-veg-pickle', name: 'Mixed Veg Pickle', label: 'Sweets', price: 189, image: tomatoPickleImg, category: 'veg', route: '/products' },
-  { id: 'green-chilli-pickle', name: 'Green Chilli Pickle', label: 'Snacks', price: 159, image: tomatoPickleImg, category: 'veg', route: '/products' },
+  { id: 'garlic-pickle', name: 'Garlic Pickle', label: 'Podis', price: 249, image: chickenBonePickleImg, category: 'podis', route: '/podis' },
 ];
 
 // ── Master flat list (all listing cards) ──────────────────────────────────────

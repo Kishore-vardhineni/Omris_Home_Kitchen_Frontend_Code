@@ -1,3 +1,4 @@
+// Omris Home Kitchen — Backend API Server
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -6,6 +7,8 @@ import dns from "dns";
 
 
 import authRoutes from "./routes/authRoutes.js";
+import productRoutes from "./routes/productRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
 
 dotenv.config();
 dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
@@ -22,13 +25,7 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, postman)
-      if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-      return callback(null, true);
-    },
+    origin: ['http://localhost:5173', 'https://omris-home-kitchen-frontend.vercel.app'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
@@ -40,10 +37,12 @@ app.use(express.json());
 // API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", authRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/reviews", reviewRoutes);
 
 app.get("/", (req, res) => {
   res.json({
-    message: "Node.js API is running successfully",
+    message: "Node.js API'ssssssssss is running successfully",
   });
 });
 

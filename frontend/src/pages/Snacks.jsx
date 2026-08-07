@@ -37,7 +37,7 @@ const ProductCard = ({ product, index }) => {
   );
 };
 
-const NonVegPickles = () => {
+const Snacks = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -46,10 +46,10 @@ const NonVegPickles = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getProducts({ category: 'non-veg-pickle' });
+      const data = await getProducts({ category: 'snack' });
       setProducts(data.products || []);
     } catch (err) {
-      setError(err.message || 'Failed to load non-veg pickles. Please try again.');
+      setError(err.message || 'Failed to load snacks. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -69,7 +69,7 @@ const NonVegPickles = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            Our Specialties
+            Crunchy Delights
           </motion.h4>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -77,20 +77,20 @@ const NonVegPickles = () => {
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
           >
-            Non-Veg Pickles
+            Savoury Snacks
           </motion.h2>
         </div>
 
         <div className="tomato-section">
           <div className="tomato-header">
-            <h3>Non-Veg Pickles</h3>
+            <h3>Homemade Snacks</h3>
             <div className="header-underline"></div>
           </div>
 
           {loading && (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--primary-dark-green)]"></div>
-              <p className="text-[var(--text-dark)] font-medium">Fetching fresh pickles...</p>
+              <p className="text-[var(--text-dark)] font-medium">Fetching fresh snacks...</p>
             </div>
           )}
 
@@ -109,7 +109,7 @@ const NonVegPickles = () => {
           {!loading && !error && products.length === 0 && (
             <div className="text-center py-20 bg-[var(--bg-cream)] rounded-xl border border-dashed border-[var(--primary-dark-green)] border-opacity-20 max-w-lg mx-auto">
               <h3 className="text-xl font-semibold text-[var(--primary-dark-green)] mb-2">No products found</h3>
-              <p className="text-[var(--text-dark)] opacity-80 mb-6">We don't have any Non-Veg Pickles in stock right now. Check back soon!</p>
+              <p className="text-[var(--text-dark)] opacity-80 mb-6">We don't have any Snacks in stock right now. Check back soon!</p>
             </div>
           )}
 
@@ -130,4 +130,4 @@ const NonVegPickles = () => {
   );
 };
 
-export default NonVegPickles;
+export default Snacks;

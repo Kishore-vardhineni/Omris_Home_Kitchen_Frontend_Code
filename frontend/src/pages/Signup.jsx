@@ -57,9 +57,9 @@ const Signup = () => {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     const val = type === 'checkbox' ? checked : value;
-    
+
     setFormData((prev) => ({ ...prev, [name]: val }));
-    
+
     // Clear error for this field dynamically
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
@@ -116,7 +116,8 @@ const Signup = () => {
     setErrors({});
 
     try {
-      const response = await fetch('http://localhost:3001/api/auth/register', {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -159,9 +160,9 @@ const Signup = () => {
   return (
     <div className="signup-page-wrapper">
       <div className="signup-container">
-        
+
         {/* ── Left Side: Brand Showcase Banner ── */}
-        <motion.div 
+        <motion.div
           className="signup-banner shadow-lg"
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
@@ -172,7 +173,7 @@ const Signup = () => {
             <Link to="/" className="banner-logo-link">
               <img src={logo} alt="Omris Home Kitchen" className="banner-logo" />
             </Link>
-            
+
             <div className="banner-tagline">
               <span className="badge-spice">
                 <Sparkles size={14} className="inline mr-1" /> 100% Traditional & Pure
@@ -214,7 +215,7 @@ const Signup = () => {
         </motion.div>
 
         {/* ── Right Side: Sign Up Form Card ── */}
-        <motion.div 
+        <motion.div
           className="signup-card"
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
@@ -227,7 +228,7 @@ const Signup = () => {
 
           <AnimatePresence>
             {errors.server && (
-              <motion.div 
+              <motion.div
                 className="success-alert"
                 style={{ backgroundColor: '#fef2f2', borderColor: '#ef4444', color: '#b91c1c' }}
                 initial={{ opacity: 0, y: -10 }}
@@ -242,7 +243,7 @@ const Signup = () => {
               </motion.div>
             )}
             {submitSuccess && (
-              <motion.div 
+              <motion.div
                 className="success-alert"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -258,7 +259,7 @@ const Signup = () => {
           </AnimatePresence>
 
           <form onSubmit={handleSubmit} noValidate className="signup-form">
-            
+
             {/* Full Name */}
             <div className="form-group">
               <label htmlFor="fullName">Full Name</label>

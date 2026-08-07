@@ -126,25 +126,25 @@ export const DEFAULT_PRODUCT_REVIEWS = {
 };
 
 // Generic fallback reviews if product has no custom dataset
-export const GENERIC_REVIEWS = [
-  {
-    id: 'gen-1',
-    name: 'Kavitha Nair',
-    email: 'kavitha@example.com',
-    rating: 5,
-    title: 'Authentic Andhra Taste!',
-    text: 'Prepared with high quality ingredients and traditional home recipe. Highly recommended!',
-    date: 'Jul 20, 2026',
-    verified: true,
-  },
-  {
-    id: 'gen-2',
-    name: 'Anita Desai',
-    email: 'anita@example.com',
-    rating: 4,
-    title: 'Very fresh and flavorful',
-    text: 'Loved the aroma and spice level. Arrived very quickly and well packed.',
-    date: 'Jul 15, 2026',
-    verified: true,
-  },
-];
+// export const GENERIC_REVIEWS = [
+//   {
+//     id: 'gen-1',
+//     name: 'Kavitha Nair',
+//     email: 'kavitha@example.com',
+//     rating: 5,
+//     title: 'Authentic Andhra Taste!',
+//     text: 'Prepared with high quality ingredients and traditional home recipe. Highly recommended!',
+//     date: 'Jul 20, 2026',
+//     verified: true,
+//   },
+//   {
+//     id: 'gen-2',
+//     name: 'Anita Desai',
+//     email: 'anita@example.com',
+//     rating: 4,
+//     title: 'Very fresh and flavorful',
+//     text: 'Loved the aroma and spice level. Arrived very quickly and well packed.',
+//     date: 'Jul 15, 2026',
+//     verified: true,
+//   },
+// ];

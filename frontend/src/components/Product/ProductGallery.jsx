@@ -16,7 +16,7 @@ const ProductGallery = ({ images, productName, onActiveImageChange }) => {
 
   useEffect(() => {
     setSelectedIndex(0);
-  }, [productName, images]);
+  }, [productName]);
 
   useEffect(() => {
     const activeImg = images[selectedIndex]?.src || images[0]?.src;
