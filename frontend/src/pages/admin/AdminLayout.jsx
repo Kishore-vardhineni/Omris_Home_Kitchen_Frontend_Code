@@ -7,21 +7,33 @@ import {
   LogOut,
   ShoppingBag,
   ChevronRight,
+  Settings,
 } from 'lucide-react';
 import './Admin.css';
-import logo from '../../assets/images/Omris_Home_Kitchen_logo1.png';
 
-const navItems = [
-  { label: 'Dashboard',    icon: LayoutDashboard, to: '/admin' },
-  { label: 'All Products', icon: Package,         to: '/admin/products' },
-  { label: 'Add Product',  icon: PlusCircle,      to: '/admin/products/add' },
+const NAV_GROUPS = [
+  {
+    section: 'Overview',
+    items: [
+      { label: 'Dashboard',    icon: LayoutDashboard, to: '/admin', end: true },
+    ]
+  },
+  {
+    section: 'Catalogue',
+    items: [
+      { label: 'All Products', icon: Package,     to: '/admin/products' },
+      { label: 'Add Product',  icon: PlusCircle,  to: '/admin/products/add' },
+    ]
+  },
 ];
 
-const AdminLayout = ({ children, title = 'Admin Panel' }) => {
+const AdminLayout = ({ children, title = 'Dashboard' }) => {
   const navigate = useNavigate();
   const userInfoStr = localStorage.getItem('userInfo');
   const user = userInfoStr ? JSON.parse(userInfoStr) : null;
-  const initials = user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'A';
+  const initials = user?.name
+    ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : 'A';
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -31,49 +43,82 @@ const AdminLayout = ({ children, title = 'Admin Panel' }) => {
 
   return (
     <div className="admin-layout">
-      {/* ── Sidebar ── */}
+      {/* ═══════════ SIDEBAR ═══════════ */}
       <aside className="admin-sidebar">
+
+        {/* Logo */}
         <div className="admin-sidebar-logo">
-          <ShoppingBag size={22} color="#3b5bdb" />
-          <span>Omris Kitchen</span>
-          <span className="logo-badge">Admin</span>
+          <div className="admin-logo-icon">
+            <ShoppingBag size={18} color="#fff" />
+          </div>
+          <div className="logo-text">
+            <span className="logo-title">Omris Kitchen</span>
+            <span className="logo-sub">Admin Panel</span>
+          </div>
         </div>
 
+        {/* Nav */}
         <nav className="admin-nav">
-          <div className="admin-nav-section">Main Menu</div>
-          {navItems.map(({ label, icon: Icon, to }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={to === '/admin'}
-              className={({ isActive }) =>
-                `admin-nav-item${isActive ? ' active' : ''}`
-              }
-            >
-              <Icon size={18} />
-              {label}
-              <ChevronRight size={14} style={{ marginLeft: 'auto', opacity: 0.4 }} />
-            </NavLink>
+          {NAV_GROUPS.map(group => (
+            <div key={group.section}>
+              <div className="admin-nav-section">{group.section}</div>
+              {group.items.map(({ label, icon: Icon, to, end }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  end={end}
+                  className={({ isActive }) =>
+                    `admin-nav-item${isActive ? ' active' : ''}`
+                  }
+                >
+                  <Icon size={17} />
+                  <span className="nav-label">{label}</span>
+                  <ChevronRight size={13} className="nav-arrow" />
+                </NavLink>
+              ))}
+            </div>
           ))}
         </nav>
 
+        {/* Footer */}
         <div className="admin-sidebar-footer">
-          <button className="admin-nav-item" onClick={handleLogout} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer' }}>
-            <LogOut size={18} />
-            Logout
+          {/* User mini */}
+          <div className="admin-user-mini">
+            <div className="admin-topbar-avatar" style={{ width: 32, height: 32, fontSize: '0.72rem', borderRadius: '8px' }}>
+              {initials}
+            </div>
+            <div className="admin-user-mini-info">
+              <span className="user-name">{user?.name || 'Admin'}</span>
+              <span className="user-role">Admin</span>
+            </div>
+          </div>
+
+          <button
+            className="admin-nav-item"
+            onClick={handleLogout}
+            style={{ borderRadius: '8px' }}
+          >
+            <LogOut size={17} />
+            <span className="nav-label">Sign Out</span>
           </button>
         </div>
       </aside>
 
-      {/* ── Main ── */}
+      {/* ═══════════ MAIN ═══════════ */}
       <main className="admin-main">
+
+        {/* Topbar */}
         <div className="admin-topbar">
-          <h1 className="admin-topbar-title">{title}</h1>
-          <div className="admin-topbar-user">
-            <span>{user?.name || 'Admin'}</span>
-            <div className="admin-avatar">{initials}</div>
+          <div className="admin-topbar-left">
+            <h1 className="admin-topbar-title">{title}</h1>
+          </div>
+          <div className="admin-topbar-right">
+            <span className="admin-topbar-name">{user?.name}</span>
+            <div className="admin-topbar-avatar">{initials}</div>
           </div>
         </div>
+
+        {/* Content */}
         <div className="admin-content">
           {children}
         </div>
