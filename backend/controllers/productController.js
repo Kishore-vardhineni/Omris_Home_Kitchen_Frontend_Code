@@ -13,31 +13,42 @@ import Product from '../models/Product.js';
  */
 export const addProduct = async (req, res) => {
   try {
-    const {
-      name,
-      category,
-      subCategory,
-      tags,
-      shortDescription,
-      longDescription,
-      ingredients,
-      shelfLife,
-      storageInstructions,
-      image,
-      gallery,
-      variants,
-      isFeatured,
-      isBestseller,
-      isNewArrival,
-      isActive,
-      isVegetarian,
-      isVegan,
-      isGlutenFree,
-      isOrganicCertified,
-      certificationBadges,
-      nutritionalInfo,
-      seo,
+    let {
+      name, category, subCategory, tags, shortDescription, longDescription,
+      ingredients, shelfLife, storageInstructions, image, gallery, variants,
+      isFeatured, isBestseller, isNewArrival, isActive, isVegetarian, isVegan,
+      isGlutenFree, isOrganicCertified, certificationBadges, nutritionalInfo, seo,
     } = req.body;
+
+    // Parse stringified JSON from FormData
+    if (typeof variants === 'string') variants = JSON.parse(variants);
+    if (typeof tags === 'string') tags = JSON.parse(tags);
+    if (typeof ingredients === 'string') ingredients = JSON.parse(ingredients);
+    if (typeof certificationBadges === 'string') certificationBadges = JSON.parse(certificationBadges);
+    if (typeof nutritionalInfo === 'string') nutritionalInfo = JSON.parse(nutritionalInfo);
+    if (typeof seo === 'string') seo = JSON.parse(seo);
+    if (typeof image === 'string') image = JSON.parse(image);
+    if (typeof gallery === 'string') gallery = JSON.parse(gallery);
+
+    // Convert string booleans
+    isFeatured = isFeatured === 'true' || isFeatured === true;
+    isBestseller = isBestseller === 'true' || isBestseller === true;
+    isNewArrival = isNewArrival === 'true' || isNewArrival === true;
+    isActive = isActive !== 'false' && isActive !== false;
+    isVegetarian = isVegetarian !== 'false' && isVegetarian !== false;
+    isVegan = isVegan === 'true' || isVegan === true;
+    isGlutenFree = isGlutenFree === 'true' || isGlutenFree === true;
+    isOrganicCertified = isOrganicCertified === 'true' || isOrganicCertified === true;
+
+    // Process uploaded files
+    if (req.files && req.files.length > 0) {
+      const baseUrl = process.env.VITE_API_URL ? process.env.VITE_API_URL.replace('/api', '') : 'http://localhost:3001';
+      image = { url: `${baseUrl}/uploads/${req.files[0].filename}`, altText: name };
+      if (req.files.length > 1) {
+        const newGallery = req.files.slice(1).map(f => ({ url: `${baseUrl}/uploads/${f.filename}`, altText: name }));
+        gallery = gallery ? [...gallery, ...newGallery] : newGallery;
+      }
+    }
 
     // ── 1. Required-field validation ──────────────────────────────────────
     if (!name || !category || !image?.url) {
@@ -293,7 +304,33 @@ export const getProductById = async (req, res) => {
 export const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const updateData = req.body;
+    let updateData = { ...req.body };
+
+    // Parse stringified JSON from FormData
+    if (typeof updateData.variants === 'string') updateData.variants = JSON.parse(updateData.variants);
+    if (typeof updateData.tags === 'string') updateData.tags = JSON.parse(updateData.tags);
+    if (typeof updateData.ingredients === 'string') updateData.ingredients = JSON.parse(updateData.ingredients);
+    if (typeof updateData.certificationBadges === 'string') updateData.certificationBadges = JSON.parse(updateData.certificationBadges);
+    if (typeof updateData.nutritionalInfo === 'string') updateData.nutritionalInfo = JSON.parse(updateData.nutritionalInfo);
+    if (typeof updateData.seo === 'string') updateData.seo = JSON.parse(updateData.seo);
+    if (typeof updateData.image === 'string') updateData.image = JSON.parse(updateData.image);
+    if (typeof updateData.gallery === 'string') updateData.gallery = JSON.parse(updateData.gallery);
+
+    // Convert string booleans
+    ['isFeatured', 'isBestseller', 'isNewArrival', 'isActive', 'isVegetarian', 'isVegan', 'isGlutenFree', 'isOrganicCertified'].forEach(key => {
+      if (updateData[key] === 'true') updateData[key] = true;
+      if (updateData[key] === 'false') updateData[key] = false;
+    });
+
+    // Process uploaded files
+    if (req.files && req.files.length > 0) {
+      const baseUrl = process.env.VITE_API_URL ? process.env.VITE_API_URL.replace('/api', '') : 'http://localhost:3001';
+      updateData.image = { url: `${baseUrl}/uploads/${req.files[0].filename}`, altText: updateData.name || 'Product Image' };
+      if (req.files.length > 1) {
+        const newGallery = req.files.slice(1).map(f => ({ url: `${baseUrl}/uploads/${f.filename}`, altText: updateData.name || 'Product Image' }));
+        updateData.gallery = updateData.gallery ? [...updateData.gallery, ...newGallery] : newGallery;
+      }
+    }
 
     // ── 1. Check if product exists ─────────────────────────────────────────
     const product = await Product.findById(id);

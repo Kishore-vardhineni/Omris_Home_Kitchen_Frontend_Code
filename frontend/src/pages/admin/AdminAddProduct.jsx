@@ -24,8 +24,7 @@ const AdminAddProduct = () => {
     ingredients: '',
     shelfLife: '',
     storageInstructions: '',
-    imageUrl: '',
-    imageAlt: '',
+    storageInstructions: '',
     isFeatured: false,
     isBestseller: false,
     isNewArrival: false,
@@ -34,6 +33,7 @@ const AdminAddProduct = () => {
     certificationBadges: '',
   });
 
+  const [images, setImages] = useState(null);
   const [variants, setVariants] = useState([emptyVariant()]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError]     = useState('');
@@ -57,40 +57,50 @@ const AdminAddProduct = () => {
     setSuccess('');
     setSubmitting(true);
 
-    const payload = {
-      name: form.name.trim(),
-      category: form.category,
-      subCategory: form.subCategory || undefined,
-      shortDescription: form.shortDescription || undefined,
-      longDescription: form.longDescription || undefined,
-      ingredients: form.ingredients ? form.ingredients.split(',').map(s => s.trim()).filter(Boolean) : [],
-      shelfLife: form.shelfLife || undefined,
-      storageInstructions: form.storageInstructions || undefined,
-      image: { url: form.imageUrl.trim(), altText: form.imageAlt || form.name },
-      isFeatured: form.isFeatured,
-      isBestseller: form.isBestseller,
-      isNewArrival: form.isNewArrival,
-      isActive: form.isActive,
-      isVegetarian: form.isVegetarian,
-      certificationBadges: form.certificationBadges ? form.certificationBadges.split(',').map(s => s.trim()).filter(Boolean) : [],
-      variants: variants.map(v => ({
-        label: v.label.trim(),
-        weightInGrams: Number(v.weightInGrams),
-        sku: v.sku.trim().toUpperCase(),
-        price: Number(v.price),
-        discountedPrice: v.discountedPrice ? Number(v.discountedPrice) : undefined,
-        stock: Number(v.stock) || 0,
-      })),
-    };
+    const formData = new FormData();
+    formData.append('name', form.name.trim());
+    formData.append('category', form.category);
+    if (form.subCategory) formData.append('subCategory', form.subCategory);
+    if (form.shortDescription) formData.append('shortDescription', form.shortDescription);
+    if (form.longDescription) formData.append('longDescription', form.longDescription);
+    if (form.shelfLife) formData.append('shelfLife', form.shelfLife);
+    if (form.storageInstructions) formData.append('storageInstructions', form.storageInstructions);
+
+    formData.append('isFeatured', form.isFeatured);
+    formData.append('isBestseller', form.isBestseller);
+    formData.append('isNewArrival', form.isNewArrival);
+    formData.append('isActive', form.isActive);
+    formData.append('isVegetarian', form.isVegetarian);
+
+    const ingredientsArr = form.ingredients ? form.ingredients.split(',').map(s => s.trim()).filter(Boolean) : [];
+    formData.append('ingredients', JSON.stringify(ingredientsArr));
+
+    const badgesArr = form.certificationBadges ? form.certificationBadges.split(',').map(s => s.trim()).filter(Boolean) : [];
+    formData.append('certificationBadges', JSON.stringify(badgesArr));
+
+    const variantsArr = variants.map(v => ({
+      label: v.label.trim(),
+      weightInGrams: Number(v.weightInGrams),
+      sku: v.sku.trim().toUpperCase(),
+      price: Number(v.price),
+      discountedPrice: v.discountedPrice ? Number(v.discountedPrice) : undefined,
+      stock: Number(v.stock) || 0,
+    }));
+    formData.append('variants', JSON.stringify(variantsArr));
+
+    if (images && images.length > 0) {
+      for (let i = 0; i < images.length; i++) {
+        formData.append('images', images[i]);
+      }
+    }
 
     try {
       const res = await fetch(`${API}/products`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(payload),
+        body: formData,
       });
       const data = await res.json();
       if (data.success) {
@@ -165,22 +175,27 @@ const AdminAddProduct = () => {
           </div>
         </div>
 
-        {/* Image */}
+        {/* Images */}
         <div className="admin-card" style={{ marginBottom: '1.25rem' }}>
-          <div className="admin-card-header"><span className="admin-card-title">Product Image</span></div>
+          <div className="admin-card-header"><span className="admin-card-title">Product Images</span></div>
           <div style={{ padding: '1.25rem' }}>
-            <div className="admin-form-grid">
-              <div className="admin-form-group">
-                <label className="admin-form-label">Image URL <span>*</span></label>
-                <input className="admin-form-input" name="imageUrl" value={form.imageUrl} onChange={handleChange} required placeholder="https://..." />
-              </div>
-              <div className="admin-form-group">
-                <label className="admin-form-label">Alt Text</label>
-                <input className="admin-form-input" name="imageAlt" value={form.imageAlt} onChange={handleChange} placeholder="Descriptive alt text" />
-              </div>
+            <div className="admin-form-group">
+              <label className="admin-form-label">Upload Images (First image is primary) <span>*</span></label>
+              <input 
+                className="admin-form-input" 
+                type="file" 
+                multiple 
+                accept="image/*" 
+                onChange={(e) => setImages(e.target.files)} 
+                required 
+              />
             </div>
-            {form.imageUrl && (
-              <img src={form.imageUrl} alt="preview" style={{ marginTop: '0.75rem', height: '100px', borderRadius: '8px', border: '1px solid var(--admin-border)', objectFit: 'cover' }} onError={e => e.target.style.display='none'} />
+            {images && images.length > 0 && (
+              <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                {Array.from(images).map((file, i) => (
+                  <img key={i} src={URL.createObjectURL(file)} alt={`preview-${i}`} style={{ height: '100px', borderRadius: '8px', border: '1px solid var(--admin-border)', objectFit: 'cover' }} />
+                ))}
+              </div>
             )}
           </div>
         </div>
