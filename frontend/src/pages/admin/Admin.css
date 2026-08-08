@@ -513,12 +513,42 @@
   color: var(--adm-muted);
 }
 
+/* Sidebar Overlay */
+.admin-sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 45;
+}
+
+.admin-sidebar-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--adm-text);
+  padding: 0;
+}
+
+.admin-sidebar-close {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
 /* ══════════════════════════════════════════════════════════
    RESPONSIVE
 ══════════════════════════════════════════════════════════ */
 @media (max-width: 900px) {
-  .admin-sidebar { transform: translateX(-100%); }
+  .admin-sidebar { transform: translateX(-100%); transition: transform 0.3s ease; }
+  .admin-sidebar.open { transform: translateX(0); }
+  .admin-sidebar-overlay { display: block; }
   .admin-main { margin-left: 0; }
+  .admin-sidebar-toggle { display: block; }
+  .admin-sidebar-close { display: block; }
   .admin-form-grid { grid-template-columns: 1fr; }
   .variant-row { grid-template-columns: 1fr 1fr; }
 }

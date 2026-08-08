@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -7,7 +7,8 @@ import {
   LogOut,
   ShoppingBag,
   ChevronRight,
-  Settings,
+  Menu,
+  X,
 } from 'lucide-react';
 import './Admin.css';
 
@@ -28,6 +29,7 @@ const NAV_GROUPS = [
 ];
 
 const AdminLayout = ({ children, title = 'Dashboard' }) => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const userInfoStr = localStorage.getItem('userInfo');
   const user = userInfoStr ? JSON.parse(userInfoStr) : null;
@@ -43,8 +45,13 @@ const AdminLayout = ({ children, title = 'Dashboard' }) => {
 
   return (
     <div className="admin-layout">
+      {/* Mobile Overlay */}
+      {isSidebarOpen && (
+        <div className="admin-sidebar-overlay" onClick={() => setIsSidebarOpen(false)}></div>
+      )}
+
       {/* ═══════════ SIDEBAR ═══════════ */}
-      <aside className="admin-sidebar">
+      <aside className={`admin-sidebar ${isSidebarOpen ? 'open' : ''}`}>
 
         {/* Logo */}
         <div className="admin-sidebar-logo">
@@ -55,6 +62,9 @@ const AdminLayout = ({ children, title = 'Dashboard' }) => {
             <span className="logo-title">Omris Kitchen</span>
             <span className="logo-sub">Admin Panel</span>
           </div>
+          <button className="admin-sidebar-close" onClick={() => setIsSidebarOpen(false)}>
+            <X size={20} color="#fff" />
+          </button>
         </div>
 
         {/* Nav */}
@@ -67,6 +77,7 @@ const AdminLayout = ({ children, title = 'Dashboard' }) => {
                   key={to}
                   to={to}
                   end={end}
+                  onClick={() => setIsSidebarOpen(false)}
                   className={({ isActive }) =>
                     `admin-nav-item${isActive ? ' active' : ''}`
                   }
@@ -110,6 +121,9 @@ const AdminLayout = ({ children, title = 'Dashboard' }) => {
         {/* Topbar */}
         <div className="admin-topbar">
           <div className="admin-topbar-left">
+            <button className="admin-sidebar-toggle" onClick={() => setIsSidebarOpen(true)}>
+              <Menu size={20} />
+            </button>
             <h1 className="admin-topbar-title">{title}</h1>
           </div>
           <div className="admin-topbar-right">
