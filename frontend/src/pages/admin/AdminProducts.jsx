@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { PlusCircle, Pencil, Trash2, Search, RefreshCw } from 'lucide-react';
+import { PlusCircle, Pencil, Trash2, Search, RefreshCw, ChevronUp, ChevronDown } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
@@ -15,6 +15,9 @@ const AdminProducts = () => {
   const [deleting, setDeleting] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+  const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
 
   const token = localStorage.getItem('token');
 
@@ -63,9 +66,53 @@ const AdminProducts = () => {
     }
   };
 
-  const filtered = products.filter(p =>
-    p.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedAndFiltered = React.useMemo(() => {
+    let result = products.filter(p =>
+      p.name.toLowerCase().includes(search.toLowerCase())
+    );
+    if (sortConfig.key) {
+      result.sort((a, b) => {
+        let valA, valB;
+        if (sortConfig.key === 'variants') {
+          valA = a.variants?.length || 0;
+          valB = b.variants?.length || 0;
+        } else if (sortConfig.key === 'price') {
+          valA = a.startingPrice ?? (a.variants?.[0]?.price ?? 0);
+          valB = b.startingPrice ?? (b.variants?.[0]?.price ?? 0);
+        } else if (sortConfig.key === 'status') {
+          valA = a.isActive ? 1 : 0;
+          valB = b.isActive ? 1 : 0;
+        } else {
+          valA = (a[sortConfig.key] || '').toString().toLowerCase();
+          valB = (b[sortConfig.key] || '').toString().toLowerCase();
+        }
+
+        if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+    return result;
+  }, [products, search, sortConfig]);
+
+  // Reset to first page on filter or sort change
+  useEffect(() => { setCurrentPage(1); }, [search, category, sortConfig]);
+
+  const totalPages = Math.ceil(sortedAndFiltered.length / itemsPerPage);
+  const currentProducts = sortedAndFiltered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const SortIcon = ({ columnKey }) => {
+    if (sortConfig.key !== columnKey) return null;
+    return sortConfig.direction === 'asc' ? <ChevronUp size={14} style={{ display: 'inline-block', verticalAlign: 'middle', marginLeft: 4 }} /> : <ChevronDown size={14} style={{ display: 'inline-block', verticalAlign: 'middle', marginLeft: 4 }} />;
+  };
 
   return (
     <AdminLayout title="All Products">
@@ -76,7 +123,7 @@ const AdminProducts = () => {
       <div className="admin-card">
         {/* Header */}
         <div className="admin-card-header">
-          <span className="admin-card-title">Products ({filtered.length})</span>
+          <span className="admin-card-title">Products ({sortedAndFiltered.length})</span>
           <Link to="/admin/products/add" className="admin-btn admin-btn-primary">
             <PlusCircle size={16} /> Add Product
           </Link>
@@ -112,26 +159,27 @@ const AdminProducts = () => {
         {/* Table */}
         {loading ? (
           <div className="admin-loader"><div className="admin-spinner" /></div>
-        ) : filtered.length === 0 ? (
+        ) : sortedAndFiltered.length === 0 ? (
           <div className="admin-empty">
             <Package size={40} style={{ opacity: 0.3, margin: '0 auto 0.75rem' }} />
             <p>No products found.</p>
           </div>
         ) : (
-          <div className="admin-table-wrapper">
+          <>
+            <div className="admin-table-wrapper">
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>Product</th>
-                  <th>Category</th>
-                  <th>Variants</th>
-                  <th>Starting Price</th>
-                  <th>Status</th>
+                  <th onClick={() => handleSort('name')} style={{cursor: 'pointer'}}>Product <SortIcon columnKey="name" /></th>
+                  <th onClick={() => handleSort('category')} style={{cursor: 'pointer'}}>Category <SortIcon columnKey="category" /></th>
+                  <th onClick={() => handleSort('variants')} style={{cursor: 'pointer'}}>Variants <SortIcon columnKey="variants" /></th>
+                  <th onClick={() => handleSort('price')} style={{cursor: 'pointer'}}>Starting Price <SortIcon columnKey="price" /></th>
+                  <th onClick={() => handleSort('status')} style={{cursor: 'pointer'}}>Status <SortIcon columnKey="status" /></th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filtered.map(p => (
+                {currentProducts.map(p => (
                   <tr key={p._id}>
                     <td data-label="Product">
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -172,6 +220,33 @@ const AdminProducts = () => {
               </tbody>
             </table>
           </div>
+          <div style={{ padding: '1rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--adm-border)', flexWrap: 'wrap', gap: '1rem' }}>
+            <span style={{ fontSize: '0.85rem', color: 'var(--adm-muted)' }}>
+              Showing {sortedAndFiltered.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, sortedAndFiltered.length)} of {sortedAndFiltered.length} products
+            </span>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                className="admin-btn admin-btn-ghost"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(p => p - 1)}
+                style={{ padding: '0.4rem 0.8rem' }}
+              >
+                Previous
+              </button>
+              <div style={{ display: 'flex', alignItems: 'center', padding: '0 0.5rem', fontSize: '0.85rem', fontWeight: 600 }}>
+                {currentPage} / {Math.max(1, totalPages)}
+              </div>
+              <button
+                className="admin-btn admin-btn-ghost"
+                disabled={currentPage >= totalPages}
+                onClick={() => setCurrentPage(p => p + 1)}
+                style={{ padding: '0.4rem 0.8rem' }}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </>
         )}
       </div>
     </AdminLayout>
