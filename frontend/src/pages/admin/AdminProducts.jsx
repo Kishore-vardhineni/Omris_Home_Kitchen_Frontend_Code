@@ -133,27 +133,27 @@ const AdminProducts = () => {
               <tbody>
                 {filtered.map(p => (
                   <tr key={p._id}>
-                    <td>
+                    <td data-label="Product">
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                         {p.image?.url
                           ? <img src={p.image.url} alt={p.name} className="admin-product-img" />
                           : <div className="admin-product-img" style={{ background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>🥒</div>
                         }
-                        <span style={{ fontWeight: 600 }}>{p.name}</span>
+                        <span style={{ fontWeight: 600, textAlign: 'left' }}>{p.name}</span>
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Category">
                       <span className="admin-badge admin-badge-info">{p.category}</span>
                     </td>
-                    <td>{p.variants?.length ?? 0}</td>
-                    <td>₹{p.startingPrice ?? (p.variants?.[0]?.price ?? '—')}</td>
-                    <td>
+                    <td data-label="Variants">{p.variants?.length ?? 0}</td>
+                    <td data-label="Starting Price">₹{p.startingPrice ?? (p.variants?.[0]?.price ?? '—')}</td>
+                    <td data-label="Status">
                       <span className={`admin-badge ${p.isActive ? 'admin-badge-success' : 'admin-badge-danger'}`}>
                         {p.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <td data-label="Actions">
+                      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                         <Link to={`/admin/products/edit/${p._id}`} className="admin-btn admin-btn-ghost" style={{ padding: '0.35rem 0.6rem' }}>
                           <Pencil size={14} />
                         </Link>
