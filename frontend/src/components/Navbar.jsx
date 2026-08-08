@@ -66,6 +66,11 @@ const Navbar = () => {
             <Link to="/non-veg-pickles" onClick={closeMenu} className="py-2 lg:py-0">Non-Veg Pickles</Link>
             <Link to="/podis" onClick={closeMenu} className="py-2 lg:py-0">Podis</Link>
             <Link to="/contact" onClick={closeMenu} className="py-2 lg:py-0">Contact Us</Link>
+            {user && user.role === 'admin' && (
+              <Link to="/admin" onClick={closeMenu} className="py-2 lg:py-0" style={{ color: '#6366f1', fontWeight: 'bold' }}>
+                Admin Panel
+              </Link>
+            )}
           </nav>
 
           {/* Cart + User + Hamburger */}
