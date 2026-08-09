@@ -1,4 +1,5 @@
 import Product from '../models/Product.js';
+import { saveBase64Image } from '../config/multer.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PRODUCT CONTROLLER
@@ -20,15 +21,36 @@ export const addProduct = async (req, res) => {
       isGlutenFree, isOrganicCertified, certificationBadges, nutritionalInfo, seo,
     } = req.body;
 
-    // Parse stringified JSON from FormData
-    if (typeof variants === 'string') variants = JSON.parse(variants);
-    if (typeof tags === 'string') tags = JSON.parse(tags);
-    if (typeof ingredients === 'string') ingredients = JSON.parse(ingredients);
-    if (typeof certificationBadges === 'string') certificationBadges = JSON.parse(certificationBadges);
-    if (typeof nutritionalInfo === 'string') nutritionalInfo = JSON.parse(nutritionalInfo);
-    if (typeof seo === 'string') seo = JSON.parse(seo);
-    if (typeof image === 'string') image = JSON.parse(image);
-    if (typeof gallery === 'string') gallery = JSON.parse(gallery);
+    // Parse stringified JSON from body fields
+    if (typeof variants === 'string') { try { variants = JSON.parse(variants); } catch (e) { variants = []; } }
+    if (typeof tags === 'string') { try { tags = JSON.parse(tags); } catch (e) { tags = []; } }
+    if (typeof ingredients === 'string') { try { ingredients = JSON.parse(ingredients); } catch (e) { ingredients = []; } }
+    if (typeof certificationBadges === 'string') { try { certificationBadges = JSON.parse(certificationBadges); } catch (e) { certificationBadges = []; } }
+    if (typeof nutritionalInfo === 'string') { try { nutritionalInfo = JSON.parse(nutritionalInfo); } catch (e) { nutritionalInfo = undefined; } }
+    if (typeof seo === 'string') { try { seo = JSON.parse(seo); } catch (e) { seo = undefined; } }
+
+    // Normalize image if string or imageUrl field is passed
+    if (typeof image === 'string') {
+      try {
+        if (image.trim().startsWith('{')) image = JSON.parse(image);
+        else image = { url: image.trim(), altText: name || 'Product Image' };
+      } catch (e) {
+        image = { url: image.trim(), altText: name || 'Product Image' };
+      }
+    }
+    if (!image && req.body.imageUrl) {
+      image = { url: req.body.imageUrl.trim(), altText: req.body.imageAlt || name || 'Product Image' };
+    }
+
+    // Normalize gallery if stringified or array of URL strings
+    if (typeof gallery === 'string') {
+      try { gallery = JSON.parse(gallery); } catch (e) { gallery = []; }
+    }
+    if (Array.isArray(gallery)) {
+      gallery = gallery.map(g => (typeof g === 'string' ? { url: g.trim(), altText: name || 'Product Image' } : g)).filter(g => g && g.url);
+    } else {
+      gallery = [];
+    }
 
     // Convert string booleans
     isFeatured = isFeatured === 'true' || isFeatured === true;
@@ -40,13 +62,69 @@ export const addProduct = async (req, res) => {
     isGlutenFree = isGlutenFree === 'true' || isGlutenFree === true;
     isOrganicCertified = isOrganicCertified === 'true' || isOrganicCertified === true;
 
-    // Process uploaded files
-    if (req.files && req.files.length > 0) {
-      const baseUrl = process.env.VITE_API_URL ? process.env.VITE_API_URL.replace('/api', '') : 'http://localhost:3001';
-      image = { url: `${baseUrl}/uploads/${req.files[0].filename}`, altText: name };
-      if (req.files.length > 1) {
-        const newGallery = req.files.slice(1).map(f => ({ url: `${baseUrl}/uploads/${f.filename}`, altText: name }));
-        gallery = gallery ? [...gallery, ...newGallery] : newGallery;
+    const baseUrl = process.env.BACKEND_URL || 'http://localhost:3001';
+
+    // Process structured primaryImage payload ({ base64, url, altText })
+    if (req.body.primaryImage) {
+      let pImg = req.body.primaryImage;
+      if (typeof pImg === 'string') { try { pImg = JSON.parse(pImg); } catch (e) {} }
+      if (pImg && typeof pImg === 'object') {
+        if (pImg.base64) {
+          try {
+            const filename = saveBase64Image(pImg.base64, 'product');
+            image = { url: `${baseUrl}/uploads/${filename}`, altText: pImg.altText || name || 'Product Image' };
+          } catch (err) {
+            console.error('Primary image save error:', err);
+          }
+        } else if (pImg.url) {
+          image = { url: pImg.url.trim(), altText: pImg.altText || name || 'Product Image' };
+        }
+      }
+    }
+
+    // Process structured galleryItems payload ([{ base64, url, altText }, ...])
+    if (req.body.galleryItems) {
+      let gItems = req.body.galleryItems;
+      if (typeof gItems === 'string') { try { gItems = JSON.parse(gItems); } catch (e) { gItems = []; } }
+      if (Array.isArray(gItems)) {
+        const processedGallery = [];
+        for (const item of gItems) {
+          if (!item) continue;
+          if (item.base64) {
+            try {
+              const filename = saveBase64Image(item.base64, 'gallery');
+              processedGallery.push({ url: `${baseUrl}/uploads/${filename}`, altText: item.altText || name || 'Gallery Image' });
+            } catch (err) {
+              console.error('Gallery item save error:', err);
+            }
+          } else if (item.url) {
+            processedGallery.push({ url: item.url.trim(), altText: item.altText || name || 'Gallery Image' });
+          }
+        }
+        gallery = processedGallery;
+      }
+    }
+
+    // Fallback: Process legacy uploaded base64 images array
+    let base64List = req.body.base64Images;
+    if (typeof base64List === 'string') {
+      try { base64List = JSON.parse(base64List); } catch (e) { base64List = [base64List]; }
+    }
+
+    if (!image?.url && Array.isArray(base64List) && base64List.length > 0) {
+      try {
+        const filename0 = saveBase64Image(base64List[0], 'product');
+        image = { url: `${baseUrl}/uploads/${filename0}`, altText: name || 'Product Image' };
+        if (base64List.length > 1) {
+          const newGallery = base64List.slice(1).map(b64 => {
+            const fn = saveBase64Image(b64, 'product');
+            return { url: `${baseUrl}/uploads/${fn}`, altText: name || 'Product Image' };
+          });
+          gallery = [...gallery, ...newGallery];
+        }
+      } catch (imgErr) {
+        console.error('Image save error in addProduct:', imgErr);
+        return res.status(400).json({ success: false, message: `Image upload failed: ${imgErr.message}` });
       }
     }
 
@@ -306,15 +384,34 @@ export const updateProduct = async (req, res) => {
     const { id } = req.params;
     let updateData = { ...req.body };
 
-    // Parse stringified JSON from FormData
-    if (typeof updateData.variants === 'string') updateData.variants = JSON.parse(updateData.variants);
-    if (typeof updateData.tags === 'string') updateData.tags = JSON.parse(updateData.tags);
-    if (typeof updateData.ingredients === 'string') updateData.ingredients = JSON.parse(updateData.ingredients);
-    if (typeof updateData.certificationBadges === 'string') updateData.certificationBadges = JSON.parse(updateData.certificationBadges);
-    if (typeof updateData.nutritionalInfo === 'string') updateData.nutritionalInfo = JSON.parse(updateData.nutritionalInfo);
-    if (typeof updateData.seo === 'string') updateData.seo = JSON.parse(updateData.seo);
-    if (typeof updateData.image === 'string') updateData.image = JSON.parse(updateData.image);
-    if (typeof updateData.gallery === 'string') updateData.gallery = JSON.parse(updateData.gallery);
+    // Parse stringified JSON from updateData fields
+    if (typeof updateData.variants === 'string') { try { updateData.variants = JSON.parse(updateData.variants); } catch (e) {} }
+    if (typeof updateData.tags === 'string') { try { updateData.tags = JSON.parse(updateData.tags); } catch (e) {} }
+    if (typeof updateData.ingredients === 'string') { try { updateData.ingredients = JSON.parse(updateData.ingredients); } catch (e) {} }
+    if (typeof updateData.certificationBadges === 'string') { try { updateData.certificationBadges = JSON.parse(updateData.certificationBadges); } catch (e) {} }
+    if (typeof updateData.nutritionalInfo === 'string') { try { updateData.nutritionalInfo = JSON.parse(updateData.nutritionalInfo); } catch (e) {} }
+    if (typeof updateData.seo === 'string') { try { updateData.seo = JSON.parse(updateData.seo); } catch (e) {} }
+
+    // Normalize image if string or imageUrl field is passed
+    if (typeof updateData.image === 'string') {
+      try {
+        if (updateData.image.trim().startsWith('{')) updateData.image = JSON.parse(updateData.image);
+        else updateData.image = { url: updateData.image.trim(), altText: updateData.name || 'Product Image' };
+      } catch (e) {
+        updateData.image = { url: updateData.image.trim(), altText: updateData.name || 'Product Image' };
+      }
+    }
+    if (!updateData.image && updateData.imageUrl) {
+      updateData.image = { url: updateData.imageUrl.trim(), altText: updateData.imageAlt || updateData.name || 'Product Image' };
+    }
+
+    // Normalize gallery if stringified or array of URL strings
+    if (typeof updateData.gallery === 'string') {
+      try { updateData.gallery = JSON.parse(updateData.gallery); } catch (e) { updateData.gallery = []; }
+    }
+    if (Array.isArray(updateData.gallery)) {
+      updateData.gallery = updateData.gallery.map(g => (typeof g === 'string' ? { url: g.trim(), altText: updateData.name || 'Product Image' } : g)).filter(g => g && g.url);
+    }
 
     // Convert string booleans
     ['isFeatured', 'isBestseller', 'isNewArrival', 'isActive', 'isVegetarian', 'isVegan', 'isGlutenFree', 'isOrganicCertified'].forEach(key => {
@@ -322,13 +419,71 @@ export const updateProduct = async (req, res) => {
       if (updateData[key] === 'false') updateData[key] = false;
     });
 
-    // Process uploaded files
-    if (req.files && req.files.length > 0) {
-      const baseUrl = process.env.VITE_API_URL ? process.env.VITE_API_URL.replace('/api', '') : 'http://localhost:3001';
-      updateData.image = { url: `${baseUrl}/uploads/${req.files[0].filename}`, altText: updateData.name || 'Product Image' };
-      if (req.files.length > 1) {
-        const newGallery = req.files.slice(1).map(f => ({ url: `${baseUrl}/uploads/${f.filename}`, altText: updateData.name || 'Product Image' }));
-        updateData.gallery = updateData.gallery ? [...updateData.gallery, ...newGallery] : newGallery;
+    const baseUrl = process.env.BACKEND_URL || 'http://localhost:3001';
+
+    // Process structured primaryImage payload ({ base64, url, altText })
+    if (req.body.primaryImage) {
+      let pImg = req.body.primaryImage;
+      if (typeof pImg === 'string') { try { pImg = JSON.parse(pImg); } catch (e) {} }
+      if (pImg && typeof pImg === 'object') {
+        if (pImg.base64) {
+          try {
+            const filename = saveBase64Image(pImg.base64, 'product');
+            updateData.image = { url: `${baseUrl}/uploads/${filename}`, altText: pImg.altText || updateData.name || 'Product Image' };
+          } catch (err) {
+            console.error('Primary image save error in update:', err);
+          }
+        } else if (pImg.url) {
+          updateData.image = { url: pImg.url.trim(), altText: pImg.altText || updateData.name || 'Product Image' };
+        }
+      }
+    }
+
+    // Process structured galleryItems payload ([{ base64, url, altText }, ...])
+    if (req.body.galleryItems) {
+      let gItems = req.body.galleryItems;
+      if (typeof gItems === 'string') { try { gItems = JSON.parse(gItems); } catch (e) { gItems = []; } }
+      if (Array.isArray(gItems)) {
+        const processedGallery = [];
+        for (const item of gItems) {
+          if (!item) continue;
+          if (item.base64) {
+            try {
+              const filename = saveBase64Image(item.base64, 'gallery');
+              processedGallery.push({ url: `${baseUrl}/uploads/${filename}`, altText: item.altText || updateData.name || 'Gallery Image' });
+            } catch (err) {
+              console.error('Gallery item save error in update:', err);
+            }
+          } else if (item.url) {
+            processedGallery.push({ url: item.url.trim(), altText: item.altText || updateData.name || 'Gallery Image' });
+          }
+        }
+        updateData.gallery = processedGallery;
+      }
+    }
+
+    // Fallback: Process legacy uploaded base64 images
+    let base64ListUpdate = req.body.base64Images;
+    if (typeof base64ListUpdate === 'string') {
+      try { base64ListUpdate = JSON.parse(base64ListUpdate); } catch (e) { base64ListUpdate = [base64ListUpdate]; }
+    }
+
+    if (!updateData.image?.url && Array.isArray(base64ListUpdate) && base64ListUpdate.length > 0) {
+      try {
+        const filename0 = saveBase64Image(base64ListUpdate[0], 'product');
+        updateData.image = { url: `${baseUrl}/uploads/${filename0}`, altText: updateData.name || 'Product Image' };
+        if (base64ListUpdate.length > 1) {
+          const newGallery = base64ListUpdate.slice(1).map(b64 => {
+            const fn = saveBase64Image(b64, 'product');
+            return { url: `${baseUrl}/uploads/${fn}`, altText: updateData.name || 'Product Image' };
+          });
+          updateData.gallery = updateData.gallery && Array.isArray(updateData.gallery)
+            ? [...updateData.gallery, ...newGallery]
+            : newGallery;
+        }
+      } catch (imgErr) {
+        console.error('Image save error in updateProduct:', imgErr);
+        return res.status(400).json({ success: false, message: `Image upload failed: ${imgErr.message}` });
       }
     }
 

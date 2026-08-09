@@ -11,6 +11,13 @@ const emptyVariant = () => ({
   label: '', weightInGrams: '', sku: '', price: '', discountedPrice: '', stock: 0,
 });
 
+const emptyGalleryItem = () => ({
+  file: null,
+  url: '',
+  altText: '',
+  preview: '',
+});
+
 const AdminAddProduct = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
@@ -24,7 +31,6 @@ const AdminAddProduct = () => {
     ingredients: '',
     shelfLife: '',
     storageInstructions: '',
-    storageInstructions: '',
     isFeatured: false,
     isBestseller: false,
     isNewArrival: false,
@@ -33,7 +39,14 @@ const AdminAddProduct = () => {
     certificationBadges: '',
   });
 
-  const [images, setImages] = useState(null);
+  const [primaryImage, setPrimaryImage] = useState({
+    file: null,
+    url: '',
+    altText: '',
+    preview: '',
+  });
+
+  const [galleryItems, setGalleryItems] = useState([]);
   const [variants, setVariants] = useState([emptyVariant()]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError]     = useState('');
@@ -51,56 +64,99 @@ const AdminAddProduct = () => {
   const addVariant = () => setVariants(prev => [...prev, emptyVariant()]);
   const removeVariant = (index) => setVariants(prev => prev.filter((_, i) => i !== index));
 
+  const addGalleryItem = () => setGalleryItems(prev => [...prev, emptyGalleryItem()]);
+  const removeGalleryItem = (index) => setGalleryItems(prev => prev.filter((_, i) => i !== index));
+  const handleGalleryItemChange = (index, field, value) => {
+    setGalleryItems(prev => prev.map((item, i) => i === index ? { ...item, [field]: value } : item));
+  };
+
+  const compressImage = (file, maxPx = 900, quality = 0.75) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          let { width, height } = img;
+          if (width > maxPx || height > maxPx) {
+            if (width > height) { height = Math.round((height * maxPx) / width); width = maxPx; }
+            else { width = Math.round((width * maxPx) / height); height = maxPx; }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width; canvas.height = height;
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = reject;
+        img.src = ev.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
     setSubmitting(true);
 
-    const formData = new FormData();
-    formData.append('name', form.name.trim());
-    formData.append('category', form.category);
-    if (form.subCategory) formData.append('subCategory', form.subCategory);
-    if (form.shortDescription) formData.append('shortDescription', form.shortDescription);
-    if (form.longDescription) formData.append('longDescription', form.longDescription);
-    if (form.shelfLife) formData.append('shelfLife', form.shelfLife);
-    if (form.storageInstructions) formData.append('storageInstructions', form.storageInstructions);
-
-    formData.append('isFeatured', form.isFeatured);
-    formData.append('isBestseller', form.isBestseller);
-    formData.append('isNewArrival', form.isNewArrival);
-    formData.append('isActive', form.isActive);
-    formData.append('isVegetarian', form.isVegetarian);
-
-    const ingredientsArr = form.ingredients ? form.ingredients.split(',').map(s => s.trim()).filter(Boolean) : [];
-    formData.append('ingredients', JSON.stringify(ingredientsArr));
-
-    const badgesArr = form.certificationBadges ? form.certificationBadges.split(',').map(s => s.trim()).filter(Boolean) : [];
-    formData.append('certificationBadges', JSON.stringify(badgesArr));
-
-    const variantsArr = variants.map(v => ({
-      label: v.label.trim(),
-      weightInGrams: Number(v.weightInGrams),
-      sku: v.sku.trim().toUpperCase(),
-      price: Number(v.price),
-      discountedPrice: v.discountedPrice ? Number(v.discountedPrice) : undefined,
-      stock: Number(v.stock) || 0,
-    }));
-    formData.append('variants', JSON.stringify(variantsArr));
-
-    if (images && images.length > 0) {
-      for (let i = 0; i < images.length; i++) {
-        formData.append('images', images[i]);
-      }
-    }
-
     try {
+      // 1. Process Primary Image
+      let primaryPayload = null;
+      if (primaryImage.file) {
+        const base64 = await compressImage(primaryImage.file);
+        primaryPayload = { base64, altText: primaryImage.altText || form.name };
+      } else if (primaryImage.url.trim()) {
+        primaryPayload = { url: primaryImage.url.trim(), altText: primaryImage.altText || form.name };
+      }
+
+      if (!primaryPayload) {
+        setError('Please upload a file or enter an Image URL for the primary product image.');
+        setSubmitting(false);
+        return;
+      }
+
+      // 2. Process Gallery Items
+      const processedGalleryItems = [];
+      for (const item of galleryItems) {
+        if (item.file) {
+          const base64 = await compressImage(item.file);
+          processedGalleryItems.push({ base64, altText: item.altText || form.name });
+        } else if (item.url && item.url.trim()) {
+          processedGalleryItems.push({ url: item.url.trim(), altText: item.altText || form.name });
+        }
+      }
+
+      const payload = {
+        name: form.name.trim(),
+        category: form.category,
+        subCategory: form.subCategory || undefined,
+        shortDescription: form.shortDescription || undefined,
+        longDescription: form.longDescription || undefined,
+        ingredients: form.ingredients ? form.ingredients.split(',').map(s => s.trim()).filter(Boolean) : [],
+        shelfLife: form.shelfLife || undefined,
+        storageInstructions: form.storageInstructions || undefined,
+        isFeatured: form.isFeatured,
+        isBestseller: form.isBestseller,
+        isNewArrival: form.isNewArrival,
+        isActive: form.isActive,
+        isVegetarian: form.isVegetarian,
+        certificationBadges: form.certificationBadges ? form.certificationBadges.split(',').map(s => s.trim()).filter(Boolean) : [],
+        variants: variants.map(v => ({
+          label: v.label.trim(),
+          weightInGrams: Number(v.weightInGrams),
+          sku: v.sku.trim().toUpperCase(),
+          price: Number(v.price),
+          discountedPrice: v.discountedPrice ? Number(v.discountedPrice) : undefined,
+          stock: Number(v.stock) || 0,
+        })),
+        primaryImage: primaryPayload,
+        galleryItems: processedGalleryItems,
+      };
+
       const res = await fetch(`${API}/products`, {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (data.success) {
@@ -175,28 +231,122 @@ const AdminAddProduct = () => {
           </div>
         </div>
 
-        {/* Images */}
+        {/* 1. Primary Product Image */}
         <div className="admin-card" style={{ marginBottom: '1.25rem' }}>
-          <div className="admin-card-header"><span className="admin-card-title">Product Images</span></div>
+          <div className="admin-card-header"><span className="admin-card-title">1. Primary Product Image <span>*</span></span></div>
           <div style={{ padding: '1.25rem' }}>
-            <div className="admin-form-group">
-              <label className="admin-form-label">Upload Images (First image is primary) <span>*</span></label>
-              <input 
-                className="admin-form-input" 
-                type="file" 
-                multiple 
-                accept="image/*" 
-                onChange={(e) => setImages(e.target.files)} 
-                required 
-              />
+            <div className="admin-form-grid">
+              <div className="admin-form-group">
+                <label className="admin-form-label">Upload Image File OR Paste Image URL <span>*</span></label>
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  className="admin-form-input" 
+                  style={{ marginBottom: '0.5rem' }}
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      setPrimaryImage(prev => ({ ...prev, file, preview: URL.createObjectURL(file) }));
+                    }
+                  }}
+                />
+                <input 
+                  className="admin-form-input" 
+                  placeholder="Or paste primary image URL (https://...)" 
+                  value={primaryImage.url} 
+                  onChange={(e) => setPrimaryImage(prev => ({ ...prev, url: e.target.value }))} 
+                />
+              </div>
+              <div className="admin-form-group">
+                <label className="admin-form-label">Alt Text</label>
+                <input 
+                  className="admin-form-input" 
+                  placeholder="Alt text for primary image" 
+                  value={primaryImage.altText} 
+                  onChange={(e) => setPrimaryImage(prev => ({ ...prev, altText: e.target.value }))} 
+                />
+              </div>
             </div>
-            {images && images.length > 0 && (
-              <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                {Array.from(images).map((file, i) => (
-                  <img key={i} src={URL.createObjectURL(file)} alt={`preview-${i}`} style={{ height: '100px', borderRadius: '8px', border: '1px solid var(--admin-border)', objectFit: 'cover' }} />
-                ))}
+            {(primaryImage.preview || primaryImage.url) && (
+              <div style={{ marginTop: '0.75rem' }}>
+                <p style={{ fontSize: '0.8rem', color: 'var(--adm-muted)', marginBottom: '0.25rem' }}>Preview:</p>
+                <img 
+                  src={primaryImage.preview || primaryImage.url} 
+                  alt="Primary Preview" 
+                  style={{ height: '100px', width: '100px', borderRadius: '8px', border: '2px solid #3b5bdb', objectFit: 'cover' }} 
+                  onError={(e) => { e.target.style.display='none'; }} 
+                />
               </div>
             )}
+          </div>
+        </div>
+
+        {/* 2. Gallery Images (+ Add Gallery Image) */}
+        <div className="admin-card" style={{ marginBottom: '1.25rem' }}>
+          <div className="admin-card-header">
+            <span className="admin-card-title">2. Gallery Images</span>
+            <button type="button" className="admin-btn admin-btn-ghost" onClick={addGalleryItem}>
+              <PlusCircle size={15} /> Add Gallery Image
+            </button>
+          </div>
+          <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {galleryItems.length === 0 && (
+              <p style={{ fontSize: '0.85rem', color: 'var(--adm-muted)', margin: 0 }}>
+                No additional gallery images added yet. Click "+ Add Gallery Image" above to add extra photos.
+              </p>
+            )}
+            {galleryItems.map((item, i) => (
+              <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '0.75rem', alignItems: 'flex-start', padding: '0.85rem', background: 'var(--admin-bg-light, #f8f9fa)', borderRadius: '8px', border: '1px solid var(--admin-border)' }}>
+                <div className="admin-form-group">
+                  <label className="admin-form-label">Upload File OR Paste Image URL</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="admin-form-input"
+                    style={{ marginBottom: '0.4rem' }}
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        handleGalleryItemChange(i, 'file', file);
+                        handleGalleryItemChange(i, 'preview', URL.createObjectURL(file));
+                      }
+                    }}
+                  />
+                  <input
+                    className="admin-form-input"
+                    placeholder="Or paste gallery image URL (https://...)"
+                    value={item.url}
+                    onChange={(e) => handleGalleryItemChange(i, 'url', e.target.value)}
+                  />
+                </div>
+                <div className="admin-form-group">
+                  <label className="admin-form-label">Alt Text</label>
+                  <input
+                    className="admin-form-input"
+                    placeholder="Alt text for gallery image"
+                    value={item.altText}
+                    onChange={(e) => handleGalleryItemChange(i, 'altText', e.target.value)}
+                  />
+                  {(item.preview || item.url) && (
+                    <img
+                      src={item.preview || item.url}
+                      alt={`Gallery preview ${i+1}`}
+                      style={{ marginTop: '0.5rem', height: '60px', width: '60px', borderRadius: '6px', border: '1px solid var(--admin-border)', objectFit: 'cover' }}
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                  )}
+                </div>
+                <button
+                  type="button"
+                  className="admin-btn admin-btn-danger"
+                  style={{ padding: '0.4rem 0.6rem', alignSelf: 'center', marginTop: '1.25rem' }}
+                  onClick={() => removeGalleryItem(i)}
+                  title="Remove image"
+                >
+                  <Trash2 size={15} />
+                </button>
+              </div>
+            ))}
           </div>
         </div>
 

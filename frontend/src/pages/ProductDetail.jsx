@@ -103,12 +103,21 @@ const ProductDetail = () => {
     reviewsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  // Gallery image setup (Moved before early returns to obey Hook rules)
+  // Gallery image setup (Combines primary image + gallery images)
   const productImages = useMemo(() => {
     if (!product) return [];
-    return product.gallery && product.gallery.length > 0
-      ? product.gallery.map((g) => ({ src: g.url, alt: g.altText || product.name }))
-      : [{ src: product.image?.url, alt: product.image?.altText || product.name }];
+    const list = [];
+    if (product.image?.url) {
+      list.push({ src: product.image.url, alt: product.image.altText || product.name });
+    }
+    if (Array.isArray(product.gallery)) {
+      product.gallery.forEach((g) => {
+        if (g?.url && g.url !== product.image?.url) {
+          list.push({ src: g.url, alt: g.altText || product.name });
+        }
+      });
+    }
+    return list.length > 0 ? list : [{ src: 'https://via.placeholder.com/600', alt: product.name }];
   }, [product]);
 
   // ── Fetch single product ───────────────────────────────────────────────────
