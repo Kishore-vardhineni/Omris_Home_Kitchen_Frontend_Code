@@ -10,6 +10,8 @@ import {
   Menu,
   X,
   TrendingUp,
+  Users,
+  FileText,
 } from 'lucide-react';
 import './Admin.css';
 
@@ -20,6 +22,18 @@ const NAV_GROUPS = [
       { label: 'Dashboard',         icon: LayoutDashboard, to: '/admin', end: true },
       { label: 'Revenue Analytics', icon: TrendingUp,      to: '/admin/revenue' },
       { label: 'Order History',     icon: ShoppingBag,     to: '/admin/orders' },
+    ]
+  },
+  {
+    section: 'Reports',
+    items: [
+      { label: 'Order Reports', icon: FileText, to: '/admin/reports' },
+    ]
+  },
+  {
+    section: 'Users',
+    items: [
+      { label: 'All Users', icon: Users, to: '/admin/users' },
     ]
   },
   {
