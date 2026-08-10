@@ -17,6 +17,7 @@ const NAV_GROUPS = [
     section: 'Overview',
     items: [
       { label: 'Dashboard',    icon: LayoutDashboard, to: '/admin', end: true },
+      { label: 'Order History', icon: ShoppingBag,    to: '/admin/orders' },
     ]
   },
   {

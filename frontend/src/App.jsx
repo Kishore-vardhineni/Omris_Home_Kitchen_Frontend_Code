@@ -30,6 +30,7 @@ const AdminDashboard   = React.lazy(() => import('./pages/admin/AdminDashboard')
 const AdminProducts    = React.lazy(() => import('./pages/admin/AdminProducts'));
 const AdminAddProduct  = React.lazy(() => import('./pages/admin/AdminAddProduct'));
 const AdminEditProduct = React.lazy(() => import('./pages/admin/AdminEditProduct'));
+const AdminOrders      = React.lazy(() => import('./pages/admin/AdminOrders'));
 
 // ── Public Layout (wraps all non-admin routes with Navbar + Footer) ───────────
 const PublicLayout = () => (
@@ -49,6 +50,7 @@ function App() {
 
           {/* ══════════════ ADMIN ROUTES — no Navbar/Footer ══════════════ */}
           <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+          <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
           <Route path="/admin/products" element={<AdminRoute><AdminProducts /></AdminRoute>} />
           <Route path="/admin/products/add" element={<AdminRoute><AdminAddProduct /></AdminRoute>} />
           <Route path="/admin/products/edit/:id" element={<AdminRoute><AdminEditProduct /></AdminRoute>} />

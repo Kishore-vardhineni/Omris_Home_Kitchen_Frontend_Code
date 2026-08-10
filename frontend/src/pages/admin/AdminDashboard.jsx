@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Package, Tag, PlusCircle, TrendingUp } from 'lucide-react';
+import { Package, Tag, PlusCircle, TrendingUp, ShoppingBag } from 'lucide-react';
 import AdminLayout from './AdminLayout';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
@@ -126,10 +126,13 @@ const AdminDashboard = () => {
           <span className="admin-card-title">Quick Actions</span>
         </div>
         <div style={{ padding: '1rem 1.25rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <Link to="/admin/orders" className="admin-btn admin-btn-primary">
+            <ShoppingBag size={16} /> View Order History
+          </Link>
           <Link to="/admin/products" className="admin-btn admin-btn-ghost">
             <Package size={16} /> Manage Products
           </Link>
-          <Link to="/admin/products/add" className="admin-btn admin-btn-primary">
+          <Link to="/admin/products/add" className="admin-btn admin-btn-ghost">
             <PlusCircle size={16} /> Add New Product
           </Link>
         </div>
