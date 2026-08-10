@@ -48,7 +48,7 @@ app.use("/api/admin", adminRoutes);
 
 app.get("/", (req, res) => {
   res.json({
-    message: "Node.js API'ssssssssss is running successfully",
+    message: "Node.js API is running successfully",
   });
 });
 
