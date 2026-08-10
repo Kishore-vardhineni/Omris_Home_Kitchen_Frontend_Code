@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Phone, Mail, Facebook, Instagram, PhoneCall, Menu, X, User, Shield } from 'lucide-react';
+import { ShoppingCart, Phone, Mail, Facebook, Instagram, PhoneCall, Menu, X, User, Shield, History } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import './Navbar.css';
 import logo from '../assets/images/Omris_Home_Kitchen_logo1.png';
@@ -111,6 +111,14 @@ const Navbar = () => {
                           Admin Panel
                         </Link>
                       )}
+                      <Link
+                        to="/order-history"
+                        className="user-dropdown-item"
+                        onClick={() => { closeMenu(); setUserDropdown(false); }}
+                      >
+                        <History size={13} style={{ display: 'inline', marginRight: '6px' }} />
+                        My Orders
+                      </Link>
                       <button className="user-dropdown-item text-left w-full" onClick={handleLogout}>
                         Logout
                       </button>
