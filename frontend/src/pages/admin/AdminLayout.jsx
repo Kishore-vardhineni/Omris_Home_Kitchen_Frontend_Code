@@ -9,6 +9,7 @@ import {
   ChevronRight,
   Menu,
   X,
+  TrendingUp,
 } from 'lucide-react';
 import './Admin.css';
 
@@ -16,8 +17,9 @@ const NAV_GROUPS = [
   {
     section: 'Overview',
     items: [
-      { label: 'Dashboard',    icon: LayoutDashboard, to: '/admin', end: true },
-      { label: 'Order History', icon: ShoppingBag,    to: '/admin/orders' },
+      { label: 'Dashboard',         icon: LayoutDashboard, to: '/admin', end: true },
+      { label: 'Revenue Analytics', icon: TrendingUp,      to: '/admin/revenue' },
+      { label: 'Order History',     icon: ShoppingBag,     to: '/admin/orders' },
     ]
   },
   {
