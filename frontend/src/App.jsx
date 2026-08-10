@@ -21,6 +21,8 @@ const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy'));
 const FAQ           = React.lazy(() => import('./pages/FAQ'));
 const Signup        = React.lazy(() => import('./pages/Signup'));
 const Login         = React.lazy(() => import('./pages/Login'));
+const ForgotPassword = React.lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = React.lazy(() => import('./pages/ResetPassword'));
 
 // ── Admin Pages ────────────────────────────────────────────────────────────────
 const AdminDashboard   = React.lazy(() => import('./pages/admin/AdminDashboard'));
@@ -62,6 +64,8 @@ function App() {
             <Route path="/checkout"        element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
             <Route path="/signup"          element={<Signup />} />
             <Route path="/login"           element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
             <Route path="/about"           element={<About />} />
             <Route path="/contact"         element={<Contact />} />
             <Route path="/privacy"         element={<PrivacyPolicy />} />
