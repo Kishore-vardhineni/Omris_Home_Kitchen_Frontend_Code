@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Phone, Mail, Facebook, Instagram, PhoneCall, Menu, X, User } from 'lucide-react';
+import { ShoppingCart, Phone, Mail, Facebook, Instagram, PhoneCall, Menu, X, User, Shield, History } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import './Navbar.css';
 import logo from '../assets/images/Omris_Home_Kitchen_logo1.png';
@@ -64,7 +64,13 @@ const Navbar = () => {
             <Link to="/about" onClick={closeMenu} className="py-2 lg:py-0">About Us</Link>
             <Link to="/veg-pickles" onClick={closeMenu} className="py-2 lg:py-0">Veg Pickles</Link>
             <Link to="/non-veg-pickles" onClick={closeMenu} className="py-2 lg:py-0">Non-Veg Pickles</Link>
+            <Link to="/podis" onClick={closeMenu} className="py-2 lg:py-0">Podis</Link>
             <Link to="/contact" onClick={closeMenu} className="py-2 lg:py-0">Contact Us</Link>
+            {user && user.role === 'admin' && (
+              <Link to="/admin" onClick={closeMenu} className="py-2 lg:py-0" style={{ color: '#6366f1', fontWeight: 'bold' }}>
+                Admin Panel
+              </Link>
+            )}
           </nav>
 
           {/* Cart + User + Hamburger */}
@@ -94,6 +100,25 @@ const Navbar = () => {
                       <div className="px-4 py-2 text-sm font-bold border-b border-gray-100 lg:hidden">
                         {user.name}
                       </div>
+                      {user.role === 'admin' && (
+                        <Link
+                          to="/admin"
+                          className="user-dropdown-item"
+                          style={{ color: '#6366f1', fontWeight: 700 }}
+                          onClick={() => { closeMenu(); setUserDropdown(false); }}
+                        >
+                          <Shield size={13} style={{ display: 'inline', marginRight: '6px' }} />
+                          Admin Panel
+                        </Link>
+                      )}
+                      <Link
+                        to="/order-history"
+                        className="user-dropdown-item"
+                        onClick={() => { closeMenu(); setUserDropdown(false); }}
+                      >
+                        <History size={13} style={{ display: 'inline', marginRight: '6px' }} />
+                        My Orders
+                      </Link>
                       <button className="user-dropdown-item text-left w-full" onClick={handleLogout}>
                         Logout
                       </button>

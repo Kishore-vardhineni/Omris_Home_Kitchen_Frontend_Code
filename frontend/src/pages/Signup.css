@@ -289,12 +289,12 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-top: 0.25rem;
+  margin-top: 0.5rem;
 }
 
 .meter-track {
   flex: 1;
-  height: 5px;
+  height: 6px;
   background: #e5e7eb;
   border-radius: 10px;
   overflow: hidden;
@@ -302,12 +302,50 @@
 
 .meter-bar {
   height: 100%;
-  transition: width 0.3s ease, background-color 0.3s ease;
+  transition: width 0.35s ease, background-color 0.35s ease;
 }
 
 .meter-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.password-rules-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem 0.65rem;
+  margin-top: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  background: #fdfbf7;
+  border-radius: 10px;
+  border: 1px solid #e2d9c5;
+}
+
+.rule-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   font-size: 0.775rem;
   font-weight: 600;
+  transition: color 0.25s ease;
+}
+
+.rule-item.valid {
+  color: #10b981;
+}
+
+.rule-item.invalid {
+  color: #888888;
+}
+
+.rule-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #aaaaaa;
+  margin: 0 3px;
+  display: inline-block;
 }
 
 .error-message {

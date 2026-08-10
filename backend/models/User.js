@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import * as bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 // Address Sub-Schema for Multiple Delivery Addresses
 const addressSchema = new mongoose.Schema(
@@ -129,6 +130,23 @@ userSchema.methods.setDefaultAddress = function (addressId) {
   this.addresses.forEach((addr) => {
     addr.isDefault = addr._id.toString() === addressId.toString();
   });
+};
+
+// Instance Method: Generate and hash password token
+userSchema.methods.getResetPasswordToken = function () {
+  // Generate token
+  const resetToken = crypto.randomBytes(20).toString('hex');
+
+  // Hash token and set to resetPasswordToken field
+  this.resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  // Set expire time (10 minutes)
+  this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+
+  return resetToken;
 };
 
 const User = mongoose.model('User', userSchema);
