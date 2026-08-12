@@ -1,13 +1,14 @@
 import Order from '../models/Order.js';
+import sendOrderNotificationEmail from '../utils/sendOrderEmail.js';
 
 /**
  * @desc    Place a new order
  * @route   POST /api/orders
- * @access  Private (logged-in user)
+ * @access  Public/Optional (supports logged-in users and guests)
  */
 export const placeOrder = async (req, res) => {
   try {
-    const { orderItems, totalPrice, paymentMethod } = req.body;
+    const { orderItems, totalPrice, paymentMethod, status, guestInfo } = req.body;
 
     if (!orderItems || orderItems.length === 0) {
       return res.status(400).json({
@@ -16,13 +17,31 @@ export const placeOrder = async (req, res) => {
       });
     }
 
-    const order = await Order.create({
-      user: req.user._id,
+    const orderData = {
       orderItems,
       totalPrice,
       paymentMethod: paymentMethod || 'WhatsApp',
-      status: req.body.status || 'Confirmed',
-    });
+      status: status || 'Awaiting Confirmation',
+    };
+
+    if (req.user) {
+      orderData.user = req.user._id;
+    } else if (guestInfo) {
+      orderData.guestInfo = guestInfo;
+    }
+
+    const order = await Order.create(orderData);
+
+    // Determine target recipient email & name for notification email
+    const recipientEmail = req.user?.email || guestInfo?.email || req.body.customerEmail;
+    const recipientName = req.user?.name || guestInfo?.name || req.body.customerName || 'Customer';
+
+    if (recipientEmail) {
+      // Fire email asynchronously
+      sendOrderNotificationEmail(order, recipientEmail, recipientName).catch((err) =>
+        console.error('Failed sending order creation email:', err)
+      );
+    }
 
     return res.status(201).json({
       success: true,
@@ -75,7 +94,7 @@ export const getAllOrders = async (req, res) => {
       .sort({ createdAt: -1 });
 
     const totalRevenue = orders
-      .filter(o => o.status !== 'Cancelled')
+      .filter((o) => o.status !== 'Cancelled')
       .reduce((acc, o) => acc + o.totalPrice, 0);
 
     return res.status(200).json({
@@ -101,22 +120,34 @@ export const getAllOrders = async (req, res) => {
  */
 export const updateOrderStatus = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
+    const { status } = req.body;
+    const order = await Order.findById(req.params.id).populate('user', 'name email phone');
 
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
 
-    order.status = req.body.status || order.status;
-    if (req.body.status === 'Delivered') {
+    const oldStatus = order.status;
+    order.status = status || order.status;
+    if (status === 'Delivered') {
       order.deliveredAt = Date.now();
     }
 
     const updatedOrder = await order.save();
 
+    // Send email notification to customer on status update
+    const recipientEmail = updatedOrder.user?.email || updatedOrder.guestInfo?.email;
+    const recipientName = updatedOrder.user?.name || updatedOrder.guestInfo?.name || 'Valued Customer';
+
+    if (recipientEmail && oldStatus !== updatedOrder.status) {
+      sendOrderNotificationEmail(updatedOrder, recipientEmail, recipientName).catch((err) =>
+        console.error('Failed sending status update email:', err)
+      );
+    }
+
     return res.status(200).json({
       success: true,
-      message: 'Order status updated',
+      message: `Order status updated to ${updatedOrder.status}`,
       order: updatedOrder,
     });
   } catch (error) {

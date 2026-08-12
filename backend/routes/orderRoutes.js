@@ -5,14 +5,14 @@ import {
   getAllOrders,
   updateOrderStatus,
 } from '../controllers/orderController.js';
-import { protect, adminOnly } from '../middleware/authMiddleware.js';
+import { protect, optionalProtect, adminOnly } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 // @route   POST /api/orders
-// @desc    Place a new order
-// @access  Private
-router.post('/', protect, placeOrder);
+// @desc    Place a new order (supports both logged-in users and guests)
+// @access  Public/Optional
+router.post('/', optionalProtect, placeOrder);
 
 // @route   GET /api/orders/myorders
 // @desc    Get logged-in user's orders

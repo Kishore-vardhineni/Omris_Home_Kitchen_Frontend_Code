@@ -222,38 +222,45 @@ const Cart = () => {
   const handleConfirmOrder = async () => {
     setIsSaving(true);
 
-    // Save to DB if logged in
     const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-        const orderItems = state.items.map(item => ({
-          name: item.name,
-          image: item.image || '',
-          price: item.price,
-          quantity: item.quantity,
-          weight: item.weight || '',
-          packing: item.packing || '',
-          productId: item.productId || item._id || undefined,
-        }));
+    const userInfoStr = localStorage.getItem('userInfo');
+    const userInfo = userInfoStr ? JSON.parse(userInfoStr) : null;
 
-        await fetch(`${API_BASE_URL}/orders`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            orderItems,
-            totalPrice: state.total,
-            paymentMethod: 'WhatsApp',
-            status: 'Awaiting Confirmation',
-          }),
-        });
-      } catch (err) {
-        console.error('Order save error:', err);
-        // Silently fail — don't block the WhatsApp flow
+    try {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const orderItems = state.items.map(item => ({
+        name: item.name,
+        image: item.image || '',
+        price: item.price,
+        quantity: item.quantity,
+        weight: item.weight || '',
+        packing: item.packing || '',
+        productId: item.productId || item._id || undefined,
+      }));
+
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
       }
+
+      const res = await fetch(`${API_BASE_URL}/orders`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          orderItems,
+          totalPrice: state.total,
+          paymentMethod: 'WhatsApp',
+          status: 'Awaiting Confirmation',
+          guestInfo: userInfo
+            ? { name: userInfo.name, email: userInfo.email, phone: userInfo.phone }
+            : undefined,
+        }),
+      });
+
+      const data = await res.json();
+      console.log('📦 Order creation API response:', data);
+    } catch (err) {
+      console.error('Order save error:', err);
     }
 
     setIsSaving(false);

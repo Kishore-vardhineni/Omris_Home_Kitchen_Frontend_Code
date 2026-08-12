@@ -42,6 +42,30 @@ export const protect = async (req, res, next) => {
 };
 
 /**
+ * @desc    Optional protect — attaches req.user if token is valid, but allows guest access
+ */
+export const optionalProtect = async (req, res, next) => {
+  let token;
+
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies?.token) {
+    token = req.cookies.token;
+  }
+
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret_key_omris_kitchen');
+      req.user = await User.findById(decoded.id).select('-password');
+    } catch (error) {
+      // Ignore token errors for optional protection
+    }
+  }
+
+  next();
+};
+
+/**
  * @desc    Admin-only middleware — must be used AFTER protect
  */
 export const adminOnly = (req, res, next) => {
