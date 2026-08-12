@@ -17,8 +17,10 @@ import {
   IndianRupee,
   FileSpreadsheet,
   FileText,
+  CreditCard,
 } from 'lucide-react';
 import AdminLayout from './AdminLayout';
+import generateInvoicePDF from '../../utils/generateInvoicePDF';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -95,6 +97,44 @@ const AdminOrders = () => {
     } catch (err) {
       console.error(err);
       alert('Error updating order status');
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const handleMarkAsPaid = async (orderId) => {
+    if (!window.confirm('Confirm marking this order as Paid (PhonePe / UPI)?')) return;
+    setUpdatingId(orderId);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API}/orders/${orderId}/pay`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ paymentMethod: 'PhonePe / UPI' }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setOrders(prev =>
+          prev.map(o =>
+            o._id === orderId
+              ? {
+                  ...o,
+                  isPaid: true,
+                  status: o.status === 'Awaiting Confirmation' ? 'Confirmed' : o.status,
+                }
+              : o
+          )
+        );
+        alert('✅ Order marked as Paid! Invoice notification email sent.');
+      } else {
+        alert(data.message || 'Failed to mark order as paid');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error updating payment status');
     } finally {
       setUpdatingId(null);
     }
@@ -496,42 +536,94 @@ const AdminOrders = () => {
                           </td>
 
                           <td>
-                            <span style={{
-                              fontSize: '0.75rem',
-                              fontWeight: 600,
-                              padding: '3px 8px',
-                              borderRadius: '6px',
-                              background: '#f3f4f6',
-                              color: '#374151'
-                            }}>
-                              {order.paymentMethod || 'WhatsApp'}
-                            </span>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                              <span style={{
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                padding: '2px 7px',
+                                borderRadius: '6px',
+                                background: order.isPaid ? '#ecfdf5' : '#fffbeb',
+                                color: order.isPaid ? '#047857' : '#b45309',
+                                border: order.isPaid ? '1px solid #a7f3d0' : '1px solid #fde68a',
+                                width: 'fit-content',
+                              }}>
+                                {order.isPaid ? 'PAID ✅' : 'UNPAID ⏳'}
+                              </span>
+                              <span style={{ fontSize: '0.72rem', color: '#6b7280' }}>
+                                {order.paymentMethod || 'WhatsApp'}
+                              </span>
+                            </div>
                           </td>
 
                           <td onClick={e => e.stopPropagation()}>
-                            <select
-                              value={order.status}
-                              disabled={updatingId === order._id}
-                              onChange={e => handleStatusChange(order._id, e.target.value)}
-                              style={{
-                                padding: '0.35rem 0.65rem',
-                                borderRadius: '8px',
-                                fontSize: '0.75rem',
-                                fontWeight: 700,
-                                background: statusInfo.bg,
-                                color: statusInfo.color,
-                                border: `1px solid ${statusInfo.border}`,
-                                cursor: 'pointer',
-                                outline: 'none',
-                              }}
-                            >
-                              <option value="Awaiting Confirmation">Awaiting WhatsApp</option>
-                              <option value="Confirmed">Confirmed</option>
-                              <option value="Processing">Processing</option>
-                              <option value="Shipped">Shipped</option>
-                              <option value="Delivered">Delivered</option>
-                              <option value="Cancelled">Cancelled</option>
-                            </select>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                              <select
+                                value={order.status}
+                                disabled={updatingId === order._id}
+                                onChange={e => handleStatusChange(order._id, e.target.value)}
+                                style={{
+                                  padding: '0.35rem 0.55rem',
+                                  borderRadius: '8px',
+                                  fontSize: '0.75rem',
+                                  fontWeight: 700,
+                                  background: statusInfo.bg,
+                                  color: statusInfo.color,
+                                  border: `1px solid ${statusInfo.border}`,
+                                  cursor: 'pointer',
+                                  outline: 'none',
+                                }}
+                              >
+                                <option value="Awaiting Confirmation">Awaiting WhatsApp</option>
+                                <option value="Confirmed">Confirmed</option>
+                                <option value="Processing">Processing</option>
+                                <option value="Shipped">Shipped</option>
+                                <option value="Delivered">Delivered</option>
+                                <option value="Cancelled">Cancelled</option>
+                              </select>
+
+                              {!order.isPaid && (
+                                <button
+                                  onClick={() => handleMarkAsPaid(order._id)}
+                                  disabled={updatingId === order._id}
+                                  style={{
+                                    padding: '0.35rem 0.6rem',
+                                    borderRadius: '8px',
+                                    fontSize: '0.72rem',
+                                    fontWeight: 700,
+                                    background: '#10b981',
+                                    color: '#ffffff',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                  }}
+                                  title="Click after receiving PhonePe / UPI payment"
+                                >
+                                  <CreditCard size={12} /> Mark as Paid
+                                </button>
+                              )}
+
+                              <button
+                                onClick={() => generateInvoicePDF(order)}
+                                style={{
+                                  padding: '0.35rem 0.6rem',
+                                  borderRadius: '8px',
+                                  fontSize: '0.72rem',
+                                  fontWeight: 700,
+                                  background: '#f3f4f6',
+                                  color: '#374151',
+                                  border: '1px solid #d1d5db',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                }}
+                                title="Download Tax Invoice PDF"
+                              >
+                                <FileText size={12} /> Invoice
+                              </button>
+                            </div>
                           </td>
                         </tr>
 
@@ -544,13 +636,62 @@ const AdminOrders = () => {
                                 {/* Left: Customer & Shipping Details */}
                                 <div style={{ background: '#fff', padding: '1rem', borderRadius: '10px', border: '1px solid #e5e7eb' }}>
                                   <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#374151', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    <User size={14} color="#6366f1" /> Customer & Contact Information
+                                    <User size={14} color="#6366f1" /> Customer & Payment Details
                                   </h4>
                                   <div style={{ fontSize: '0.8rem', color: '#4b5563', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                                    <div><strong>Name:</strong> {order.user?.name || 'N/A'}</div>
-                                    <div><strong>Email:</strong> {order.user?.email || 'N/A'}</div>
-                                    <div><strong>Phone:</strong> {order.user?.phone || 'N/A'}</div>
+                                    <div><strong>Name:</strong> {order.user?.name || order.guestInfo?.name || 'Guest User'}</div>
+                                    <div><strong>Email:</strong> {order.user?.email || order.guestInfo?.email || 'N/A'}</div>
+                                    <div><strong>Phone:</strong> {order.user?.phone || order.guestInfo?.phone || 'N/A'}</div>
                                     <div><strong>Order Date:</strong> {new Date(order.createdAt).toLocaleString('en-IN')}</div>
+                                    <div>
+                                      <strong>Payment Status:</strong>{' '}
+                                      <span style={{ color: order.isPaid ? '#047857' : '#b45309', fontWeight: 700 }}>
+                                        {order.isPaid ? 'PAID ✅' : 'UNPAID ⏳'}
+                                      </span>
+                                    </div>
+                                    {order.paidAt && (
+                                      <div><strong>Paid At:</strong> {new Date(order.paidAt).toLocaleString('en-IN')}</div>
+                                    )}
+                                    <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                      {!order.isPaid && (
+                                        <button
+                                          onClick={() => handleMarkAsPaid(order._id)}
+                                          style={{
+                                            padding: '0.4rem 0.75rem',
+                                            borderRadius: '8px',
+                                            fontSize: '0.78rem',
+                                            fontWeight: 700,
+                                            background: '#10b981',
+                                            color: '#fff',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '5px',
+                                          }}
+                                        >
+                                          <CreditCard size={14} /> Mark as Paid (PhonePe / UPI)
+                                        </button>
+                                      )}
+                                      <button
+                                        onClick={() => generateInvoicePDF(order)}
+                                        style={{
+                                          padding: '0.4rem 0.75rem',
+                                          borderRadius: '8px',
+                                          fontSize: '0.78rem',
+                                          fontWeight: 700,
+                                          background: '#374151',
+                                          color: '#fff',
+                                          border: 'none',
+                                          cursor: 'pointer',
+                                          display: 'inline-flex',
+                                          alignItems: 'center',
+                                          gap: '5px',
+                                        }}
+                                      >
+                                        <FileText size={14} /> Download Invoice PDF
+                                      </button>
+                                    </div>
                                   </div>
                                 </div>
 
@@ -561,7 +702,7 @@ const AdminOrders = () => {
                                   </h4>
                                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                                     {order.orderItems?.map((item, idx) => (
-                                      <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.8rem', borderBottom: idx < order.orderItems.length - 1 ? '1px dashed #f3f4f6' : 'none', paddingBottom: '0.4rem' }}>
+                                      <div key={idx} style={{ display: 'flex', alignItems: 'center', justify: 'space-between', fontSize: '0.8rem', borderBottom: idx < order.orderItems.length - 1 ? '1px dashed #f3f4f6' : 'none', paddingBottom: '0.4rem' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                                           {item.image ? (
                                             <img src={item.image} alt={item.name} style={{ width: 32, height: 32, borderRadius: 6, objectFit: 'cover' }} />
@@ -579,7 +720,7 @@ const AdminOrders = () => {
                                           </div>
                                         </div>
                                         <div style={{ fontWeight: 700, color: '#111827' }}>
-                                          {item.qty || 1} x ₹{item.price} = ₹{(item.qty || 1) * item.price}
+                                          {item.quantity || item.qty || 1} x ₹{item.price} = ₹{(item.quantity || item.qty || 1) * item.price}
                                         </div>
                                       </div>
                                     ))}

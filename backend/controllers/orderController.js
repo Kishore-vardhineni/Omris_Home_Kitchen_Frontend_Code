@@ -159,3 +159,57 @@ export const updateOrderStatus = async (req, res) => {
     });
   }
 };
+
+/**
+ * @desc    Mark order as paid (admin) & send invoice email
+ * @route   PUT /api/orders/:id/pay
+ * @access  Private/Admin
+ */
+export const markOrderAsPaid = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id).populate('user', 'name email phone');
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    order.isPaid = true;
+    order.paidAt = Date.now();
+    order.paymentMethod = req.body.paymentMethod || 'PhonePe / UPI';
+    order.paymentResult = {
+      id: req.body.transactionId || `PHONEPE_${Date.now()}`,
+      status: 'SUCCESS',
+      update_time: new Date().toISOString(),
+    };
+
+    // Automatically update status to Confirmed when paid
+    if (order.status === 'Awaiting Confirmation' || order.status === 'Pending') {
+      order.status = 'Confirmed';
+    }
+
+    const updatedOrder = await order.save();
+
+    // Send payment confirmation & invoice notification email
+    const recipientEmail = updatedOrder.user?.email || updatedOrder.guestInfo?.email;
+    const recipientName = updatedOrder.user?.name || updatedOrder.guestInfo?.name || 'Valued Customer';
+
+    if (recipientEmail) {
+      sendOrderNotificationEmail(updatedOrder, recipientEmail, recipientName).catch((err) =>
+        console.error('Failed sending payment confirmation email:', err)
+      );
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Order marked as Paid successfully',
+      order: updatedOrder,
+    });
+  } catch (error) {
+    console.error('Error in markOrderAsPaid:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while marking order as paid',
+      error: error.message,
+    });
+  }
+};

@@ -30,8 +30,21 @@ const orderSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ['WhatsApp', 'Online', 'Cash on Delivery'],
+      enum: ['WhatsApp', 'Online', 'Cash on Delivery', 'PhonePe / UPI'],
       default: 'WhatsApp',
+    },
+    isPaid: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+    paidAt: {
+      type: Date,
+    },
+    paymentResult: {
+      id: { type: String },
+      status: { type: String },
+      update_time: { type: String },
     },
     status: {
       type: String,

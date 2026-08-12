@@ -12,7 +12,9 @@ import {
   ChevronUp,
   ArrowLeft,
   RefreshCw,
+  FileText,
 } from 'lucide-react';
+import generateInvoicePDF from '../utils/generateInvoicePDF';
 
 // ── Status Configuration ──────────────────────────────────────────────────────
 const STATUS_CONFIG = {
@@ -130,6 +132,16 @@ const OrderCard = ({ order, index }) => {
             >
               {status.label}
             </span>
+
+            {/* Download Invoice Button */}
+            <button
+              onClick={() => generateInvoicePDF(order)}
+              className="flex items-center gap-1 px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-semibold transition-colors whitespace-nowrap border border-stone-200"
+              title="Download Tax Invoice PDF"
+            >
+              <FileText size={13} />
+              <span className="hidden sm:inline">Invoice</span>
+            </button>
 
             {/* Expand Button */}
             <button

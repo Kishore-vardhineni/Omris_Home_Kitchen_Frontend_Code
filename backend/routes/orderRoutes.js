@@ -4,6 +4,7 @@ import {
   getMyOrders,
   getAllOrders,
   updateOrderStatus,
+  markOrderAsPaid,
 } from '../controllers/orderController.js';
 import { protect, optionalProtect, adminOnly } from '../middleware/authMiddleware.js';
 
@@ -28,5 +29,10 @@ router.get('/', protect, adminOnly, getAllOrders);
 // @desc    Update order status (admin)
 // @access  Admin
 router.put('/:id/status', protect, adminOnly, updateOrderStatus);
+
+// @route   PUT /api/orders/:id/pay
+// @desc    Mark order as paid (admin)
+// @access  Admin
+router.put('/:id/pay', protect, adminOnly, markOrderAsPaid);
 
 export default router;
