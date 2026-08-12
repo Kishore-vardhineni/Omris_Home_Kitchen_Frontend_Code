@@ -16,6 +16,13 @@ import {
 
 // ── Status Configuration ──────────────────────────────────────────────────────
 const STATUS_CONFIG = {
+  'Awaiting Confirmation': {
+    color: '#d97706',
+    bg: '#fffbeb',
+    border: '#fde68a',
+    icon: Clock,
+    label: 'Awaiting WhatsApp Confirmation',
+  },
   Pending: {
     color: '#f59e0b',
     bg: '#fffbeb',
@@ -28,7 +35,7 @@ const STATUS_CONFIG = {
     bg: '#ecfdf5',
     border: '#a7f3d0',
     icon: CheckCircle2,
-    label: 'Order Placed',
+    label: 'Order Confirmed',
   },
   Processing: {
     color: '#8b5cf6',
@@ -161,6 +168,14 @@ const OrderCard = ({ order, index }) => {
               {order.orderItems.length} item{order.orderItems.length > 1 ? 's' : ''} •{' '}
               <span className="capitalize text-neutral-400 text-xs">{order.paymentMethod}</span>
             </p>
+          </div>
+        )}
+
+        {/* Awaiting Confirmation Notice Banner */}
+        {order.status === 'Awaiting Confirmation' && (
+          <div className="mt-3 sm:ml-16 bg-amber-50 border border-amber-200/80 rounded-xl p-3 text-xs text-amber-800 flex items-center gap-2">
+            <Clock size={16} className="text-amber-600 flex-shrink-0" />
+            <span>Waiting for your WhatsApp message to confirm this order. Once received, our team will update status to Confirmed.</span>
           </div>
         )}
       </div>

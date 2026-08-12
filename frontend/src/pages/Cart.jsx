@@ -247,7 +247,7 @@ const Cart = () => {
             orderItems,
             totalPrice: state.total,
             paymentMethod: 'WhatsApp',
-            status: 'Confirmed',
+            status: 'Awaiting Confirmation',
           }),
         });
       } catch (err) {
@@ -262,6 +262,9 @@ const Cart = () => {
     // Open WhatsApp
     const encodedMsg = encodeURIComponent(buildWhatsAppMessage());
     window.open(`https://wa.me/917670851967?text=${encodedMsg}`, '_blank', 'noopener,noreferrer');
+
+    // Clear cart so badge resets to 0
+    dispatch({ type: 'CLEAR_CART' });
 
     // Show success banner
     setOrderSuccess(true);
@@ -298,15 +301,15 @@ const Cart = () => {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="mb-6 bg-green-50 border border-green-200 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+              className="mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
-                  <CheckCircle2 size={22} className="text-green-600" />
+                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+                  <Clock size={22} className="text-amber-700" />
                 </div>
                 <div>
-                  <p className="font-bold text-green-800 text-sm">Order Placed Successfully! 🎉</p>
-                  <p className="text-green-600 text-xs mt-0.5">Your order has been saved. Send the WhatsApp message to confirm with our team.</p>
+                  <p className="font-bold text-amber-900 text-sm">Order Placed! Awaiting Confirmation ⏳</p>
+                  <p className="text-amber-700 text-xs mt-0.5">Your order is saved as "Awaiting Confirmation". Please send the WhatsApp message so our team can confirm it.</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 ml-13 sm:ml-0">

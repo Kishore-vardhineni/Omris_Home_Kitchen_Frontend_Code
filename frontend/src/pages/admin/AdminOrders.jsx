@@ -23,8 +23,9 @@ import AdminLayout from './AdminLayout';
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 const STATUS_CONFIG = {
+  'Awaiting Confirmation': { color: '#d97706', bg: '#fef3c7', border: '#fde68a', label: 'Awaiting WhatsApp' },
   Pending:    { color: '#d97706', bg: '#fef3c7', border: '#fde68a', label: 'Pending' },
-  Confirmed:  { color: '#059669', bg: '#d1fae5', border: '#a7f3d0', label: 'Order Placed' },
+  Confirmed:  { color: '#059669', bg: '#d1fae5', border: '#a7f3d0', label: 'Confirmed' },
   Processing: { color: '#7c3aed', bg: '#ede9fe', border: '#ddd6fe', label: 'Processing' },
   Shipped:    { color: '#0284c7', bg: '#e0f2fe', border: '#bae6fd', label: 'Shipped' },
   Delivered:  { color: '#16a34a', bg: '#dcfce7', border: '#86efac', label: 'Delivered' },
@@ -319,7 +320,7 @@ const AdminOrders = () => {
           {/* Status Filter Buttons + Download Options */}
           <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
             <Filter size={15} color="#6b7280" style={{ marginRight: '0.2rem' }} />
-            {['All', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled'].map(st => (
+            {['All', 'Awaiting Confirmation', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled'].map(st => (
               <button
                 key={st}
                 onClick={() => { setStatusFilter(st); setPage(1); }}
@@ -335,7 +336,7 @@ const AdminOrders = () => {
                   transition: 'all 0.15s ease',
                 }}
               >
-                {st === 'Confirmed' ? 'Placed' : st}
+                {st === 'Awaiting Confirmation' ? 'Awaiting WhatsApp' : st}
               </button>
             ))}
 
@@ -524,7 +525,8 @@ const AdminOrders = () => {
                                 outline: 'none',
                               }}
                             >
-                              <option value="Confirmed">Order Placed</option>
+                              <option value="Awaiting Confirmation">Awaiting WhatsApp</option>
+                              <option value="Confirmed">Confirmed</option>
                               <option value="Processing">Processing</option>
                               <option value="Shipped">Shipped</option>
                               <option value="Delivered">Delivered</option>

@@ -112,6 +112,14 @@ const Navbar = () => {
                         </Link>
                       )}
                       <Link
+                        to="/profile"
+                        className="user-dropdown-item"
+                        onClick={() => { closeMenu(); setUserDropdown(false); }}
+                      >
+                        <User size={13} style={{ display: 'inline', marginRight: '6px' }} />
+                        My Profile
+                      </Link>
+                      <Link
                         to="/order-history"
                         className="user-dropdown-item"
                         onClick={() => { closeMenu(); setUserDropdown(false); }}

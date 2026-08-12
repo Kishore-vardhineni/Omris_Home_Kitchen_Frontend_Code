@@ -16,8 +16,9 @@ import AdminLayout from './AdminLayout';
 const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 const STATUS_CONFIG = {
+  'Awaiting Confirmation': { color: '#d97706', bg: '#fef3c7', label: 'Awaiting WhatsApp' },
   Pending:    { color: '#d97706', bg: '#fef3c7', label: 'Pending' },
-  Confirmed:  { color: '#059669', bg: '#d1fae5', label: 'Order Placed' },
+  Confirmed:  { color: '#059669', bg: '#d1fae5', label: 'Confirmed' },
   Processing: { color: '#7c3aed', bg: '#ede9fe', label: 'Processing' },
   Shipped:    { color: '#0284c7', bg: '#e0f2fe', label: 'Shipped' },
   Delivered:  { color: '#16a34a', bg: '#dcfce7', label: 'Delivered' },
