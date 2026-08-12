@@ -165,7 +165,7 @@ const PrivacyPolicy = () => {
             </div>
             <div className="flex items-center gap-3">
               <Mail size={16} className="text-[#f88812] flex-shrink-0" />
-              <span>omrishomekitchen@gmail.com</span>
+              <span>omrishomekichen@gmail.com</span>
             </div>
           </div>
         </motion.div>

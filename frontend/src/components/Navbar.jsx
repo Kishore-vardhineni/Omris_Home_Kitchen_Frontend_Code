@@ -31,7 +31,7 @@ const Navbar = () => {
         <div className="container top-bar-inner">
           <div className="contact-info">
             <span><Phone size={14} /> +91 7670851967</span>
-            <span><Mail size={14} /> omrishomekitchen@gmail.com</span>
+            <span><Mail size={14} /> omrishomekichen@gmail.com</span>
           </div>
           <div className="social-links">
             <a href="#"><Facebook size={14} /></a>

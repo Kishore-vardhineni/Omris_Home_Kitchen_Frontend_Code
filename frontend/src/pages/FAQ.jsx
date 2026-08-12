@@ -84,7 +84,7 @@ const faqs = [
       },
       {
         q: 'What if my order arrives damaged?',
-        a: 'We take great care in packaging to prevent damage during transit. If your order arrives damaged, please take photos immediately and send them to us on WhatsApp (+91 7670851967) or email (omrishomekitchen@gmail.com) within 24 hours. We will arrange a replacement or full refund promptly.',
+        a: 'We take great care in packaging to prevent damage during transit. If your order arrives damaged, please take photos immediately and send them to us on WhatsApp (+91 7670851967) or email (omrishomekichen@gmail.com) within 24 hours. We will arrange a replacement or full refund promptly.',
       },
       {
         q: 'How long does a refund take to process?',
@@ -98,7 +98,7 @@ const faqs = [
     questions: [
       {
         q: 'How can I contact Omris Home Kitchen?',
-        a: 'You can reach us via WhatsApp at +91 7670851967, by email at omrishomekitchen@gmail.com, or through our Contact page. We typically respond within a few hours during business hours (9 AM – 7 PM IST).',
+        a: 'You can reach us via WhatsApp at +91 7670851967, by email at omrishomekichen@gmail.com, or through our Contact page. We typically respond within a few hours during business hours (9 AM – 7 PM IST).',
       },
       {
         q: 'Do you take bulk or custom orders?',
@@ -182,11 +182,10 @@ const FAQ = () => {
         <div className="flex flex-wrap gap-2 mb-10 justify-center">
           <button
             onClick={() => setActiveCategory(null)}
-            className={`px-4 py-2 rounded-full text-sm font-bold border transition-all ${
-              activeCategory === null
+            className={`px-4 py-2 rounded-full text-sm font-bold border transition-all ${activeCategory === null
                 ? 'bg-[#3a2a22] text-white border-[#3a2a22]'
                 : 'bg-white text-gray-600 border-gray-200 hover:border-[#f88812] hover:text-[#f88812]'
-            }`}
+              }`}
           >
             All
           </button>
@@ -194,11 +193,10 @@ const FAQ = () => {
             <button
               key={cat.category}
               onClick={() => setActiveCategory(cat.category === activeCategory ? null : cat.category)}
-              className={`px-4 py-2 rounded-full text-sm font-bold border transition-all flex items-center gap-2 ${
-                activeCategory === cat.category
+              className={`px-4 py-2 rounded-full text-sm font-bold border transition-all flex items-center gap-2 ${activeCategory === cat.category
                   ? 'bg-[#f88812] text-white border-[#f88812]'
                   : 'bg-white text-gray-600 border-gray-200 hover:border-[#f88812] hover:text-[#f88812]'
-              }`}
+                }`}
             >
               <cat.icon size={14} />
               {cat.category}
