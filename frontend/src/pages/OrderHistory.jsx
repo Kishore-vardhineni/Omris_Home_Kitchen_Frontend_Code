@@ -116,8 +116,9 @@ const OrderCard = ({ order, index }) => {
             </div>
           </div>
 
-          {/* Right: Status + Total */}
+          {/* Right: Total + Payment + Order Status */}
           <div className="flex items-center gap-4 sm:gap-6 ml-16 sm:ml-0">
+            {/* Total Column */}
             <div className="text-left sm:text-right">
               <p className="text-xs text-neutral-400 uppercase tracking-wider font-medium">Total</p>
               <p className="text-lg font-bold text-neutral-900 mt-0.5">
@@ -125,23 +126,43 @@ const OrderCard = ({ order, index }) => {
               </p>
             </div>
 
-            {/* Status Badge */}
-            <span
-              className="px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap"
-              style={{ color: status.color, background: status.bg, border: `1px solid ${status.border}` }}
-            >
-              {status.label}
-            </span>
+            {/* Separate Payment Status Column */}
+            <div className="text-left sm:text-center">
+              <p className="text-xs text-neutral-400 uppercase tracking-wider font-medium mb-1">Payment</p>
+              <span
+                className="inline-block px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap"
+                style={{
+                  color: order.isPaid ? '#047857' : '#b45309',
+                  background: order.isPaid ? '#ecfdf5' : '#fffbeb',
+                  border: order.isPaid ? '1px solid #a7f3d0' : '1px solid #fde68a',
+                }}
+              >
+                {order.isPaid ? 'PAID ✅' : 'UNPAID ⏳'}
+              </span>
+            </div>
 
-            {/* Download Invoice Button */}
-            <button
-              onClick={() => generateInvoicePDF(order)}
-              className="flex items-center gap-1 px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-semibold transition-colors whitespace-nowrap border border-stone-200"
-              title="Download Tax Invoice PDF"
-            >
-              <FileText size={13} />
-              <span className="hidden sm:inline">Invoice</span>
-            </button>
+            {/* Order Status Badge Column */}
+            <div className="text-left sm:text-center">
+              <p className="text-xs text-neutral-400 uppercase tracking-wider font-medium mb-1">Status</p>
+              <span
+                className="inline-block px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap"
+                style={{ color: status.color, background: status.bg, border: `1px solid ${status.border}` }}
+              >
+                {status.label}
+              </span>
+            </div>
+
+            {/* Download Invoice Button — only shown after payment confirmed */}
+            {order.isPaid && (
+              <button
+                onClick={() => generateInvoicePDF(order)}
+                className="flex items-center gap-1 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-xs font-semibold transition-colors whitespace-nowrap border border-emerald-200"
+                title="Download Tax Invoice PDF"
+              >
+                <FileText size={13} />
+                <span className="hidden sm:inline">Invoice</span>
+              </button>
+            )}
 
             {/* Expand Button */}
             <button
