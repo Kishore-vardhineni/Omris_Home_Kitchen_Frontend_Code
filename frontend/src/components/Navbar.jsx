@@ -77,27 +77,48 @@ const Navbar = () => {
           <div className="flex items-center gap-4">
             {/* User / Sign-In Icon */}
             <div
-              className="user-icon-wrapper"
-              onMouseEnter={() => setUserDropdown(true)}
-              onMouseLeave={() => setUserDropdown(false)}
+              className="user-icon-wrapper relative"
+              onMouseEnter={() => window.innerWidth >= 1024 && setUserDropdown(true)}
+              onMouseLeave={() => window.innerWidth >= 1024 && setUserDropdown(false)}
             >
               {user ? (
-                <div className="user-link cursor-pointer flex items-center gap-2" onClick={closeMenu}>
+                <div 
+                  className="user-link cursor-pointer flex items-center gap-2" 
+                  onClick={(e) => {
+                    if (window.innerWidth < 1024) {
+                      e.preventDefault();
+                      setUserDropdown(!userDropdown);
+                    } else {
+                      closeMenu();
+                    }
+                  }}
+                >
                   <User size={24} strokeWidth={1.5} />
                   <span className="hidden lg:inline-block text-sm font-semibold truncate max-w-[120px]">
                     {user.name}
                   </span>
                 </div>
               ) : (
-                <Link to="/login" className="user-link" onClick={closeMenu} aria-label="Sign In">
+                <div 
+                  className="user-link cursor-pointer flex items-center gap-2"
+                  onClick={(e) => {
+                    if (window.innerWidth < 1024) {
+                      e.preventDefault();
+                      setUserDropdown(!userDropdown);
+                    } else {
+                      window.location.href = '/login';
+                    }
+                  }}
+                  aria-label="Sign In"
+                >
                   <User size={24} strokeWidth={1.5} />
-                </Link>
+                </div>
               )}
               {userDropdown && (
-                <div className="user-dropdown">
+                <div className="user-dropdown" style={{ backgroundColor: 'var(--bg-cream)' }}>
                   {user ? (
                     <>
-                      <div className="px-4 py-2 text-sm font-bold border-b border-gray-100 lg:hidden">
+                      <div className="px-4 py-2 text-sm font-bold border-b border-gray-200 lg:hidden text-[var(--text-dark)]">
                         {user.name}
                       </div>
                       {user.role === 'admin' && (
