@@ -117,7 +117,7 @@ const OrderCard = ({ order, index }) => {
           </div>
 
           {/* Right: Total + Payment + Order Status */}
-          <div className="flex items-center gap-4 sm:gap-6 ml-16 sm:ml-0">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-6 ml-16 sm:ml-0 pr-4 sm:pr-0">
             {/* Total Column */}
             <div className="text-left sm:text-right">
               <p className="text-xs text-neutral-400 uppercase tracking-wider font-medium">Total</p>

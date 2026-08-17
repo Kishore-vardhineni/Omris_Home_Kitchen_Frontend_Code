@@ -265,7 +265,14 @@ export const resetPassword = async (req, res) => {
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid or expired token',
+        message: 'Invalid or expired password reset token',
+      });
+    }
+
+    if (!req.body.password || req.body.password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a password with at least 6 characters',
       });
     }
 
@@ -273,16 +280,15 @@ export const resetPassword = async (req, res) => {
     user.password = req.body.password;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
-    
+
     await user.save();
 
-    // Generate token and login automatically (optional)
     const token = generateToken(user._id);
     setTokenCookie(res, token);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: 'Password updated successfully',
+      message: 'Password reset successful',
       token,
       user: {
         _id: user._id,
@@ -295,7 +301,110 @@ export const resetPassword = async (req, res) => {
     console.error('Error in resetPassword:', error);
     return res.status(500).json({
       success: false,
-      message: 'Server error during reset password',
+      message: 'Server error during password reset',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * @desc    Update logged-in user's profile
+ * @route   PUT /api/users/profile
+ * @access  Private
+ */
+export const updateUserProfile = async (req, res) => {
+  try {
+    const { name, email, phone } = req.body;
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    if (name !== undefined && name !== null) {
+      const trimmedName = String(name).trim();
+      if (!trimmedName) {
+        return res.status(400).json({
+          success: false,
+          message: 'Full name cannot be empty',
+        });
+      }
+      user.name = trimmedName;
+    }
+
+    if (email !== undefined && email !== null) {
+      const formattedEmail = String(email).toLowerCase().trim();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formattedEmail)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please provide a valid email address',
+        });
+      }
+
+      if (formattedEmail !== user.email) {
+        const existingUser = await User.findOne({ email: formattedEmail });
+        if (existingUser) {
+          return res.status(409).json({
+            success: false,
+            message: 'This email address is already in use by another account',
+          });
+        }
+        user.email = formattedEmail;
+      }
+    }
+
+    if (phone !== undefined && phone !== null) {
+      const cleanPhone = String(phone).replace(/\D/g, '');
+      if (!/^\d{10}$/.test(cleanPhone)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please provide a valid 10-digit mobile number',
+        });
+      }
+      user.phone = cleanPhone;
+    }
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully',
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        addresses: user.addresses,
+        isVerified: user.isVerified,
+        createdAt: user.createdAt,
+      },
+    });
+  } catch (error) {
+    console.error('Error in updateUserProfile:', error);
+
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map((val) => val.message);
+      return res.status(400).json({
+        success: false,
+        message: messages.join(', '),
+      });
+    }
+
+    if (error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: 'Email address is already registered',
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while updating profile',
       error: error.message,
     });
   }

@@ -1,18 +1,159 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { User, Mail, Shield, ShoppingBag, ArrowLeft, LogOut, KeyRound, Clock, Phone } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  User,
+  Mail,
+  Shield,
+  ShoppingBag,
+  ArrowLeft,
+  LogOut,
+  KeyRound,
+  Clock,
+  Phone,
+  Pencil,
+  CheckCircle2,
+  AlertCircle,
+  XCircle
+} from 'lucide-react';
 
 const Profile = () => {
   const navigate = useNavigate();
   const userInfoStr = localStorage.getItem('userInfo');
   const user = userInfoStr ? JSON.parse(userInfoStr) : null;
 
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    name: user?.name || '',
+    email: user?.email || '',
+    phone: user?.phone || '',
+  });
+  const [errors, setErrors] = useState({});
+  const [serverError, setServerError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+      });
+    }
+  }, [user]);
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userInfo');
     navigate('/login');
     window.location.reload();
+  };
+
+  const validate = () => {
+    const newErrors = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Full name is required';
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = 'Name must be at least 2 characters';
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email address is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Phone number is required';
+    } else if (!/^\d{10}$/.test(formData.phone.replace(/\D/g, ''))) {
+      newErrors.phone = 'Please enter a valid 10-digit mobile number';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const handleEdit = () => {
+    if (user) {
+      setFormData({
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+      });
+    }
+    setErrors({});
+    setServerError('');
+    setSuccessMessage('');
+    setIsEditing(true);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setErrors({});
+    setServerError('');
+    setSuccessMessage('');
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+
+    if (!validate()) return;
+
+    setIsSubmitting(true);
+    setServerError('');
+    setSuccessMessage('');
+    setErrors({});
+
+    try {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const token = localStorage.getItem('token');
+
+      const response = await fetch(`${API_BASE_URL}/users/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        setServerError(data.message || 'Failed to update profile. Please try again.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const updatedUser = {
+        ...user,
+        name: data.user.name,
+        email: data.user.email,
+        phone: data.user.phone,
+      };
+      localStorage.setItem('userInfo', JSON.stringify(updatedUser));
+      setSuccessMessage(data.message || 'Profile updated successfully');
+      setIsSubmitting(false);
+      setIsEditing(false);
+    } catch (err) {
+      console.error('Profile update error:', err);
+      setServerError('Unable to connect to server. Please check your network.');
+      setIsSubmitting(false);
+    }
   };
 
   if (!user) {
@@ -47,7 +188,7 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-[#faf7f2] py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-8">
-        
+
         {/* Back Link */}
         <div className="flex items-center justify-between">
           <Link
@@ -152,25 +293,173 @@ const Profile = () => {
           transition={{ delay: 0.2 }}
           className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-stone-200/60 space-y-6"
         >
-          <h2 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-4">
-            Account Details
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Full Name</label>
-              <div className="text-base font-semibold text-gray-800 bg-stone-50 px-4 py-3 rounded-xl border border-stone-200/70">
-                {user.name}
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Email Address</label>
-              <div className="text-base font-semibold text-gray-800 bg-stone-50 px-4 py-3 rounded-xl border border-stone-200/70">
-                {user.email}
-              </div>
-            </div>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-4 flex-1">
+              Account Details
+            </h2>
+            {!isEditing && (
+              <button
+                onClick={handleEdit}
+                className="inline-flex items-center gap-2 text-sm font-semibold text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100/80 px-4 py-2.5 rounded-xl transition-colors ml-4"
+              >
+                <Pencil size={16} /> Edit Details
+              </button>
+            )}
           </div>
+
+          <AnimatePresence>
+            {serverError && (
+              <motion.div
+                className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+              >
+                <AlertCircle size={20} className="text-red-500 flex-shrink-0" />
+                <div>
+                  <strong className="block text-sm font-semibold">Update Failed</strong>
+                  <p className="text-sm">{serverError}</p>
+                </div>
+              </motion.div>
+            )}
+            {successMessage && (
+              <motion.div
+                className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+              >
+                <CheckCircle2 size={20} className="text-emerald-500 flex-shrink-0" />
+                <div>
+                  <strong className="block text-sm font-semibold">Success</strong>
+                  <p className="text-sm">{successMessage}</p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <form onSubmit={handleSave}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Full Name</label>
+                {isEditing ? (
+                  <div>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      disabled={isSubmitting}
+                      className={`w-full text-base font-semibold text-gray-800 bg-stone-50 px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-amber-500/50 ${
+                        errors.name ? 'border-red-400 bg-red-50' : 'border-stone-200/70'
+                      }`}
+                    />
+                    {errors.name && (
+                      <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                        <AlertCircle size={12} /> {errors.name}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-base font-semibold text-gray-800 bg-stone-50 px-4 py-3 rounded-xl border border-stone-200/70">
+                    {user.name}
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Email Address</label>
+                {isEditing ? (
+                  <div>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      disabled={isSubmitting}
+                      className={`w-full text-base font-semibold text-gray-800 bg-stone-50 px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-amber-500/50 ${
+                        errors.email ? 'border-red-400 bg-red-50' : 'border-stone-200/70'
+                      }`}
+                    />
+                    {errors.email && (
+                      <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                        <AlertCircle size={12} /> {errors.email}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-base font-semibold text-gray-800 bg-stone-50 px-4 py-3 rounded-xl border border-stone-200/70">
+                    {user.email}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Phone Number</label>
+                {isEditing ? (
+                  <div>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        disabled={isSubmitting}
+                        maxLength={10}
+                        placeholder="10-digit mobile number"
+                        className={`w-full text-base font-semibold text-gray-800 bg-stone-50 pl-10 pr-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-amber-500/50 ${
+                          errors.phone ? 'border-red-400 bg-red-50' : 'border-stone-200/70'
+                        }`}
+                      />
+                    </div>
+                    {errors.phone && (
+                      <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                        <AlertCircle size={12} /> {errors.phone}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-base font-semibold text-gray-800 bg-stone-50 px-4 py-3 rounded-xl border border-stone-200/70">
+                    {user.phone || 'Not provided'}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {isEditing && (
+              <div className="mt-6 flex flex-wrap items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  disabled={isSubmitting}
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 px-5 py-2.5 rounded-xl transition-colors"
+                >
+                  <XCircle size={16} /> Cancel
+                </button>
+                <motion.button
+                  type="submit"
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-white bg-[#1c1917] hover:bg-[#332e2b] px-5 py-2.5 rounded-xl transition-colors"
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <span className="inline-block w-4 h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 size={16} /> Save Changes
+                    </>
+                  )}
+                </motion.button>
+              </div>
+            )}
+          </form>
 
           <div className="pt-4 border-t border-gray-100 flex flex-wrap items-center justify-between gap-4">
             <Link
