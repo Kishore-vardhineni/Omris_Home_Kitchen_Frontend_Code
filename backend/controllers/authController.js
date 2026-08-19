@@ -133,17 +133,26 @@ export const registerUser = async (req, res) => {
  */
 export const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, mobile, password } = req.body;
 
-    if (!email || !password) {
+    // Must provide either email or mobile, plus password
+    if ((!email && !mobile) || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide both email and password',
+        message: 'Please provide your email or mobile number along with your password',
       });
     }
 
-    // Find user and explicitly select password field
-    const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
+    let user = null;
+
+    if (mobile) {
+      // Login via mobile/phone number
+      const cleanMobile = String(mobile).replace(/\D/g, '');
+      user = await User.findOne({ phone: cleanMobile }).select('+password');
+    } else {
+      // Login via email
+      user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
+    }
 
     if (user && (await user.matchPassword(password))) {
       // Ensure 'Gude veeranya' has admin role
@@ -172,7 +181,7 @@ export const loginUser = async (req, res) => {
     } else {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password',
+        message: 'Invalid credentials. Please check your email/mobile and password.',
       });
     }
   } catch (error) {

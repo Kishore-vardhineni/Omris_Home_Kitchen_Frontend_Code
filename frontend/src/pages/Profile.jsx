@@ -206,30 +206,30 @@ const Profile = () => {
           className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-stone-200/60 relative overflow-hidden"
         >
           {/* Background Decorative Gradient Banner */}
-          <div className="h-28 -mx-6 -mt-6 sm:-mx-8 sm:-mt-8 bg-gradient-to-r from-[#1c1917] via-[#3d2e1e] to-[#78350f] relative flex items-end px-8 pb-4">
+          <div className="h-28 -mx-6 -mt-6 sm:-mx-8 sm:-mt-8 bg-gradient-to-r from-[#1c1917] via-[#3d2e1e] to-[#78350f] relative flex items-end justify-end px-6 sm:px-8 pb-4">
             <span className="text-xs font-semibold tracking-wider uppercase text-amber-200/80">
               Omris Home Kitchen Member
             </span>
           </div>
 
           {/* User Info Container */}
-          <div className="relative flex flex-col sm:flex-row items-start sm:items-end justify-between -mt-12 gap-4">
-            <div className="flex items-end gap-5">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 text-white font-bold text-2xl sm:text-3xl flex items-center justify-center shadow-lg border-4 border-white flex-shrink-0">
+          <div className="relative flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 sm:gap-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-end gap-3 sm:gap-5">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 text-white font-bold text-2xl sm:text-3xl flex items-center justify-center shadow-lg border-4 border-white flex-shrink-0 -mt-10 sm:-mt-12">
                 {getInitials(user.name)}
               </div>
-              <div className="mb-1">
+              <div className="mb-1 mt-1 sm:mt-0">
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1c1917] capitalize">
                   {user.name}
                 </h1>
-                <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
-                  <Mail size={14} className="text-amber-600" />
+                <div className="flex items-center gap-2 text-sm text-gray-500 mt-1 break-all sm:break-normal">
+                  <Mail size={14} className="text-amber-600 flex-shrink-0" />
                   <span>{user.email}</span>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 sm:mb-1">
               <span className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${
                 user.role === 'admin'
                   ? 'bg-indigo-100 text-indigo-700 border border-indigo-200'

@@ -105,6 +105,12 @@ const userSchema = new mongoose.Schema(
     resetPasswordExpire: {
       type: Date,
     },
+    loginOtp: {
+      type: String,
+    },
+    loginOtpExpire: {
+      type: Date,
+    },
   },
   {
     timestamps: true, // Automatically manages createdAt and updatedAt
@@ -147,6 +153,23 @@ userSchema.methods.getResetPasswordToken = function () {
   this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
 
   return resetToken;
+};
+
+// Instance Method: Generate login OTP
+userSchema.methods.generateLoginOtp = function () {
+  // Generate 6 digit OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+  // Hash OTP and set to loginOtp field
+  this.loginOtp = crypto
+    .createHash('sha256')
+    .update(otp)
+    .digest('hex');
+
+  // Set expire time (10 minutes)
+  this.loginOtpExpire = Date.now() + 10 * 60 * 1000;
+
+  return otp;
 };
 
 const User = mongoose.model('User', userSchema);

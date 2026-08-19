@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Mail,
+  Phone,
   Lock,
   Eye,
   EyeOff,
@@ -23,61 +24,28 @@ const Login = () => {
   const from = location.state?.from?.pathname || '/';
 
   const [formData, setFormData] = useState({
-    email: '',
+    identifier: '',   // email OR mobile
     password: '',
     rememberMe: false
   });
+
+  // Detect whether the user is typing an email or a mobile number
+  const identifierType = (() => {
+    const val = formData.identifier.trim();
+    if (!val) return 'email';
+    if (/^[0-9+\- ]{1,}$/.test(val)) return 'mobile';
+    return 'email';
+  })();
 
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Calculate password strength & rule compliance
-  const getPasswordValidation = (pass = '') => {
-    const hasMinLen = pass.length >= 6;
-    const hasCaps = /[A-Z]/.test(pass);
-    const hasLower = /[a-z]/.test(pass);
-    const hasNumber = /[0-9]/.test(pass);
-    const hasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pass);
 
-    const rules = [
-      { id: 'minLen', label: 'Minimum 6 characters', valid: hasMinLen },
-      { id: 'caps', label: 'One Caps Letter (A-Z)', valid: hasCaps },
-      { id: 'lower', label: 'One Lower Case (a-z)', valid: hasLower },
-      { id: 'number', label: 'One Special Number (0-9)', valid: hasNumber },
-      { id: 'symbol', label: 'One Special Symbol (!@#$%^&*)', valid: hasSymbol },
-    ];
-
-    const passedCount = rules.filter(r => r.valid).length;
-    let label = '';
-    let color = '#e5e7eb';
-    let percentage = 0;
-
-    if (!pass) {
-      label = '';
-      color = '#e5e7eb';
-      percentage = 0;
-    } else if (passedCount <= 2) {
-      label = 'Weak Password';
-      color = '#ef4444';
-      percentage = Math.max((passedCount / 5) * 100, 20);
-    } else if (passedCount <= 4) {
-      label = 'Medium Password';
-      color = '#f59e0b';
-      percentage = (passedCount / 5) * 100;
-    } else {
-      label = 'Strong Password';
-      color = '#10b981';
-      percentage = 100;
-    }
-
-    const isValid = passedCount === 5;
-    return { rules, passedCount, label, color, percentage, isValid };
-  };
 
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  const passwordValidation = getPasswordValidation(formData.password);
+
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -92,17 +60,22 @@ const Login = () => {
 
   const validate = () => {
     const newErrors = {};
+    const val = formData.identifier.trim();
 
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email address is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+    if (!val) {
+      newErrors.identifier = 'Email address or mobile number is required';
+    } else if (/^[0-9+\- ]{1,}$/.test(val)) {
+      // Mobile validation: must be 10 digits (strip spaces/+/-)
+      const digits = val.replace(/[^0-9]/g, '');
+      if (digits.length < 10 || digits.length > 15) {
+        newErrors.identifier = 'Please enter a valid mobile number (10–15 digits)';
+      }
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+      newErrors.identifier = 'Please enter a valid email address';
     }
 
     if (!formData.password) {
       newErrors.password = 'Password is required';
-    } else if (!passwordValidation.isValid) {
-      newErrors.password = 'Password must meet all complexity requirements below';
     }
 
     setErrors(newErrors);
@@ -119,13 +92,16 @@ const Login = () => {
 
     try {
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const isMobile = /^[0-9+\- ]{1,}$/.test(formData.identifier.trim());
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: formData.email,
+          ...(isMobile
+            ? { mobile: formData.identifier.replace(/[^0-9]/g, '') }
+            : { email: formData.identifier.trim() }),
           password: formData.password,
         }),
       });
@@ -133,7 +109,7 @@ const Login = () => {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        setErrors({ server: data.message || 'Invalid email or password' });
+        setErrors({ server: data.message || 'Invalid credentials. Please try again.' });
         setIsSubmitting(false);
         return;
       }
@@ -251,24 +227,27 @@ const Login = () => {
 
           <form onSubmit={handleSubmit} noValidate className="signup-form">
 
-            {/* Email Address */}
+            {/* Email or Mobile */}
             <div className="form-group">
-              <label htmlFor="email">Email Address</label>
-              <div className={`input-wrapper ${errors.email ? 'has-error' : ''}`}>
-                <Mail className="field-icon" size={18} />
+              <label htmlFor="identifier">Email Address or Mobile Number</label>
+              <div className={`input-wrapper ${errors.identifier ? 'has-error' : ''}`}>
+                {identifierType === 'mobile'
+                  ? <Phone className="field-icon" size={18} />
+                  : <Mail className="field-icon" size={18} />}
                 <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  placeholder="name@example.com"
-                  value={formData.email}
+                  type="text"
+                  id="identifier"
+                  name="identifier"
+                  placeholder="name@example.com or 9876543210"
+                  value={formData.identifier}
                   onChange={handleChange}
                   disabled={isSubmitting || submitSuccess}
+                  autoComplete="username"
                 />
               </div>
-              {errors.email && (
+              {errors.identifier && (
                 <span className="error-message">
-                  <AlertCircle size={14} /> {errors.email}
+                  <AlertCircle size={14} /> {errors.identifier}
                 </span>
               )}
             </div>
@@ -301,42 +280,6 @@ const Login = () => {
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-
-              {/* Password Strength Indicator & Rules Checklist */}
-              {formData.password && (
-                <>
-                  <div className="password-meter">
-                    <div className="meter-track">
-                      <div
-                        className="meter-bar"
-                        style={{
-                          width: `${passwordValidation.percentage}%`,
-                          backgroundColor: passwordValidation.color
-                        }}
-                      ></div>
-                    </div>
-                    <span className="meter-label" style={{ color: passwordValidation.color }}>
-                      {passwordValidation.label}
-                    </span>
-                  </div>
-
-                  <div className="password-rules-grid">
-                    {passwordValidation.rules.map((rule) => (
-                      <div
-                        key={rule.id}
-                        className={`rule-item ${rule.valid ? 'valid' : 'invalid'}`}
-                      >
-                        {rule.valid ? (
-                          <CheckCircle2 size={13} color="#10b981" />
-                        ) : (
-                          <span className="rule-dot" />
-                        )}
-                        {rule.label}
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
 
               {errors.password && (
                 <span className="error-message" style={{ marginTop: '0.4rem' }}>
