@@ -14,7 +14,7 @@
 
 .signup-container {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   width: 100%;
   max-width: 1100px;
   background: #ffffff;
@@ -29,11 +29,13 @@
   position: relative;
   background: linear-gradient(135deg, #1C1500 0%, #362900 100%);
   color: #FEF3C0;
-  padding: 3rem 2.5rem;
+  padding: 3rem 2rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   overflow: hidden;
+  min-width: 0;
+  word-break: break-word;
 }
 
 .banner-overlay {
@@ -145,11 +147,13 @@
 
 /* ── Right Form Card ── */
 .signup-card {
-  padding: 3rem 2.75rem;
+  padding: 2.5rem 2.25rem;
   background: #ffffff;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 .form-header {
@@ -241,6 +245,7 @@
 
 .input-wrapper input {
   width: 100%;
+  min-width: 0;
   padding: 0.75rem 0.85rem 0.75rem 2.6rem;
   font-family: inherit;
   font-size: 0.925rem;
@@ -259,14 +264,17 @@
 .phone-wrapper .country-code {
   position: absolute;
   left: 2.6rem;
-  font-size: 0.925rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #1C1500;
   user-select: none;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .phone-wrapper input {
-  padding-left: 5rem;
+  padding-left: 5.5rem;
 }
 
 .toggle-password-btn {

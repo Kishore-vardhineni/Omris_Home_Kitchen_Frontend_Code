@@ -2,6 +2,7 @@ import User from '../models/User.js';
 import { generateToken, setTokenCookie } from '../utils/generateToken.js';
 import crypto from 'crypto';
 import sendEmail from '../utils/sendEmail.js';
+import sendSms from '../utils/sendSms.js';
 
 /**
  * @desc    Register a new user (Signup)
@@ -418,3 +419,149 @@ export const updateUserProfile = async (req, res) => {
     });
   }
 };
+
+/**
+ * @desc    Send OTP to a registered mobile number for login
+ * @route   POST /api/auth/send-otp
+ * @access  Public
+ */
+export const sendOtp = async (req, res) => {
+  try {
+    const { mobile } = req.body;
+
+    if (!mobile) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a mobile number',
+      });
+    }
+
+    const cleanMobile = String(mobile).replace(/\D/g, '');
+    if (cleanMobile.length !== 10) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid 10-digit mobile number',
+      });
+    }
+
+    const user = await User.findOne({ phone: cleanMobile });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'No account found with this mobile number. Please register first.',
+      });
+    }
+
+    // Generate OTP using model method (stores hashed OTP + expiry on user doc)
+    const otp = user.generateLoginOtp();
+    await user.save({ validateBeforeSave: false });
+
+    // 1. Send OTP to registered email (using existing working Gmail SMTP)
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: `Your Login OTP - ${otp} | Omris Home Kitchen`,
+        message: `Your login OTP is ${otp}. It is valid for 10 minutes.`,
+        htmlMessage: `
+          <div style="font-family: Arial, sans-serif; padding: 20px; color: #1C1500; background-color: #FEF3C0; border-radius: 10px;">
+            <h2 style="color: #1C1500; margin-bottom: 10px;">Omri's Home Kitchen - Login OTP</h2>
+            <p>Hello <strong>${user.name || 'Valued Customer'}</strong>,</p>
+            <p>You requested a 6-digit OTP to log into your account with mobile number <strong>+91 ${cleanMobile}</strong>.</p>
+            <div style="background-color: #1C1500; color: #F5B800; font-size: 28px; font-weight: bold; letter-spacing: 6px; padding: 15px 25px; display: inline-block; border-radius: 8px; margin: 15px 0;">
+              ${otp}
+            </div>
+            <p>This OTP is valid for <strong>10 minutes</strong>. Do not share it with anyone.</p>
+            <hr style="border: none; border-top: 1px solid #e2d9c5; margin: 20px 0;" />
+            <p style="font-size: 12px; color: #666666;">If you did not request this OTP, please ignore this email.</p>
+          </div>
+        `,
+      });
+    } catch (emailErr) {
+      console.warn('⚠️ Could not send OTP email fallback:', emailErr.message);
+    }
+
+    // 2. Send the OTP via SMS (Twilio)
+    const smsMessage = `Your Omris Home Kitchen login OTP is ${otp}. It is valid for 10 minutes.`;
+    await sendSms(cleanMobile, smsMessage);
+
+    return res.status(200).json({
+      success: true,
+      message: `OTP sent successfully to +91 ${cleanMobile} (and to ${user.email})`,
+      ...(process.env.NODE_ENV === 'development' && { devOtp: otp }),
+    });
+  } catch (error) {
+    console.error('Error in sendOtp:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while sending OTP',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * @desc    Verify OTP and log user in
+ * @route   POST /api/auth/verify-otp
+ * @access  Public
+ */
+export const verifyOtp = async (req, res) => {
+  try {
+    const { mobile, otp } = req.body;
+
+    if (!mobile || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide both mobile number and OTP',
+      });
+    }
+
+    const cleanMobile = String(mobile).replace(/\D/g, '');
+
+    // Hash the submitted OTP to compare with stored hash
+    const hashedOtp = crypto.createHash('sha256').update(String(otp)).digest('hex');
+
+    const user = await User.findOne({
+      phone: cleanMobile,
+      loginOtp: hashedOtp,
+      loginOtpExpire: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid or expired OTP. Please request a new one.',
+      });
+    }
+
+    // Clear OTP fields after successful verification
+    user.loginOtp = undefined;
+    user.loginOtpExpire = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    const token = generateToken(user._id);
+    setTokenCookie(res, token);
+
+    return res.status(200).json({
+      success: true,
+      message: 'OTP verified. Login successful.',
+      token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        addresses: user.addresses,
+        isVerified: user.isVerified,
+      },
+    });
+  } catch (error) {
+    console.error('Error in verifyOtp:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while verifying OTP',
+      error: error.message,
+    });
+  }
+};
+

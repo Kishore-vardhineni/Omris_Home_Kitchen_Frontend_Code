@@ -1,0 +1,251 @@
+/* Login.css – Omri's Home Kitchen – Two-Mode Login UI */
+
+/* ── Mode Toggle Tabs ── */
+.login-mode-tabs {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #f4f0e6;
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 1.75rem;
+  overflow: hidden;
+  width: 100%;
+}
+
+.login-tab {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.6rem 0.5rem;
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: #888888;
+  background: transparent;
+  border: none;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: color 0.25s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.login-tab--active {
+  color: #1C1500;
+}
+
+.login-tab-indicator {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  height: calc(100% - 8px);
+  background: #ffffff;
+  border-radius: 9px;
+  box-shadow: 0 2px 8px rgba(28, 21, 0, 0.12);
+  z-index: 1;
+}
+
+/* ── Form container ── */
+.login-mode-form {
+  margin-top: 0;
+  width: 100%;
+}
+
+/* ── Label row with Forgot Password ── */
+.login-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.login-forgot-link {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1C1500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.login-forgot-link:hover {
+  color: #d99b00;
+}
+
+/* ── "Use OTP / Use Email" switch link ── */
+.login-switch-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.1rem;
+}
+
+.login-otp-switch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: none;
+  color: #1C1500;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s;
+  padding: 0;
+}
+
+.login-otp-switch-btn:hover {
+  color: #d99b00;
+}
+
+/* ── OTP hint text ── */
+.login-otp-hint {
+  font-size: 0.82rem;
+  color: #777777;
+  margin-top: 0.2rem;
+  display: block;
+}
+
+/* ── "Use Email to Login" outlined button ── */
+.login-email-switch-btn {
+  border: 2px solid #1C1500 !important;
+  color: #1C1500 !important;
+  font-weight: 700 !important;
+  gap: 0.5rem;
+}
+
+.login-email-switch-btn:hover:not(:disabled) {
+  background: #1C1500 !important;
+  color: #F5B800 !important;
+}
+
+/* ── OTP Sent Banner ── */
+.otp-sent-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #ecfdf5;
+  border: 1px solid #10b981;
+  color: #065f46;
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+}
+
+.otp-sent-banner p {
+  margin: 0;
+}
+
+.otp-sent-banner strong {
+  font-weight: 700;
+}
+
+/* ── OTP 6-Box Input Row ── */
+.otp-boxes-row {
+  display: flex;
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.otp-box {
+  /* Fixed sizing — each box is square */
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 52px;
+  height: 52px;
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1C1500;
+  background: #fdfbf7;
+  border: 2px solid #e2d9c5;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  caret-color: #F5B800;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.otp-box::-webkit-outer-spin-button,
+.otp-box::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+.otp-box:focus {
+  border-color: #1C1500;
+  box-shadow: 0 0 0 3px rgba(245, 184, 0, 0.3);
+  background: #ffffff;
+}
+
+.otp-box--filled {
+  border-color: #1C1500;
+  background: #fffdf5;
+}
+
+.otp-box--error {
+  border-color: #ef4444 !important;
+  background: #fef2f2 !important;
+}
+
+/* ── Resend Row ── */
+.otp-resend-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: -0.25rem;
+}
+
+.otp-resend-text {
+  font-size: 0.82rem;
+  color: #666666;
+}
+
+.otp-resend-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1C1500;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.2s;
+}
+
+.otp-resend-btn:hover:not(:disabled) {
+  color: #d99b00;
+}
+
+.otp-resend-btn:disabled {
+  color: #aaaaaa;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+/* ── Ensure signup-card doesn't overflow horizontally ── */
+.signup-card {
+  overflow: hidden;
+  min-width: 0;
+}
+
+.signup-card .signup-form,
+.signup-card .login-mode-form {
+  overflow: hidden;
+  min-width: 0;
+}
