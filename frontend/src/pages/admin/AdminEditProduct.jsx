@@ -431,6 +431,26 @@ const AdminEditProduct = () => {
                   <label className="admin-form-label">Price ₹</label>
                   <input className="admin-form-input" type="number" value={v.price} onChange={e => handleVariantChange(i, 'price', e.target.value)} min="0" />
                 </div>
+                <div className="admin-form-group" style={{ minWidth: '90px' }}>
+                  <label className="admin-form-label">Discount %</label>
+                  <select 
+                    className="admin-form-select" 
+                    onChange={e => {
+                      const discount = parseInt(e.target.value, 10);
+                      if (v.price && discount > 0) {
+                        const newDiscountedPrice = Math.round(v.price * (1 - discount / 100));
+                        handleVariantChange(i, 'discountedPrice', newDiscountedPrice);
+                      } else if (discount === 0) {
+                        handleVariantChange(i, 'discountedPrice', '');
+                      }
+                    }}
+                    defaultValue="0"
+                  >
+                    {[0, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100].map(pct => (
+                      <option key={pct} value={pct}>{pct}%</option>
+                    ))}
+                  </select>
+                </div>
                 <div className="admin-form-group">
                   <label className="admin-form-label">Discounted ₹</label>
                   <input className="admin-form-input" type="number" value={v.discountedPrice} onChange={e => handleVariantChange(i, 'discountedPrice', e.target.value)} min="0" />
