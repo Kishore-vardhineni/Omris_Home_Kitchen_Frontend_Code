@@ -10,7 +10,7 @@ import VariantSelector from '../components/Product/VariantSelector';
 import QuantitySelector from '../components/Product/QuantitySelector';
 import StickyMobileAddToCart from '../components/Product/StickyMobileAddToCart';
 import ProductReviewsSection from '../components/ProductReviewsSection';
-import { PACKING_PRICES } from '../data/products';
+
 import { useCart } from '../context/CartContext';
 import { getProductBySlug } from '../services/productService';
 
@@ -89,7 +89,7 @@ const ProductDetail = () => {
   const [error, setError] = useState(null);
 
   const [selectedWeight, setSelectedWeight] = useState('');
-  const [selectedPacking, setSelectedPacking] = useState('Without Bottle');
+
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -174,13 +174,14 @@ const ProductDetail = () => {
 
   // ── Derived State Options ──────────────────────────────────────────────────
   const weightOptions = product.variants ? product.variants.map((v) => v.label) : [];
-  const packingOptions = Object.keys(PACKING_PRICES);
-
   // Identify active variant details
   const activeVariant = product.variants?.find((v) => v.label === selectedWeight) || product.variants?.[0];
   const unitPrice = activeVariant ? (activeVariant.discountedPrice ?? activeVariant.price) : 0;
-  const packCharge = PACKING_PRICES[selectedPacking] ?? 0;
-  const totalPrice = ((unitPrice + packCharge) * quantity).toFixed(2);
+  const originalUnitPrice = activeVariant?.discountedPrice ? activeVariant.price : null;
+  const discountPercent = (originalUnitPrice && originalUnitPrice > unitPrice)
+    ? Math.round(((originalUnitPrice - unitPrice) / originalUnitPrice) * 100)
+    : 0;
+  const totalPrice = (unitPrice * quantity).toFixed(2);
 
   // Disabled weight options (out of stock or unavailable)
   const disabledWeights = product.variants
@@ -220,19 +221,18 @@ const ProductDetail = () => {
   // ── Cart Handlers ─────────────────────────────────────────────────────────
   const handleAddToCart = () => {
     if (!activeVariant) return;
-    const itemPrice = unitPrice + packCharge;
 
     dispatch({
       type: 'ADD_ITEM',
       payload: {
-        id: `${product._id}-${selectedWeight}-${selectedPacking.replace(/\s+/g, '-').toLowerCase()}`,
+        id: `${product._id}-${selectedWeight}`,
         name: product.name,
-        price: itemPrice,
+        price: unitPrice,
+        originalPrice: originalUnitPrice,
         image: product.image?.url,
         quantity: quantity,
         description: product.shortDescription || product.longDescription,
         weight: selectedWeight,
-        packing: selectedPacking,
       },
     });
 
@@ -384,6 +384,16 @@ const ProductDetail = () => {
 
             <div className="flex flex-wrap items-baseline gap-3 pt-1">
               <AnimatedPrice price={totalPrice} />
+              {originalUnitPrice && (
+                <span className="text-lg sm:text-xl text-neutral-400 line-through font-medium">
+                  ₹{(originalUnitPrice * quantity).toFixed(0)}
+                </span>
+              )}
+              {discountPercent > 0 && (
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">
+                  {discountPercent}% OFF
+                </span>
+              )}
             </div>
 
             <p className="-mt-3 text-xs sm:text-sm text-neutral-500 font-medium">
@@ -406,21 +416,7 @@ const ProductDetail = () => {
               />
             )}
 
-            {/* Packing Selector */}
-            <VariantSelector
-              label="Packing"
-              options={packingOptions}
-              selectedValue={selectedPacking}
-              onChange={setSelectedPacking}
-              priceHint={
-                Object.fromEntries(
-                  packingOptions.map((opt) => [
-                    opt,
-                    PACKING_PRICES[opt] === 0 ? 'Free' : `+₹${PACKING_PRICES[opt]}`,
-                  ])
-                )
-              }
-            />
+
 
             {/* Quantity selector */}
             <QuantitySelector

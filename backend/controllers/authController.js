@@ -318,6 +318,29 @@ export const resetPassword = async (req, res) => {
 };
 
 /**
+ * @desc    Get logged-in user's profile
+ * @route   GET /api/auth/profile
+ * @access  Private
+ */
+export const getUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('-password -resetPasswordToken -resetPasswordExpire');
+    
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    return res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    return res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+};
+
+/**
  * @desc    Update logged-in user's profile
  * @route   PUT /api/users/profile
  * @access  Private
@@ -415,6 +438,64 @@ export const updateUserProfile = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Server error while updating profile',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * @desc    Add a delivery address for the logged-in user
+ * @route   POST /api/auth/profile/address
+ * @access  Private
+ */
+export const addUserAddress = async (req, res) => {
+  try {
+    const { name, phone, state, address, remarks, addressId } = req.body;
+    
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    if (addressId) {
+      // UPDATE existing address
+      const existingIndex = user.addresses.findIndex(
+        (a) => a._id.toString() === addressId
+      );
+      if (existingIndex !== -1) {
+        user.addresses[existingIndex].fullName = name;
+        user.addresses[existingIndex].phone    = phone || user.phone;
+        user.addresses[existingIndex].street   = address;
+        user.addresses[existingIndex].state    = state;
+        user.addresses[existingIndex].landmark = remarks || '';
+      } else {
+        return res.status(404).json({ success: false, message: 'Address not found' });
+      }
+    } else {
+      // ADD new address
+      const newAddress = {
+        fullName: name,
+        phone: phone || user.phone,
+        street: address,
+        state: state,
+        landmark: remarks || '',
+        isDefault: user.addresses.length === 0
+      };
+      user.addresses.push(newAddress);
+    }
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: addressId ? 'Address updated successfully' : 'Address saved successfully',
+      addresses: user.addresses,
+    });
+  } catch (error) {
+    console.error('Error in addUserAddress:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error while saving address',
       error: error.message,
     });
   }

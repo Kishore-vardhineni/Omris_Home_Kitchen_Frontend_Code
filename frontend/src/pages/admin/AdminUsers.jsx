@@ -191,14 +191,18 @@ const AdminUsers = () => {
   const exportToExcel = () => {
     if (sorted.length === 0) return alert('No users to export');
     
-    const headers = ['Name', 'Email', 'Phone', 'Role', 'Joined Date'];
-    const rows = sorted.map((u) => [
+    const headers = ['Name', 'Email', 'Phone', 'Address', 'Role', 'Joined Date'];
+    const rows = sorted.map((u) => {
+      const address = u.addresses && u.addresses.length > 0 ? `${u.addresses[0].street}, ${u.addresses[0].state}` : 'N/A';
+      return [
       `"${(u.name || '').replace(/"/g, '""')}"`,
       `"${(u.email || '').replace(/"/g, '""')}"`,
       `"${(u.phone || '').replace(/"/g, '""')}"`,
+      `"${address.replace(/"/g, '""')}"`,
       `"${u.role === 'admin' ? 'Admin' : 'Customer'}"`,
       `"${new Date(u.createdAt).toLocaleDateString('en-IN')} ${new Date(u.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}"`,
-    ]);
+      ];
+    });
 
     const csvString = '\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
     const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
@@ -229,15 +233,19 @@ const AdminUsers = () => {
         doc.setTextColor(107, 114, 128);
         doc.text(`Generated on: ${new Date().toLocaleString('en-IN')} | Total Records: ${sorted.length}`, 14, 22);
 
-        const tableColumn = ['S.No', 'Name', 'Email', 'Phone', 'Role', 'Joined Date'];
-        const tableRows = sorted.map((u, i) => [
+        const tableColumn = ['S.No', 'Name', 'Email', 'Phone', 'Address', 'Role', 'Joined Date'];
+        const tableRows = sorted.map((u, i) => {
+          const address = u.addresses && u.addresses.length > 0 ? `${u.addresses[0].street}, ${u.addresses[0].state}` : 'N/A';
+          return [
           i + 1,
           u.name || '',
           u.email || '',
           u.phone || 'N/A',
+          address,
           u.role === 'admin' ? 'Admin' : 'Customer',
           `${new Date(u.createdAt).toLocaleDateString('en-IN')} ${new Date(u.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}`,
-        ]);
+        ];
+        });
 
         doc.autoTable({
           head: [tableColumn],
@@ -436,6 +444,11 @@ const AdminUsers = () => {
                     </div>
                   </th>
                   <th style={{ ...tdStyle, borderBottom: '1px solid #f3f4f6' }}>
+                    <div style={thStyle('')}>
+                      ADDRESS
+                    </div>
+                  </th>
+                  <th style={{ ...tdStyle, borderBottom: '1px solid #f3f4f6' }}>
                     <div style={thStyle('role')} onClick={() => handleSort('role')}>
                       ROLE <SortIcon field="role" />
                     </div>
@@ -502,6 +515,20 @@ const AdminUsers = () => {
                         {/* Phone */}
                         <td style={tdStyle}>
                           <span style={{ color: '#6b7280', fontSize: '0.85rem' }}>{user.phone || '—'}</span>
+                        </td>
+
+                        {/* Address */}
+                        <td style={tdStyle}>
+                          <div style={{ color: '#374151', fontSize: '0.8rem', maxWidth: '150px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={user.addresses && user.addresses.length > 0 ? `${user.addresses[0].street}, ${user.addresses[0].state}` : 'N/A'}>
+                            {user.addresses && user.addresses.length > 0 ? (
+                              <>
+                                <div style={{ fontWeight: 500 }}>{user.addresses[0].street}</div>
+                                <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>{user.addresses[0].state}</div>
+                              </>
+                            ) : (
+                              <span style={{ color: '#9ca3af' }}>—</span>
+                            )}
+                          </div>
                         </td>
 
                         {/* Role badge */}

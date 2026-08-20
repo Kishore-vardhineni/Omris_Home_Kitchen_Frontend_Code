@@ -23,6 +23,7 @@ const Signup        = React.lazy(() => import('./pages/Signup'));
 const Login         = React.lazy(() => import('./pages/Login'));
 const ForgotPassword = React.lazy(() => import('./pages/ForgotPassword'));
 const ResetPassword = React.lazy(() => import('./pages/ResetPassword'));
+const OrderSuccess   = React.lazy(() => import('./pages/OrderSuccess'));
 const OrderHistory  = React.lazy(() => import('./pages/OrderHistory'));
 const Profile       = React.lazy(() => import('./pages/Profile'));
 
@@ -35,6 +36,7 @@ const AdminOrders      = React.lazy(() => import('./pages/admin/AdminOrders'));
 const AdminRevenue     = React.lazy(() => import('./pages/admin/AdminRevenue'));
 const AdminUsers       = React.lazy(() => import('./pages/admin/AdminUsers'));
 const AdminReports     = React.lazy(() => import('./pages/admin/AdminReports'));
+const AdminSettings    = React.lazy(() => import('./pages/admin/AdminSettings'));
 
 // ── Public Layout (wraps all non-admin routes with Navbar + Footer) ───────────
 const PublicLayout = () => (
@@ -61,6 +63,7 @@ function App() {
           <Route path="/admin/products" element={<AdminRoute><AdminProducts /></AdminRoute>} />
           <Route path="/admin/products/add" element={<AdminRoute><AdminAddProduct /></AdminRoute>} />
           <Route path="/admin/products/edit/:id" element={<AdminRoute><AdminEditProduct /></AdminRoute>} />
+          <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
 
           {/* ══════════════ PUBLIC ROUTES — wrapped in PublicLayout ══════════════ */}
           <Route element={<PublicLayout />}>
@@ -72,6 +75,7 @@ function App() {
             <Route path="/products/:id"    element={<ProductDetail />} />
             <Route path="/cart"            element={<ProtectedRoute><Cart /></ProtectedRoute>} />
             <Route path="/checkout"        element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+            <Route path="/order/success"   element={<ProtectedRoute><OrderSuccess /></ProtectedRoute>} />
             <Route path="/signup"          element={<Signup />} />
             <Route path="/login"           element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />

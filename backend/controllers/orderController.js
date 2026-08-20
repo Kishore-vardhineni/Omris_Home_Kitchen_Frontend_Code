@@ -8,7 +8,7 @@ import sendOrderNotificationEmail from '../utils/sendOrderEmail.js';
  */
 export const placeOrder = async (req, res) => {
   try {
-    const { orderItems, totalPrice, paymentMethod, status, guestInfo } = req.body;
+    const { orderItems, totalPrice, paymentMethod, status, guestInfo, shippingAddress } = req.body;
 
     if (!orderItems || orderItems.length === 0) {
       return res.status(400).json({
@@ -22,6 +22,7 @@ export const placeOrder = async (req, res) => {
       totalPrice,
       paymentMethod: paymentMethod || 'WhatsApp',
       status: status || 'Awaiting Confirmation',
+      shippingAddress: shippingAddress || {},
     };
 
     if (req.user) {

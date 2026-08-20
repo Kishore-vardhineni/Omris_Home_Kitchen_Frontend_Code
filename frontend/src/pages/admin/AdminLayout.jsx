@@ -12,6 +12,7 @@ import {
   TrendingUp,
   Users,
   FileText,
+  QrCode,
 } from 'lucide-react';
 import './Admin.css';
 
@@ -41,6 +42,12 @@ const NAV_GROUPS = [
     items: [
       { label: 'All Products', icon: Package,     to: '/admin/products' },
       { label: 'Add Product',  icon: PlusCircle,  to: '/admin/products/add' },
+    ]
+  },
+  {
+    section: 'Settings',
+    items: [
+      { label: 'Payment Settings', icon: QrCode, to: '/admin/settings' },
     ]
   },
 ];
@@ -146,6 +153,30 @@ const AdminLayout = ({ children, title = 'Dashboard' }) => {
           <div className="admin-topbar-right">
             <span className="admin-topbar-name">{user?.name}</span>
             <div className="admin-topbar-avatar">{initials}</div>
+            <button 
+              onClick={handleLogout}
+              title="Sign Out"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                marginLeft: '12px',
+                padding: '6px 12px',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                backgroundColor: '#fff',
+                color: '#ef4444',
+                fontSize: '0.85rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#fef2f2'; e.currentTarget.style.borderColor = '#fca5a5'; }}
+              onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#fff'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
+            >
+              <LogOut size={16} />
+              <span className="hidden sm:inline" style={{ display: 'none' }}>Sign Out</span>
+            </button>
           </div>
         </div>
 

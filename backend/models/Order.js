@@ -23,6 +23,16 @@ const orderSchema = new mongoose.Schema(
       phone: { type: String },
     },
     orderItems: [orderItemSchema],
+    shippingAddress: {
+      fullName: { type: String },
+      name:     { type: String },
+      street:   { type: String },
+      address:  { type: String },
+      state:    { type: String },
+      phone:    { type: String },
+      landmark: { type: String },
+      remarks:  { type: String },
+    },
     totalPrice: {
       type: Number,
       required: true,
@@ -30,7 +40,7 @@ const orderSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ['WhatsApp', 'Online', 'Cash on Delivery', 'PhonePe / UPI'],
+      enum: ['WhatsApp', 'Online', 'Cash on Delivery', 'PhonePe / UPI', 'UPI'],
       default: 'WhatsApp',
     },
     isPaid: {
@@ -48,7 +58,7 @@ const orderSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['Pending', 'Awaiting Confirmation', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
+      enum: ['Pending', 'Payment Pending', 'Awaiting Confirmation', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
       default: 'Awaiting Confirmation',
     },
     deliveredAt: {

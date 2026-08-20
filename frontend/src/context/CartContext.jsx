@@ -55,14 +55,10 @@ const cartReducer = (state, action) => {
 };
 
 export const CartProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(cartReducer, initialState);
-
-  useEffect(() => {
+  const [state, dispatch] = useReducer(cartReducer, initialState, () => {
     const savedCart = localStorage.getItem('OmrisHomeKitchenPicklesCart');
-    if (savedCart) {
-      dispatch({ type: 'INIT_CART', payload: JSON.parse(savedCart) });
-    }
-  }, []);
+    return savedCart ? JSON.parse(savedCart) : initialState;
+  });
 
   useEffect(() => {
     localStorage.setItem('OmrisHomeKitchenPicklesCart', JSON.stringify(state));

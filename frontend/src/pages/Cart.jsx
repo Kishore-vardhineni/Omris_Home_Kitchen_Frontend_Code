@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingBag, Trash2, ArrowLeft, Clock, CheckCircle2, X, MessageCircle, Loader2 } from 'lucide-react';
+import { ShoppingBag, Trash2, ArrowLeft, Clock, CheckCircle2, X, Loader2, Star, Truck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // ── Cart Item Component ────────────────────────────────────────────────────────
@@ -9,62 +9,76 @@ const CartItem = ({ item, dispatch }) => {
   const cleanName = item.name ? item.name.replace(/\s*\([^)]*\)/, '') : '';
   const rawVariant = item.name && item.name.match(/\(([^)]+)\)/)?.[1];
   const displayWeight = item.weight || rawVariant || '250 gms';
-  const displayPacking = item.packing && item.packing !== 'Without Bottle' ? ` • ${item.packing}` : '';
+  const itemTotal = (item.price * item.quantity).toFixed(0);
+  const originalTotal = item.originalPrice ? (item.originalPrice * item.quantity).toFixed(0) : null;
+  const discountPercent = originalTotal && originalTotal > itemTotal
+    ? Math.round(((originalTotal - itemTotal) / originalTotal) * 100)
+    : 0;
 
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 py-6 border-b border-neutral-100 last:border-b-0">
-      <div className="flex items-center gap-5 sm:gap-6">
-        <img
-          src={item.image || "https://images.unsplash.com/photo-1589301773950-a92c4c1538df?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"}
-          alt={cleanName || item.name}
-          className="w-24 h-24 sm:w-28 sm:h-28 object-cover rounded-md bg-neutral-50 flex-shrink-0 border border-neutral-200/60"
-        />
-        <div>
-          <h3 className="font-bold text-neutral-900 text-base sm:text-lg leading-snug">
-            {cleanName || item.name}
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 py-5 border-b border-neutral-100 last:border-b-0">
+      <div className="flex items-center gap-4 sm:gap-5 w-full sm:w-auto flex-1">
+        <div className="p-1 border border-neutral-200 rounded bg-white flex-shrink-0">
+          <img
+            src={item.image || "https://images.unsplash.com/photo-1589301773950-a92c4c1538df?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"}
+            alt={cleanName || item.name}
+            className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded bg-neutral-50"
+          />
+        </div>
+        <div className="flex-1">
+          <h3 className="font-medium text-[#0f172a] text-base sm:text-[17px] leading-snug tracking-tight">
+            {cleanName || item.name} {displayWeight}
           </h3>
-          <p className="text-neutral-400 text-sm mt-1 font-normal">
-            {displayWeight}{displayPacking}
+          <p className="text-[#64748b] text-[13px] mt-1 mb-3 uppercase tracking-wide">
+            NOS
           </p>
-          <button
-            onClick={() => dispatch({ type: 'REMOVE_ITEM', payload: item })}
-            className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 px-3 py-1.5 rounded-lg transition-colors mt-3 w-fit cursor-pointer"
-          >
-            <Trash2 size={15} />
-            <span>Remove</span>
-          </button>
+          <div className="flex items-baseline gap-2.5">
+            <span className="font-bold text-[#0f172a] text-base sm:text-lg">₹{itemTotal}</span>
+            {originalTotal && (
+              <span className="text-sm text-[#64748b] line-through font-medium">₹{originalTotal}</span>
+            )}
+            {discountPercent > 0 && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-[#dcfce7] text-[#166534]">
+                {discountPercent}% OFF
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center justify-between sm:justify-end gap-6 sm:gap-10 w-full sm:w-auto">
-        <div className="flex items-center bg-[#f5f5f5] rounded border border-neutral-200 overflow-hidden text-neutral-600">
+      <div className="flex items-center gap-4 sm:gap-6 self-end sm:self-auto w-full sm:w-auto justify-end mt-2 sm:mt-0">
+        <div className="flex items-center bg-white rounded border border-neutral-200 overflow-hidden">
           <button
             onClick={() => {
               if (item.quantity > 1) {
                 dispatch({ type: 'UPDATE_QUANTITY', payload: { id: item.id, quantity: item.quantity - 1 } });
               }
             }}
-            className="w-8 h-8 flex items-center justify-center hover:bg-neutral-200 text-neutral-500 transition-colors text-sm font-medium"
+            className="w-8 h-8 flex items-center justify-center hover:bg-neutral-50 text-[#5c4bdf] transition-colors text-lg border-r border-neutral-100"
             aria-label="Decrease quantity"
           >
             -
           </button>
-          <span className="w-9 text-center text-sm font-medium text-neutral-800 select-none">
+          <span className="w-10 text-center text-sm text-neutral-800 select-none">
             {item.quantity}
           </span>
           <button
             onClick={() => {
               dispatch({ type: 'UPDATE_QUANTITY', payload: { id: item.id, quantity: item.quantity + 1 } });
             }}
-            className="w-8 h-8 flex items-center justify-center hover:bg-neutral-200 text-neutral-500 transition-colors text-sm font-medium"
+            className="w-8 h-8 flex items-center justify-center hover:bg-neutral-50 text-[#5c4bdf] transition-colors text-lg border-l border-neutral-100"
             aria-label="Increase quantity"
           >
             +
           </button>
         </div>
-        <div className="text-right font-medium text-neutral-700 text-base sm:text-lg min-w-[100px]">
-          Rs. {(item.price * item.quantity).toFixed(2)}
-        </div>
+        <button
+          onClick={() => dispatch({ type: 'REMOVE_ITEM', payload: item })}
+          className="text-neutral-400 hover:text-red-500 transition-colors p-1"
+          aria-label="Remove item"
+        >
+          <Trash2 size={18} />
+        </button>
       </div>
     </div>
   );
@@ -277,29 +291,47 @@ const Cart = () => {
     setOrderSuccess(true);
   };
 
+  // Calculate original total for savings
+  const originalTotal = state.items.reduce((acc, item) => {
+    const origPrice = item.originalPrice || Math.round(item.price * 1.43);
+    return acc + (origPrice * item.quantity);
+  }, 0);
+  const savings = originalTotal - state.total;
+  const deliveryCharge = state.total > 2000 ? 0 : 100;
+  const orderTotal = state.total + deliveryCharge;
+
   return (
     <div className="bg-[#faf9f6] min-h-screen font-sans text-neutral-800 p-4 sm:p-8 lg:p-12">
-      <div className="max-w-[1000px] mx-auto">
+      <div className="max-w-[1200px] mx-auto">
 
-        {/* Breadcrumb */}
-        <nav aria-label="Breadcrumb" className="mb-3 text-xs sm:text-sm text-neutral-500 flex flex-wrap items-center gap-1.5">
-          <Link to="/" className="hover:text-black transition-colors">Home</Link>
-          <span>/</span>
-          <span className="text-neutral-900 font-medium">Cart</span>
-        </nav>
+        {/* Header: Title and Back Button */}
+        <div className="flex flex-wrap items-center justify-between mb-6 gap-4">
+          <h1 className="text-3xl font-semibold text-[#2f3542]">My Cart</h1>
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-1.5 text-[#5c4bdf] border border-[#e0ddf7] hover:bg-[#f3f0ff] bg-white px-4 py-2 rounded-md font-medium text-sm transition-colors"
+          >
+            <ArrowLeft size={16} /> Back to shopping
+          </button>
+        </div>
 
-        {/* Back button */}
-        <button
-          onClick={() => navigate(-1)}
-          className="mb-6 flex items-center gap-1.5 text-sm font-medium text-neutral-500 hover:text-black transition-colors cursor-pointer"
-          aria-label="Go back"
-        >
-          <ArrowLeft size={16} /> Back
-        </button>
-
-        <h1 className="text-3xl sm:text-4xl font-serif text-neutral-900 mb-5 tracking-tight">
-          Shopping Cart
-        </h1>
+        {/* Top Stepper inside a white box */}
+        <div className="mb-8 flex flex-wrap items-center gap-3 sm:gap-4 text-sm font-medium text-neutral-400 bg-white p-4 rounded-lg shadow-sm border border-neutral-100 w-full">
+          <div className="flex items-center gap-2 text-[#5c4bdf]">
+            <span className="w-5 h-5 rounded-full bg-[#5c4bdf] text-white flex items-center justify-center text-xs">1</span>
+            Cart
+          </div>
+          <span>→</span>
+          <div className="flex items-center gap-2">
+            <span className="w-5 h-5 rounded-full bg-neutral-200 text-neutral-400 flex items-center justify-center text-xs">2</span>
+            Delivery Address
+          </div>
+          <span>→</span>
+          <div className="flex items-center gap-2">
+            <span className="w-5 h-5 rounded-full bg-neutral-200 text-neutral-400 flex items-center justify-center text-xs">3</span>
+            Payment
+          </div>
+        </div>
 
         {/* ── Order Success Banner ── */}
         <AnimatePresence>
@@ -316,7 +348,7 @@ const Cart = () => {
                 </div>
                 <div>
                   <p className="font-bold text-amber-900 text-sm">Order Placed! Awaiting Confirmation ⏳</p>
-                  <p className="text-amber-700 text-xs mt-0.5">Your order is saved as "Awaiting Confirmation". Please send the WhatsApp message so our team can confirm it.</p>
+                  <p className="text-amber-700 text-xs mt-0.5">Your order is saved as "Awaiting Confirmation".</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 ml-13 sm:ml-0">
@@ -338,66 +370,101 @@ const Cart = () => {
           )}
         </AnimatePresence>
 
-        <div className="bg-white rounded-xl p-6 sm:p-8 shadow-sm border border-neutral-200/80">
-          {state.items.length === 0 ? (
-            <div className="text-center py-16">
-              <ShoppingBag className="mx-auto text-neutral-300 mb-4" size={56} strokeWidth={1.5} />
-              <h2 className="text-2xl font-serif text-neutral-800 mb-2">Your cart is empty</h2>
-              <p className="text-neutral-500 mb-6 text-sm sm:text-base">
-                Looks like you haven't added any items to your cart yet.
-              </p>
-              <Link
-                to="/products"
-                className="inline-block px-6 py-3 bg-black text-white rounded-lg font-medium text-sm hover:bg-neutral-800 transition-colors shadow-sm"
-              >
-                Start Shopping
-              </Link>
-            </div>
-          ) : (
-            <div>
-              <div className="divide-y divide-neutral-100">
+        {state.items.length === 0 ? (
+          <div className="bg-white rounded-xl p-6 sm:p-8 shadow-sm border border-neutral-200 text-center py-16">
+            <ShoppingBag className="mx-auto text-neutral-300 mb-4" size={56} strokeWidth={1.5} />
+            <h2 className="text-2xl font-serif text-neutral-800 mb-2">Your cart is empty</h2>
+            <p className="text-neutral-500 mb-6 text-sm sm:text-base">
+              Looks like you haven't added any items to your cart yet.
+            </p>
+            <Link
+              to="/products"
+              className="inline-block px-6 py-3 bg-[#5c4bdf] text-white rounded font-medium text-sm hover:bg-[#4f3cc9] transition-colors shadow-sm"
+            >
+              Start Shopping
+            </Link>
+          </div>
+        ) : (
+          <div className="flex flex-col lg:flex-row gap-6 items-start">
+            
+            {/* Left Column: Cart Items */}
+            <div className="flex-1 w-full bg-white rounded-lg border border-neutral-200">
+              <div className="flex items-center justify-between p-5 sm:p-6 border-b border-neutral-200">
+                <h2 className="text-lg font-medium text-neutral-800">My cart ({state.items.length} Items)</h2>
+                <span className="text-lg font-medium text-neutral-800">Total ₹{state.total.toFixed(0)}</span>
+              </div>
+              
+              <div className="divide-y divide-neutral-200 px-5 sm:px-6">
                 {state.items.map((item) => (
                   <CartItem key={item.id} item={item} dispatch={dispatch} />
                 ))}
               </div>
+            </div>
 
-              {/* Cart Footer */}
-              <div className="mt-8 pt-6 border-t border-neutral-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <p className="text-neutral-400 text-xs sm:text-sm">
-                  Clicking "Order on WhatsApp" will review your order and send it directly to our kitchen team!
-                </p>
-                <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto flex-wrap">
-                  <div className="text-left sm:text-right">
-                    <span className="text-xs text-neutral-500 block uppercase tracking-wider font-semibold">Subtotal</span>
-                    <span className="text-xl font-bold text-neutral-900">
-                      Rs. {state.total.toFixed(2)}
-                    </span>
+            {/* Right Column: Order Summary */}
+            <div className="w-full lg:w-[360px] flex-shrink-0 flex flex-col gap-4">
+              
+              <div className="bg-white rounded-lg p-5 sm:p-6 border border-neutral-200">
+                <h2 className="text-lg font-medium text-neutral-800 mb-4">Order Summary</h2>
+                
+                <div className="space-y-3 text-sm text-neutral-500">
+                  <div className="flex justify-between">
+                    <span>Items ({state.items.length})</span>
+                    <span className="text-neutral-800 font-medium">₹{state.total.toFixed(0)}</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span>Delivery Charges</span>
+                    <span className="text-neutral-800 font-medium">₹{deliveryCharge}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>GST</span>
+                    <span className="text-neutral-800 font-medium">₹0</span>
+                  </div>
+                </div>
 
-                  {/* Order on WhatsApp Button */}
-                  <button
-                    onClick={handleWhatsAppClick}
-                    className="px-6 py-3.5 bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl font-bold text-sm sm:text-base transition-all shadow-md flex items-center justify-center gap-2.5 cursor-pointer hover:shadow-lg hover:scale-[1.01]"
-                  >
-                    <MessageCircle size={20} />
-                    <span>Order on WhatsApp</span>
-                  </button>
+                <hr className="border-t border-dashed border-neutral-300 my-5" />
+                
+                <div className="flex justify-between items-center mb-6">
+                  <span className="text-base text-neutral-800">Order Total</span>
+                  <span className="text-lg font-bold text-neutral-900">₹{orderTotal.toFixed(0)}</span>
+                </div>
 
-                  {/* My Orders shortcut */}
-                  {localStorage.getItem('token') && (
-                    <Link
-                      to="/order-history"
-                      className="flex items-center gap-1.5 text-sm font-medium text-neutral-600 hover:text-neutral-900 border border-neutral-300 hover:border-neutral-500 px-4 py-3.5 rounded-xl transition-all"
-                    >
-                      <Clock size={16} />
-                      My Orders
-                    </Link>
-                  )}
+                <button 
+                  onClick={() => navigate('/checkout')}
+                  className="w-full py-3 bg-[#5c4bdf] hover:bg-[#4f3cc9] text-white rounded font-medium transition-colors mb-4"
+                >
+                  Checkout
+                </button>
+                
+                {savings > 0 && (
+                  <div className="flex items-center justify-center gap-1.5 text-[#22c55e] text-sm font-medium">
+                    <Star size={16} className="fill-current" /> Your Savings: ₹{savings.toFixed(0)}
+                  </div>
+                )}
+              </div>
+              
+              <div className="bg-[#f1f5f9] rounded-lg p-4 flex items-center gap-3 text-sm text-neutral-700">
+                <Truck size={20} className="text-neutral-400 flex-shrink-0" />
+                <span>Free delivery with cart value above <strong>₹2,000</strong></span>
+              </div>
+
+              <div className="mt-2">
+                <p className="text-[#64748b] font-medium mb-3">Store Terms and Conditions</p>
+                <div className="bg-[#f8fafc] p-5 rounded-lg text-sm text-[#475569] leading-relaxed tracking-wide">
+                  <ul className="list-disc pl-5 space-y-2 marker:text-[#94a3b8]">
+                    <li>NO RETURN, ONLY EXCHANGE, IF ANY DAMAGE.</li>
+                    <li>WHEN YOU OPEN THE PACKAGE YOU CAN SHOOT A VIDEO AND SEND TO WHATSAPP IF THERE IS ANY DAMAGES,</li>
+                    <li>NOTE:</li>
+                    <li><span role="img" aria-label="cross">❌</span>YOU CAN'T RECORD VIDEO OR YOU CAN'T SEND TO CUSTOMER SUPPORT WE CAN'T HELP YOU<span role="img" aria-label="cross">❌</span></li>
+                    <li className="list-none">&nbsp;</li>
+                    <li>PLEASE KINDLY FOLLOW.</li>
+                  </ul>
                 </div>
               </div>
+
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* ── Order Confirm Modal ── */}

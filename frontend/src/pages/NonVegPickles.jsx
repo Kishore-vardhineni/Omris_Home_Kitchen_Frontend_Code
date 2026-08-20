@@ -1,41 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import '../styles/PickleVarieties.css';
 import { getProducts } from '../services/productService';
-
-const ProductCard = ({ product, index }) => {
-  const displayPrice = product.startingPrice || (product.variants && product.variants[0] ? product.variants[0].price : 0);
-  const displayWeight = product.variants && product.variants[0] ? product.variants[0].label : '';
-
-  return (
-    <Link
-      to={`/products/${product.slug}`}
-      className="product-card-link"
-      aria-label={`View details for ${product.name}`}
-    >
-      <motion.div
-        className="tomato-card"
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ delay: index * 0.1 }}
-        whileHover={{ y: -10, scale: 1.02 }}
-      >
-        <div className="tomato-img-wrapper">
-          <img src={product.image?.url} alt={product.name} />
-        </div>
-        <div className="tomato-info">
-          <h4>{product.name} {displayWeight && <strong>({displayWeight})</strong>}</h4>
-          <p className="tomato-price">₹{displayPrice}</p>
-          <button className="btn btn-choose-option add-to-cart-btn">
-            Choose an Option
-          </button>
-        </div>
-      </motion.div>
-    </Link>
-  );
-};
+import ProductCard from '../components/ProductCard/ProductCard';
 
 const NonVegPickles = () => {
   const [products, setProducts] = useState([]);

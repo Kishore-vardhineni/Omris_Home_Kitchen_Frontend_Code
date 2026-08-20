@@ -1,5 +1,6 @@
 import express from 'express';
 import User from '../models/User.js';
+import Settings from '../models/Settings.js';
 import { protect, adminOnly } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -76,6 +77,27 @@ router.put('/users/:id', protect, adminOnly, async (req, res) => {
   } catch (error) {
     console.error('Error updating user:', error);
     return res.status(500).json({ success: false, message: 'Server error updating user', error: error.message });
+  }
+});
+
+// @route   PUT /api/admin/settings
+// @desc    Update global settings (UPI QR code, UPI ID, etc.) — admin only
+// @access  Private/Admin
+router.put('/settings', protect, adminOnly, async (req, res) => {
+  try {
+    const { upiId, upiQrCode, upiName } = req.body;
+    let settings = await Settings.findOne({ key: 'global' });
+    if (!settings) {
+      settings = new Settings({ key: 'global' });
+    }
+    if (upiId !== undefined) settings.upiId = upiId;
+    if (upiQrCode !== undefined) settings.upiQrCode = upiQrCode;
+    if (upiName !== undefined) settings.upiName = upiName;
+    await settings.save();
+    return res.status(200).json({ success: true, message: 'Settings updated', settings });
+  } catch (error) {
+    console.error('Error updating settings:', error);
+    return res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 });
 

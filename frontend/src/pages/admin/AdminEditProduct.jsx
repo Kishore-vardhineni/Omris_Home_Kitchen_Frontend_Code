@@ -435,6 +435,15 @@ const AdminEditProduct = () => {
                   <label className="admin-form-label">Discount %</label>
                   <select 
                     className="admin-form-select" 
+                    value={(() => {
+                      if (v.price && v.discountedPrice && Number(v.price) > 0) {
+                        const pct = Math.round(((Number(v.price) - Number(v.discountedPrice)) / Number(v.price)) * 100);
+                        const options = [0, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100];
+                        // Find the closest option
+                        return options.includes(pct) ? pct : 0;
+                      }
+                      return 0;
+                    })()}
                     onChange={e => {
                       const discount = parseInt(e.target.value, 10);
                       if (v.price && discount > 0) {
@@ -444,10 +453,9 @@ const AdminEditProduct = () => {
                         handleVariantChange(i, 'discountedPrice', '');
                       }
                     }}
-                    defaultValue="0"
                   >
                     {[0, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100].map(pct => (
-                      <option key={pct} value={pct}>{pct}%</option>
+                      <option key={pct} value={pct}>{pct === 0 ? '0%' : `${pct}%`}</option>
                     ))}
                   </select>
                 </div>

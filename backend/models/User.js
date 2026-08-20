@@ -28,7 +28,6 @@ const addressSchema = new mongoose.Schema(
     },
     city: {
       type: String,
-      required: [true, 'City is required'],
       trim: true,
     },
     state: {
@@ -38,9 +37,7 @@ const addressSchema = new mongoose.Schema(
     },
     pincode: {
       type: String,
-      required: [true, 'Pincode is required'],
       trim: true,
-      match: [/^\d{6}$/, 'Please enter a valid 6-digit Indian PIN code'],
     },
     addressType: {
       type: String,

@@ -5,6 +5,8 @@ import {
   forgotPassword,
   resetPassword,
   updateUserProfile,
+  getUserProfile,
+  addUserAddress,
   sendOtp,
   verifyOtp,
 } from '../controllers/authController.js';
@@ -45,9 +47,19 @@ router.post('/forgotpassword', forgotPassword);
 // @access  Public
 router.put('/resetpassword/:token', resetPassword);
 
+// @route   GET /api/auth/profile
+// @desc    Get logged-in user's profile
+// @access  Private
+router.get('/profile', protect, getUserProfile);
+
 // @route   PUT /api/auth/profile
 // @desc    Update logged-in user's profile
 // @access  Private
 router.put('/profile', protect, updateUserProfile);
+
+// @route   POST /api/auth/profile/address
+// @desc    Add a delivery address to user's profile
+// @access  Private
+router.post('/profile/address', protect, addUserAddress);
 
 export default router;

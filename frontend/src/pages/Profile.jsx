@@ -19,8 +19,10 @@ import {
 
 const Profile = () => {
   const navigate = useNavigate();
-  const userInfoStr = localStorage.getItem('userInfo');
-  const user = userInfoStr ? JSON.parse(userInfoStr) : null;
+  const [user, setUser] = useState(() => {
+    const userInfoStr = localStorage.getItem('userInfo');
+    return userInfoStr ? JSON.parse(userInfoStr) : null;
+  });
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -34,14 +36,33 @@ const Profile = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      setFormData({
-        name: user.name || '',
-        email: user.email || '',
-        phone: user.phone || '',
-      });
-    }
-  }, [user]);
+    const fetchProfile = async () => {
+      try {
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await response.json();
+
+        if (data.success && data.user) {
+          setUser(data.user);
+          localStorage.setItem('userInfo', JSON.stringify(data.user));
+          setFormData({
+            name: data.user.name || '',
+            email: data.user.email || '',
+            phone: data.user.phone || '',
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -230,11 +251,10 @@ const Profile = () => {
             </div>
 
             <div className="flex items-center gap-2 sm:mb-1">
-              <span className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${
-                user.role === 'admin'
+              <span className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${user.role === 'admin'
                   ? 'bg-indigo-100 text-indigo-700 border border-indigo-200'
                   : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-              }`}>
+                }`}>
                 {user.role === 'admin' ? <Shield size={13} /> : <User size={13} />}
                 {user.role === 'admin' ? 'Administrator' : 'Customer Account'}
               </span>
@@ -350,9 +370,8 @@ const Profile = () => {
                       value={formData.name}
                       onChange={handleChange}
                       disabled={isSubmitting}
-                      className={`w-full text-base font-semibold text-gray-800 bg-stone-50 px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-amber-500/50 ${
-                        errors.name ? 'border-red-400 bg-red-50' : 'border-stone-200/70'
-                      }`}
+                      className={`w-full text-base font-semibold text-gray-800 bg-stone-50 px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-amber-500/50 ${errors.name ? 'border-red-400 bg-red-50' : 'border-stone-200/70'
+                        }`}
                     />
                     {errors.name && (
                       <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
@@ -377,9 +396,8 @@ const Profile = () => {
                       value={formData.email}
                       onChange={handleChange}
                       disabled={isSubmitting}
-                      className={`w-full text-base font-semibold text-gray-800 bg-stone-50 px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-amber-500/50 ${
-                        errors.email ? 'border-red-400 bg-red-50' : 'border-stone-200/70'
-                      }`}
+                      className={`w-full text-base font-semibold text-gray-800 bg-stone-50 px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-amber-500/50 ${errors.email ? 'border-red-400 bg-red-50' : 'border-stone-200/70'
+                        }`}
                     />
                     {errors.email && (
                       <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
@@ -410,9 +428,8 @@ const Profile = () => {
                         disabled={isSubmitting}
                         maxLength={10}
                         placeholder="10-digit mobile number"
-                        className={`w-full text-base font-semibold text-gray-800 bg-stone-50 pl-10 pr-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-amber-500/50 ${
-                          errors.phone ? 'border-red-400 bg-red-50' : 'border-stone-200/70'
-                        }`}
+                        className={`w-full text-base font-semibold text-gray-800 bg-stone-50 pl-10 pr-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-amber-500/50 ${errors.phone ? 'border-red-400 bg-red-50' : 'border-stone-200/70'
+                          }`}
                       />
                     </div>
                     {errors.phone && (
@@ -428,6 +445,36 @@ const Profile = () => {
                 )}
               </div>
             </div>
+
+            {/* Address Display Section */}
+            {!isEditing && (
+              <div className="mt-6">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Saved Delivery Address</label>
+                  <div className="text-base font-semibold text-gray-800 bg-stone-50 px-4 py-3 rounded-xl border border-stone-200/70">
+                    {user?.addresses && user.addresses.length > 0 ? (
+                      <div>
+                        {user.addresses.filter(a => a.isDefault).length > 0 ? (
+                          user.addresses.filter(a => a.isDefault).map((addr, idx) => (
+                            <div key={idx}>
+                              <p>{addr.street}</p>
+                              <p className="text-sm text-gray-500 font-medium">{addr.state} {(addr.landmark || addr.remarks) ? `- ${addr.landmark || addr.remarks}` : ''}</p>
+                            </div>
+                          ))
+                        ) : (
+                          <div>
+                            <p>{user.addresses[0].street}</p>
+                            <p className="text-sm text-gray-500 font-medium">{user.addresses[0].state} {(user.addresses[0].landmark || user.addresses[0].remarks) ? `- ${user.addresses[0].landmark || user.addresses[0].remarks}` : ''}</p>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-gray-400 font-normal italic">No address saved yet. You can add one during checkout.</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {isEditing && (
               <div className="mt-6 flex flex-wrap items-center justify-end gap-3">
