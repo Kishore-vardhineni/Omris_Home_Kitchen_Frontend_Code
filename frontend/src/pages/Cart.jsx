@@ -297,7 +297,7 @@ const Cart = () => {
     return acc + (origPrice * item.quantity);
   }, 0);
   const savings = originalTotal - state.total;
-  const deliveryCharge = state.total > 2000 ? 0 : 100;
+  const deliveryCharge = state.total >= 2000 ? 0 : 100;
   const orderTotal = state.total + deliveryCharge;
 
   return (

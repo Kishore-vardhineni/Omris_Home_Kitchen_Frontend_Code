@@ -396,7 +396,22 @@ const ProductDetail = () => {
               )}
             </div>
 
-            <p className="-mt-3 text-xs sm:text-sm text-neutral-500 font-medium">
+            {/* Stock Status Badge */}
+            {activeVariant && (!activeVariant.isAvailable || activeVariant.stock <= 0) ? (
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-red-100 text-red-700 border border-red-200 self-start">
+                ✕ Out of Stock
+              </div>
+            ) : activeVariant?.stock > 0 && activeVariant?.stock <= 5 ? (
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200 self-start">
+                ⚡ Only {activeVariant.stock} left in stock - order soon!
+              </div>
+            ) : activeVariant?.stock > 5 ? (
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 self-start">
+                ✓ In Stock ({activeVariant.stock} available)
+              </div>
+            ) : null}
+
+            <p className="-mt-1 text-xs sm:text-sm text-neutral-500 font-medium">
               Taxes included.{' '}
               <span className="underline cursor-pointer hover:text-black">Shipping</span>{' '}
               calculated at checkout.
@@ -416,8 +431,6 @@ const ProductDetail = () => {
               />
             )}
 
-
-
             {/* Quantity selector */}
             <QuantitySelector
               quantity={quantity}
@@ -430,13 +443,22 @@ const ProductDetail = () => {
               <motion.button
                 type="button"
                 onClick={handleAddToCart}
-                whileHover={{ scale: 1.015 }}
-                whileTap={{ scale: 0.985 }}
+                disabled={!activeVariant || !activeVariant.isAvailable || activeVariant.stock <= 0}
+                whileHover={(!activeVariant || !activeVariant.isAvailable || activeVariant.stock <= 0) ? {} : { scale: 1.015 }}
+                whileTap={(!activeVariant || !activeVariant.isAvailable || activeVariant.stock <= 0) ? {} : { scale: 0.985 }}
                 transition={{ duration: 0.15 }}
-                className="w-full py-3.5 sm:py-4 px-6 sm:px-8 bg-black text-white font-bold text-sm sm:text-base rounded-2xl shadow-lg hover:shadow-xl hover:bg-neutral-800 transition-all duration-200 flex items-center justify-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
+                className={`w-full py-3.5 sm:py-4 px-6 sm:px-8 font-bold text-sm sm:text-base rounded-2xl transition-all duration-200 flex items-center justify-center gap-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 ${
+                  !activeVariant || !activeVariant.isAvailable || activeVariant.stock <= 0
+                    ? 'bg-neutral-200 text-neutral-400 cursor-not-allowed border border-neutral-300'
+                    : 'bg-black text-white shadow-lg hover:shadow-xl hover:bg-neutral-800'
+                }`}
               >
                 <ShoppingBag size={20} strokeWidth={2.2} />
-                <span>Add to Cart</span>
+                <span>
+                  {!activeVariant || !activeVariant.isAvailable || activeVariant.stock <= 0
+                    ? 'Out of Stock'
+                    : 'Add to Cart'}
+                </span>
               </motion.button>
             </div>
 

@@ -10,7 +10,7 @@ const settingsSchema = new mongoose.Schema(
     },
     upiId: {
       type: String,
-      default: '',
+      default: 'babuvardhineni@ybl',
     },
     upiQrCode: {
       type: String, // base64 data URL or hosted image URL

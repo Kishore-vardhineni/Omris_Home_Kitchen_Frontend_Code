@@ -80,7 +80,11 @@ const VariantSelector = ({ label, options, selectedValue, onChange, priceHint, d
                 }}
               >
                 <span>{option}</span>
-                {priceHint && priceHint[option] != null && (
+                {isDisabled ? (
+                  <span style={{ fontSize: '0.65rem', color: '#dc2626', fontWeight: '700', lineHeight: 1 }}>
+                    Out of stock
+                  </span>
+                ) : priceHint && priceHint[option] != null ? (
                   <span
                     style={{
                       fontSize:   '0.7rem',
@@ -91,7 +95,7 @@ const VariantSelector = ({ label, options, selectedValue, onChange, priceHint, d
                   >
                     {typeof priceHint[option] === 'number' ? `₹${priceHint[option]}` : priceHint[option]}
                   </span>
-                )}
+                ) : null}
               </motion.button>
             );
           })}

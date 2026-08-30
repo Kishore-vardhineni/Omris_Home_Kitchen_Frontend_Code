@@ -122,7 +122,7 @@ const Checkout = () => {
     return acc + (origPrice * item.quantity);
   }, 0);
   const savings = originalTotal > state.total ? originalTotal - state.total : 0;
-  const deliveryCharge = state.total > 2000 ? 0 : 100;
+  const deliveryCharge = state.total >= 2000 ? 0 : 100;
   const orderTotal = state.total + deliveryCharge;
 
   const handleInputChange = (e) => {

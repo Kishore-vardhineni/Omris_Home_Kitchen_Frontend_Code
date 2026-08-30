@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { Star } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import '../styles/PickleVarieties.css';
 import {
@@ -46,6 +47,16 @@ const ProductCard = ({ product, cardKey, index, handleWhatsApp }) => {
         </div>
         <div className="tomato-info">
           <h4>{product.name}</h4>
+          <div className="flex items-center gap-1 my-1">
+            <div className="flex items-center text-amber-500">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} size={12} fill="#f59e0b" stroke="none" />
+              ))}
+            </div>
+            <span className="text-xs font-bold text-neutral-800 ml-1">4.9</span>
+            <span className="text-xs text-neutral-400">•</span>
+            <span className="text-[11px] text-neutral-500 underline">148 Verified Reviews</span>
+          </div>
           <span className="weight-badge">{product.weight}</span>
           <p className="tomato-price">₹{product.price}</p>
           <button

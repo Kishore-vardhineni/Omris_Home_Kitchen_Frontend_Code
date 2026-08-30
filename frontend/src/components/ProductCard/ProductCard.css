@@ -79,6 +79,42 @@
   color: #475569;
 }
 
+.product-card-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.product-card-stars {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.product-card-star-icon {
+  color: #f59e0b;
+}
+
+.product-card-rating-score {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.product-card-rating-dot {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.product-card-rating-reviews {
+  font-size: 0.75rem;
+  color: #475569;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
 .product-card-category {
   font-size: 0.85rem;
   color: #64748b;
@@ -115,26 +151,54 @@
   text-decoration: line-through;
 }
 
-.product-card-add-btn {
-  background: #ffffff;
-  border: 1.5px solid #4f46e5;
-  color: #4f46e5;
-  font-weight: 600;
-  font-size: 0.9rem;
-  padding: 0.5rem 1.25rem;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
+.product-card-badge.out-of-stock-badge {
+  background-color: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
 }
 
-.product-card-add-btn:hover {
-  background: #4f46e5;
+.out-of-stock-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
   color: #ffffff;
+  font-weight: 800;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 1px;
+  backdrop-filter: blur(1px);
 }
 
-.product-card-add-btn:active {
-  transform: scale(0.96);
+.product-card-category-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: auto;
+}
+
+.product-card-stock-warning {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #d97706;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}
+
+.product-card-add-btn.out-of-stock {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.product-card-add-btn.out-of-stock:hover {
+  background: #f3f4f6;
+  color: #9ca3af;
 }
 
 /* Responsive */
