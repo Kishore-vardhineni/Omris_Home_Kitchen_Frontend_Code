@@ -121,25 +121,30 @@ const AdminEditProduct = () => {
   };
 
   const compressImage = (file, maxPx = 900, quality = 0.75) =>
-    new Promise((resolve, reject) => {
+    new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (ev) => {
+        const rawDataUrl = ev.target.result;
         const img = new Image();
         img.onload = () => {
-          let { width, height } = img;
-          if (width > maxPx || height > maxPx) {
-            if (width > height) { height = Math.round((height * maxPx) / width); width = maxPx; }
-            else { width = Math.round((width * maxPx) / height); height = maxPx; }
+          try {
+            let { width, height } = img;
+            if (width > maxPx || height > maxPx) {
+              if (width > height) { height = Math.round((height * maxPx) / width); width = maxPx; }
+              else { width = Math.round((width * maxPx) / height); height = maxPx; }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width; canvas.height = height;
+            canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          } catch (e) {
+            resolve(rawDataUrl);
           }
-          const canvas = document.createElement('canvas');
-          canvas.width = width; canvas.height = height;
-          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL('image/jpeg', quality));
         };
-        img.onerror = reject;
-        img.src = ev.target.result;
+        img.onerror = () => resolve(rawDataUrl);
+        img.src = rawDataUrl;
       };
-      reader.onerror = reject;
+      reader.onerror = () => resolve('');
       reader.readAsDataURL(file);
     });
 
@@ -149,18 +154,14 @@ const AdminEditProduct = () => {
 
     try {
       // Process Primary Image
-      let primaryPayload = null;
+      let primaryPayload = { url: primaryImage.url || '', altText: primaryImage.altText || form.name };
       if (primaryImage.file) {
         const base64 = await compressImage(primaryImage.file);
-        primaryPayload = { base64, altText: primaryImage.altText || form.name };
-      } else if (primaryImage.url.trim()) {
+        if (base64) {
+          primaryPayload = { base64, altText: primaryImage.altText || form.name };
+        }
+      } else if (primaryImage.url && primaryImage.url.trim()) {
         primaryPayload = { url: primaryImage.url.trim(), altText: primaryImage.altText || form.name };
-      }
-
-      if (!primaryPayload) {
-        setError('Please upload a file or enter an Image URL for the primary product image.');
-        setSubmitting(false);
-        return;
       }
 
       // Process Gallery Items

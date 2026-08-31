@@ -43,18 +43,45 @@ export const generateInvoicePDF = (order) => {
       doc.setFillColor(...primaryColor);
       doc.rect(0, 0, 210, 42, 'F');
 
-      // Title & Subtitle
-      doc.setFontSize(20);
-      doc.setTextColor(245, 158, 11); // Gold
-      doc.setFont('helvetica', 'bold');
-      doc.text('OMRIS HOME KITCHEN', 14, 18);
+      // Top Left Corner Logo Badge (Omri's Home Kitchen)
+      doc.setFillColor(15, 12, 10);
+      doc.roundedRect(12, 6, 30, 30, 3, 3, 'F');
+      doc.setDrawColor(217, 119, 6); // Gold border
+      doc.setLineWidth(0.6);
+      doc.roundedRect(12, 6, 30, 30, 3, 3, 'S');
 
-      doc.setFontSize(9);
+      // Logo Icon / Text inside Badge
+      doc.setFontSize(11);
+      doc.setTextColor(245, 158, 11);
+      doc.setFont('times', 'bolditalic');
+      doc.text('Omri\'s', 27, 16, { align: 'center' });
+
+      doc.setFontSize(5.5);
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.text('HOME KITCHEN', 27, 21, { align: 'center' });
+
+      doc.setFillColor(217, 119, 6);
+      doc.rect(17, 23, 20, 0.4, 'F');
+
+      doc.setFontSize(4.5);
       doc.setTextColor(214, 211, 209);
       doc.setFont('helvetica', 'normal');
-      doc.text('Authentic Homemade Pickles & Podis', 14, 24);
-      doc.text('H.No.2-3-84/1/A, Lalitha Nilyam, Quadribagh, Amberpet, Hyderabad, Telangana - 500013', 14, 29);
-      doc.text('Ph: +91 7670851967  |  Email: omrishomekichen@gmail.com', 14, 34);
+      doc.text('Authentic & Homemade', 27, 27, { align: 'center' });
+      doc.text('Est. 2022', 27, 31, { align: 'center' });
+
+      // Title & Subtitle Next to Logo
+      doc.setFontSize(19);
+      doc.setTextColor(245, 158, 11); // Gold
+      doc.setFont('helvetica', 'bold');
+      doc.text('OMRIS HOME KITCHEN', 47, 17);
+
+      doc.setFontSize(8.5);
+      doc.setTextColor(214, 211, 209);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Authentic Homemade Pickles & Podis', 47, 23);
+      doc.text('H.No.2-3-84/1/A, Lalitha Nilyam, Quadribagh, Amberpet, Hyderabad, Telangana - 500013', 47, 28);
+      doc.text('Ph: +91 7670851967  |  Email: omrishomekichen@gmail.com', 47, 33);
 
       // INVOICE Title Badge Right Side
       doc.setFontSize(16);
@@ -192,7 +219,12 @@ export const generateInvoicePDF = (order) => {
       });
 
       const totalQty = (order.orderItems || []).reduce((s, i) => s + Number(i.quantity || 1), 0);
-      const subtotal = Number(order.totalPrice || 0);
+
+      // Subtotal calculated strictly from items sum (e.g. 135)
+      const subtotal = (order.orderItems || []).reduce(
+        (sum, item) => sum + (Number(item.price || 0) * Number(item.quantity || 1)),
+        0
+      );
 
       doc.autoTable({
         head: tableHeaders,
@@ -247,8 +279,10 @@ export const generateInvoicePDF = (order) => {
 
       // Delivery charge rule: FREE for ₹2000 and above, ₹100 for below ₹2000
       const deliveryCharge = (order.deliveryCharge != null)
-        ? order.deliveryCharge
+        ? Number(order.deliveryCharge)
         : (subtotal >= 2000 ? 0 : 100);
+
+      // Grand Total = Subtotal + Delivery Charges (e.g. 135 + 100 = 235)
       const grandTotal = subtotal + deliveryCharge;
 
       // Terms & Conditions (Left)
@@ -262,100 +296,143 @@ export const generateInvoicePDF = (order) => {
       doc.text('1. Goods once sold will not be taken back or exchanged', 14, finalY + 10);
       doc.text('2. All disputes are subject to Hyderabad jurisdiction only', 14, finalY + 15);
 
-      // Right: Delivery Charges + Total Amount
+      // Right: Subtotal + Delivery Charges + Total Amount
       doc.setDrawColor(180, 140, 30);
       doc.setLineWidth(0.3);
       doc.line(125, finalY + 1, 196, finalY + 1);
 
-      doc.setFontSize(9);
+      doc.setFontSize(8.5);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(...textGray);
-      doc.text('Delivery Charges', 127, finalY + 8);
+      doc.text('Subtotal', 127, finalY + 6);
+      doc.setTextColor(...primaryColor);
+      doc.text(`Rs. ${subtotal.toFixed(2)}`, 196, finalY + 6, { align: 'right' });
 
+      doc.setTextColor(...textGray);
+      doc.text('Delivery Charges', 127, finalY + 11);
       if (deliveryCharge > 0) {
         doc.setTextColor(...primaryColor);
-        doc.text(`Rs. ${deliveryCharge.toFixed(2)}`, 196, finalY + 8, { align: 'right' });
+        doc.text(`Rs. ${deliveryCharge.toFixed(2)}`, 196, finalY + 11, { align: 'right' });
       } else {
         doc.setTextColor(...successColor);
-        doc.text('FREE', 196, finalY + 8, { align: 'right' });
+        doc.text('FREE', 196, finalY + 11, { align: 'right' });
       }
 
       doc.setDrawColor(180, 140, 30);
       doc.setLineWidth(0.5);
-      doc.line(125, finalY + 12, 196, finalY + 12);
+      doc.line(125, finalY + 14, 196, finalY + 14);
 
       doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(...primaryColor);
-      doc.text('Total Amount', 127, finalY + 19);
+      doc.text('Total Amount', 127, finalY + 21);
       doc.setTextColor(...accentColor);
-      doc.text(`Rs. ${grandTotal.toFixed(2)}`, 196, finalY + 19, { align: 'right' });
+      doc.text(`Rs. ${grandTotal.toFixed(2)}`, 196, finalY + 21, { align: 'right' });
 
       doc.setLineWidth(0.5);
-      doc.line(125, finalY + 22, 196, finalY + 22);
+      doc.line(125, finalY + 24, 196, finalY + 24);
 
-      // ── Payment QR Code & Signature Block ──────────────────────────────────
-      const pyY = finalY + 28;
-
-      // Draw Payment QR Box (Left)
-      doc.setDrawColor(180, 140, 30);
-      doc.setLineWidth(0.3);
-      doc.roundedRect(14, pyY, 88, 26, 2, 2);
-
-      // Inner PhonePe QR representation box
-      doc.setFillColor(245, 240, 220);
-      doc.rect(17, pyY + 3, 20, 20, 'F');
-      doc.setFontSize(7.5);
-      doc.setTextColor(40, 30, 5);
-      doc.setFont('helvetica', 'bold');
-      doc.text('PhonePe', 27, pyY + 11, { align: 'center' });
-      doc.text('QR', 27, pyY + 16, { align: 'center' });
-
+      // ── Total Amount in Words (Dedicated Row) ────────────────────────────────
+      const wordsY = finalY + 29;
       doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(30, 41, 59);
-      doc.text('Payment QR Code', 40, pyY + 8);
+      doc.text('Total Amount (in words):', 14, wordsY);
 
-      doc.setFontSize(7.5);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(100, 116, 139);
-      doc.text('PhonePe | GPay | Paytm | UPI', 40, pyY + 13);
-
-      doc.setFontSize(8.5);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(30, 41, 59);
-      doc.text('UPI ID: ', 40, pyY + 19);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(15, 23, 42);
-      doc.text('babuvardhineni@ybl', 52, pyY + 19);
-
-      // Total Amount (in words) (Middle)
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(30, 41, 59);
-      doc.text('Total Amount (in words)', 108, pyY + 6);
-
-      doc.setFontSize(8.5);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(71, 85, 105);
-      doc.text(numberToWords(grandTotal), 108, pyY + 12);
+      doc.text(numberToWords(grandTotal), 53, wordsY);
 
-      // Signature Box (Right)
+      // ── Payment QR Code & Signature Row ───────────────────────────────────
+      const pyY = wordsY + 6;
+
+      // Draw Payment QR Box (Left Side)
+      doc.setDrawColor(180, 140, 30);
+      doc.setLineWidth(0.35);
+      doc.roundedRect(14, pyY, 94, 28, 2, 2);
+
+      // PhonePe QR Code Icon Box (White bg, purple accents, center PhonePe emblem)
+      doc.setFillColor(255, 255, 255);
+      doc.rect(17, pyY + 3, 22, 22, 'F');
+      doc.setDrawColor(95, 37, 159); // PhonePe Purple border
+      doc.setLineWidth(0.4);
+      doc.rect(17, pyY + 3, 22, 22, 'S');
+
+      // Top corner targets of QR Code
+      doc.setFillColor(30, 30, 30);
+      doc.rect(18.5, pyY + 4.5, 4.5, 4.5, 'F');
+      doc.rect(33, pyY + 4.5, 4.5, 4.5, 'F');
+      doc.rect(18.5, pyY + 19, 4.5, 4.5, 'F');
+
+      // Center PhonePe Circle & Text
+      doc.setFillColor(95, 37, 159); // #5f259f Purple
+      doc.circle(28, pyY + 14, 4.2, 'F');
+      doc.setFontSize(7);
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.text('पे', 28, pyY + 16.2, { align: 'center' });
+
+      // Title: Payment QR Code
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(30, 41, 59);
+      doc.text('Payment QR Code', 43, pyY + 7);
+
+      // Colored Payment App Logos Line: PhonePe, GPay, Paytm, UPI
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+
+      // PhonePe (Purple)
+      doc.setTextColor(95, 37, 159);
+      doc.text('PhonePe', 43, pyY + 13);
+
+      // GPay (Google Blue/Multi)
+      doc.setTextColor(66, 133, 244);
+      doc.text('G', 60, pyY + 13);
+      doc.setTextColor(75, 85, 99);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Pay', 63, pyY + 13);
+
+      // Paytm (Navy & Cyan)
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0, 46, 110);
+      doc.text('pay', 71, pyY + 13);
+      doc.setTextColor(0, 186, 242);
+      doc.text('tm', 77.5, pyY + 13);
+
+      // UPI (Dark Gray + Tri-color tag)
+      doc.setTextColor(75, 85, 99);
+      doc.text('UPI', 84, pyY + 13);
+      doc.setFillColor(249, 115, 22); // Orange arrow
+      doc.rect(91, pyY + 10.5, 1.2, 2.5, 'F');
+      doc.setFillColor(34, 197, 94); // Green arrow
+      doc.rect(92.5, pyY + 10.5, 1.2, 2.5, 'F');
+
+      // UPI ID Line
+      doc.setFontSize(8.5);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(30, 41, 59);
+      doc.text('UPI ID: ', 43, pyY + 20);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(15, 23, 42);
+      doc.text('babuvardhineni@ybl', 55, pyY + 20);
+
+      // Signature Box (Right Side)
       doc.setDrawColor(180, 140, 30);
       doc.setLineWidth(0.4);
-      doc.roundedRect(138, pyY + 5, 58, 22, 2, 2);
+      doc.roundedRect(136, pyY, 60, 26, 2, 2);
 
       doc.setFont('times', 'bolditalic');
-      doc.setFontSize(12);
+      doc.setFontSize(12.5);
       doc.setTextColor(20, 20, 20);
-      doc.text('V. Kishor babu', 167, pyY + 13, { align: 'center' });
+      doc.text('V. Kishor babu', 166, pyY + 11, { align: 'center' });
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(7.5);
       doc.setTextColor(100, 116, 139);
-      doc.text('Signature', 167, pyY + 18, { align: 'center' });
+      doc.text('Signature', 166, pyY + 17, { align: 'center' });
       doc.setFontSize(7);
-      doc.text('Omri\'s Home Kitchen', 167, pyY + 22, { align: 'center' });
+      doc.text('Omri\'s Home Kitchen', 166, pyY + 21, { align: 'center' });
 
       // ── Footer ─────────────────────────────────────────────────────────────
       const footerY = Math.max(pyY + 34, 276);
@@ -390,20 +467,3 @@ export const generateInvoicePDF = (order) => {
 
 export default generateInvoicePDF;
 
-  // Load jsPDF CDN scripts dynamically if not present
-  if (window.jspdf && window.jspdf.jsPDF) {
-    executePDFGeneration();
-  } else {
-    const script1 = document.createElement('script');
-    script1.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-    script1.onload = () => {
-      const script2 = document.createElement('script');
-      script2.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js';
-      script2.onload = executePDFGeneration;
-      document.body.appendChild(script2);
-    };
-    document.body.appendChild(script1);
-  }
-};
-
-export default generateInvoicePDF;

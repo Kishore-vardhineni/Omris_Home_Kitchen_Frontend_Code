@@ -137,9 +137,15 @@ const Profile = () => {
 
     try {
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || user?.token;
 
-      const response = await fetch(`${API_BASE_URL}/users/profile`, {
+      if (!token) {
+        setServerError('No authentication token found. Please sign out and sign in again.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/auth/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -155,7 +161,11 @@ const Profile = () => {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        setServerError(data.message || 'Failed to update profile. Please try again.');
+        if (response.status === 401) {
+          setServerError('Session expired or not authorized. Please sign out and sign in again.');
+        } else {
+          setServerError(data.message || 'Failed to update profile. Please try again.');
+        }
         setIsSubmitting(false);
         return;
       }

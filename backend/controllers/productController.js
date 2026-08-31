@@ -128,12 +128,30 @@ export const addProduct = async (req, res) => {
       }
     }
 
+    // ── Image Fallback & Normalization ──────────────────────────────────────
+    if (!image || !image.url) {
+      if (req.body.primaryImage && typeof req.body.primaryImage === 'string') {
+        try {
+          const fn = saveBase64Image(req.body.primaryImage, 'product');
+          image = { url: `${baseUrl}/uploads/${fn}`, altText: name || 'Product Image' };
+        } catch (e) {
+          console.error('Fallback image save error:', e.message);
+        }
+      }
+    }
+
+    if (!image || !image.url) {
+      image = {
+        url: `${baseUrl}/uploads/default-pickle.jpg`,
+        altText: name || 'Product Image',
+      };
+    }
+
     // ── 1. Required-field validation ──────────────────────────────────────
-    if (!name || !category || !image?.url) {
+    if (!name || !category) {
       return res.status(400).json({
         success: false,
-        message:
-          'Please provide all required fields: name, category, and image (with url)',
+        message: 'Please provide all required fields: Product Name and Category',
       });
     }
 
