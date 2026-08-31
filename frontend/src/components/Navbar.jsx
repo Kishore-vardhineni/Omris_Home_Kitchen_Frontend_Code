@@ -47,11 +47,11 @@ const Navbar = () => {
 
           {/* Logo */}
           <div className="logo">
-            <Link to="/" onClick={closeMenu} className="flex items-center">
+            <Link to="/" onClick={closeMenu} className="flex items-center gap-2">
               <img
                 src={logo}
-                alt="Omris Home Kitchen Logo"
-                className="w-[200px] h-[50px] object-contain transition-transform duration-200 hover:scale-105"
+                alt="Pickel Home Kitchen Logo"
+                className="h-[58px] w-auto max-w-[220px] object-contain transition-transform duration-200 hover:scale-105 drop-shadow-sm"
               />
             </Link>
           </div>

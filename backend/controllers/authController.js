@@ -33,11 +33,16 @@ export const registerUser = async (req, res) => {
       });
     }
 
-    // 4. Password length check
-    if (password.length < 6) {
+    // 4. Password complexity check
+    const hasCaps = /[A-Z]/.test(password);
+    const hasLower = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+
+    if (password.length < 6 || !hasCaps || !hasLower || !hasNumber || !hasSymbol) {
       return res.status(400).json({
         success: false,
-        message: 'Password must be at least 6 characters long',
+        message: 'Password must contain at least 1 uppercase letter (A-Z), 1 lowercase letter (a-z), 1 number (0-9), and 1 special symbol (!@#$%^&*).',
       });
     }
 
@@ -279,10 +284,16 @@ export const resetPassword = async (req, res) => {
       });
     }
 
-    if (!req.body.password || req.body.password.length < 6) {
+    const newPass = req.body.password || '';
+    const hasCaps = /[A-Z]/.test(newPass);
+    const hasLower = /[a-z]/.test(newPass);
+    const hasNumber = /[0-9]/.test(newPass);
+    const hasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPass);
+
+    if (!newPass || newPass.length < 6 || !hasCaps || !hasLower || !hasNumber || !hasSymbol) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide a password with at least 6 characters',
+        message: 'Password must contain at least 1 uppercase letter (A-Z), 1 lowercase letter (a-z), 1 number (0-9), and 1 special symbol (!@#$%^&*).',
       });
     }
 

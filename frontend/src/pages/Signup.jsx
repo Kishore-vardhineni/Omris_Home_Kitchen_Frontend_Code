@@ -382,39 +382,37 @@ const Signup = () => {
 
               {/* Password Strength Indicator & Rules Checklist */}
               {formData.password && (
-                <>
-                  <div className="password-meter">
-                    <div className="meter-track">
-                      <div
-                        className="meter-bar"
-                        style={{
-                          width: `${passwordValidation.percentage}%`,
-                          backgroundColor: passwordValidation.color
-                        }}
-                      ></div>
-                    </div>
-                    <span className="meter-label" style={{ color: passwordValidation.color }}>
-                      {passwordValidation.label}
-                    </span>
+                <div className="password-meter">
+                  <div className="meter-track">
+                    <div
+                      className="meter-bar"
+                      style={{
+                        width: `${passwordValidation.percentage}%`,
+                        backgroundColor: passwordValidation.color
+                      }}
+                    ></div>
                   </div>
-
-                  <div className="password-rules-grid">
-                    {passwordValidation.rules.map((rule) => (
-                      <div
-                        key={rule.id}
-                        className={`rule-item ${rule.valid ? 'valid' : 'invalid'}`}
-                      >
-                        {rule.valid ? (
-                          <CheckCircle2 size={13} color="#10b981" />
-                        ) : (
-                          <span className="rule-dot" />
-                        )}
-                        {rule.label}
-                      </div>
-                    ))}
-                  </div>
-                </>
+                  <span className="meter-label" style={{ color: passwordValidation.color }}>
+                    {passwordValidation.label}
+                  </span>
+                </div>
               )}
+
+              <div className="password-rules-grid">
+                {passwordValidation.rules.map((rule) => (
+                  <div
+                    key={rule.id}
+                    className={`rule-item ${rule.valid ? 'valid' : 'invalid'}`}
+                  >
+                    {rule.valid ? (
+                      <CheckCircle2 size={13} color="#10b981" />
+                    ) : (
+                      <span className="rule-dot" />
+                    )}
+                    {rule.label}
+                  </div>
+                ))}
+              </div>
 
               {errors.password && (
                 <span className="error-message" style={{ marginTop: '0.4rem' }}>

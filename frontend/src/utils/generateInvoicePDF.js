@@ -43,32 +43,35 @@ export const generateInvoicePDF = (order) => {
       doc.setFillColor(...primaryColor);
       doc.rect(0, 0, 210, 42, 'F');
 
-      // Top Left Corner Logo Badge (Omri's Home Kitchen)
-      doc.setFillColor(15, 12, 10);
-      doc.roundedRect(12, 6, 30, 30, 3, 3, 'F');
-      doc.setDrawColor(217, 119, 6); // Gold border
-      doc.setLineWidth(0.6);
-      doc.roundedRect(12, 6, 30, 30, 3, 3, 'S');
+      // Top Left Corner Circular Logo Badge (Pickel Home Kitchen - Homemade with Love)
+      doc.setFillColor(255, 255, 255);
+      doc.circle(27, 21, 15, 'F');
+      doc.setDrawColor(34, 84, 61); // Deep Green border
+      doc.setLineWidth(0.7);
+      doc.circle(27, 21, 15, 'S');
+      doc.setDrawColor(217, 119, 6); // Gold inner ring
+      doc.setLineWidth(0.3);
+      doc.circle(27, 21, 14.1, 'S');
 
-      // Logo Icon / Text inside Badge
+      // Inner Logo Typography & Emblem
       doc.setFontSize(11);
-      doc.setTextColor(245, 158, 11);
-      doc.setFont('times', 'bolditalic');
-      doc.text('Omri\'s', 27, 16, { align: 'center' });
+      doc.setTextColor(34, 84, 61); // Deep Green
+      doc.setFont('helvetica', 'bold');
+      doc.text('Pickel', 27, 18, { align: 'center' });
 
       doc.setFontSize(5.5);
-      doc.setTextColor(255, 255, 255);
+      doc.setTextColor(136, 19, 36); // Crimson Red
       doc.setFont('helvetica', 'bold');
-      doc.text('HOME KITCHEN', 27, 21, { align: 'center' });
+      doc.text('Home Kitchen', 27, 22.5, { align: 'center' });
 
-      doc.setFillColor(217, 119, 6);
-      doc.rect(17, 23, 20, 0.4, 'F');
+      doc.setDrawColor(217, 119, 6);
+      doc.setLineWidth(0.3);
+      doc.line(18, 24.5, 36, 24.5);
 
-      doc.setFontSize(4.5);
-      doc.setTextColor(214, 211, 209);
+      doc.setFontSize(4);
+      doc.setTextColor(60, 60, 60);
       doc.setFont('helvetica', 'normal');
-      doc.text('Authentic & Homemade', 27, 27, { align: 'center' });
-      doc.text('Est. 2022', 27, 31, { align: 'center' });
+      doc.text('HOMEMADE WITH LOVE', 27, 27.5, { align: 'center' });
 
       // Title & Subtitle Next to Logo
       doc.setFontSize(19);

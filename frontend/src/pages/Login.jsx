@@ -37,6 +37,50 @@ const EmailPasswordForm = ({ onSwitchToOtp }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
+  const getPasswordValidation = (pass = '') => {
+    const hasMinLen = pass.length >= 6;
+    const hasCaps = /[A-Z]/.test(pass);
+    const hasLower = /[a-z]/.test(pass);
+    const hasNumber = /[0-9]/.test(pass);
+    const hasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pass);
+
+    const rules = [
+      { id: 'minLen', label: 'Minimum 6 characters', valid: hasMinLen },
+      { id: 'caps', label: 'One Caps Letter (A-Z)', valid: hasCaps },
+      { id: 'lower', label: 'One Lower Case (a-z)', valid: hasLower },
+      { id: 'number', label: 'One Special Number (0-9)', valid: hasNumber },
+      { id: 'symbol', label: 'One Special Symbol (!@#$%^&*)', valid: hasSymbol },
+    ];
+
+    const passedCount = rules.filter(r => r.valid).length;
+    let label = '';
+    let color = '#e5e7eb';
+    let percentage = 0;
+
+    if (!pass) {
+      label = '';
+      color = '#e5e7eb';
+      percentage = 0;
+    } else if (passedCount <= 2) {
+      label = 'Weak Password';
+      color = '#ef4444';
+      percentage = Math.max((passedCount / 5) * 100, 20);
+    } else if (passedCount <= 4) {
+      label = 'Medium Password';
+      color = '#f59e0b';
+      percentage = (passedCount / 5) * 100;
+    } else {
+      label = 'Strong Password';
+      color = '#10b981';
+      percentage = 100;
+    }
+
+    const isValid = passedCount === 5;
+    return { rules, passedCount, label, color, percentage, isValid };
+  };
+
+  const passwordValidation = getPasswordValidation(formData.password);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -148,6 +192,40 @@ const EmailPasswordForm = ({ onSwitchToOtp }) => {
           </button>
         </div>
         {errors.password && <span className="error-message"><AlertCircle size={13} /> {errors.password}</span>}
+
+        {/* Password Strength Indicator & Interactive Rules Grid */}
+        {formData.password && (
+          <div className="password-meter" style={{ marginTop: '0.4rem' }}>
+            <div className="meter-track">
+              <div
+                className="meter-bar"
+                style={{
+                  width: `${passwordValidation.percentage}%`,
+                  backgroundColor: passwordValidation.color
+                }}
+              ></div>
+            </div>
+            <span className="meter-label" style={{ color: passwordValidation.color }}>
+              {passwordValidation.label}
+            </span>
+          </div>
+        )}
+
+        <div className="password-rules-grid" style={{ marginTop: '0.4rem' }}>
+          {passwordValidation.rules.map((rule) => (
+            <div
+              key={rule.id}
+              className={`rule-item ${rule.valid ? 'valid' : 'invalid'}`}
+            >
+              {rule.valid ? (
+                <CheckCircle2 size={13} color="#10b981" />
+              ) : (
+                <span className="rule-dot" />
+              )}
+              {rule.label}
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Sign In Button */}
