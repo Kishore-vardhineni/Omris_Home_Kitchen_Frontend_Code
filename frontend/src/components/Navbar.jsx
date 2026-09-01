@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { ShoppingCart, Phone, Mail, Facebook, Instagram, PhoneCall, Menu, X, User, Shield, History } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import './Navbar.css';
-import logo from '../assets/images/Omris_Home_Kitchen_logo1.png';
+import logo from '../assets/images/Pickel_Home_Kitchen_Logo.png';
 
 const Navbar = () => {
   const { state } = useCart();

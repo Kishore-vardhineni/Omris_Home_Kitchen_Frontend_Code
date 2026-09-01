@@ -15,6 +15,7 @@ import {
   QrCode,
 } from 'lucide-react';
 import './Admin.css';
+import logo from '../../assets/images/Pickel_Home_Kitchen_Logo.png';
 
 const NAV_GROUPS = [
   {
@@ -79,11 +80,9 @@ const AdminLayout = ({ children, title = 'Dashboard' }) => {
 
         {/* Logo */}
         <div className="admin-sidebar-logo">
-          <div className="admin-logo-icon">
-            <ShoppingBag size={18} color="#fff" />
-          </div>
+          <img src={logo} alt="Pickel Home Kitchen Logo" className="admin-logo-img" />
           <div className="logo-text">
-            <span className="logo-title">Omris Kitchen</span>
+            <span className="logo-title">Pickel Kitchen</span>
             <span className="logo-sub">Admin Panel</span>
           </div>
           <button className="admin-sidebar-close" onClick={() => setIsSidebarOpen(false)}>

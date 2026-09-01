@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import './Signup.css';
 import './Login.css';
-import logo from '../assets/images/Omris_Home_Kitchen_logo1.png';
+import logo from '../assets/images/Pickel_Home_Kitchen_Logo.png';
 import bannerImg from '../assets/images/Mango_Pickel.png';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';

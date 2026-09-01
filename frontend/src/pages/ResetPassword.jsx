@@ -3,7 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, Eye, EyeOff, AlertCircle, ArrowRight, CheckCircle2, ShieldCheck, Heart, Sparkles } from 'lucide-react';
 import './Signup.css'; // Reuses design system styles
-import logo from '../assets/images/Omris_Home_Kitchen_logo1.png';
+import logo from '../assets/images/Pickel_Home_Kitchen_Logo.png';
 import bannerImg from '../assets/images/Mango_Pickel.png';
 
 const ResetPassword = () => {

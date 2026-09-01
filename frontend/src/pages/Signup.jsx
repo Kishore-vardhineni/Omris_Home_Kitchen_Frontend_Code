@@ -16,7 +16,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import './Signup.css';
-import logo from '../assets/images/Omris_Home_Kitchen_logo1.png';
+import logo from '../assets/images/Pickel_Home_Kitchen_Logo.png';
 import bannerImg from '../assets/images/Mango_Pickel.png';
 
 const Signup = () => {
